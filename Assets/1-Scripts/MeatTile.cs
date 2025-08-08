@@ -1,11 +1,15 @@
 using UnityEngine;
 
+/// <summary>
+/// Tile de carne que dejan los herbívoros al morir. Se degrada con el tiempo
+/// y puede ser consumido por los carnívoros.
+/// </summary>
 public class MeatTile : MonoBehaviour
 {
-    public float nutrition = 50f;
-    public float decayRate = 1f;
+    public float nutrition = 50f;   // Cantidad de comida disponible
+    public float decayRate = 1f;     // Velocidad a la que se pudre
 
-    public bool isAlive => nutrition > 0f;
+    public bool isAlive => nutrition > 0f; // Sigue existiendo mientras tenga comida
 
     void Update()
     {
@@ -16,6 +20,8 @@ public class MeatTile : MonoBehaviour
         if (nutrition <= 0f)
             Destroy(gameObject);
     }
+
+    // Permite a un carnívoro consumir parte de la carne disponible
 
     public float Consume(float amount)
     {
