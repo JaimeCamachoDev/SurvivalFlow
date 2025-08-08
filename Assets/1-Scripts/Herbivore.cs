@@ -3,15 +3,18 @@ using System.Linq;
 
 public class Herbivore : MonoBehaviour
 {
+    public float maxHunger = 100f;
     public float hunger = 100f;
     public float hungerRate = 5f;
     public float hungerDeathThreshold = 0f;
+    public float seekThreshold = 50f;
     public float moveSpeed = 2f;
     public float eatRate = 10f;
     public float wanderChangeInterval = 3f;
     public float avoidanceRadius = 0.5f;
     public float detectionRadius = 5f;
-
+    public float health = 50f;
+    public GameObject meatPrefab;
     public VegetationTile targetPlant;
 
     Vector3 wanderDir;
@@ -20,29 +23,40 @@ public class Herbivore : MonoBehaviour
     void Update()
     {
         hunger -= hungerRate * Time.deltaTime;
-
         if (hunger <= hungerDeathThreshold)
         {
             Die();
             return;
         }
 
-        if (targetPlant == null || !targetPlant.isAlive ||
-            Vector3.Distance(transform.position, targetPlant.transform.position) > detectionRadius)
+        bool hungry = hunger <= seekThreshold;
+        if (hunger >= maxHunger)
+            hunger = maxHunger;
+
+        if (!hungry)
+            targetPlant = null;
+
+        if (hungry && (targetPlant == null || !targetPlant.isAlive ||
+            Vector3.Distance(transform.position, targetPlant.transform.position) > detectionRadius))
             FindNewTarget();
 
         Vector3 moveDir = Vector3.zero;
+        bool isEating = false;
 
-        if (targetPlant != null)
+        if (hungry && targetPlant != null)
         {
             Vector3 toPlant = targetPlant.transform.position - transform.position;
             toPlant.y = 0f;
-            moveDir += toPlant.normalized;
 
             if (toPlant.magnitude < 1.5f)
             {
                 float eaten = targetPlant.Consume(eatRate * Time.deltaTime);
-                hunger = Mathf.Min(hunger + eaten, 100f);
+                hunger = Mathf.Min(hunger + eaten, maxHunger);
+                isEating = true;
+            }
+            else
+            {
+                moveDir += toPlant.normalized;
             }
         }
         else
@@ -55,20 +69,23 @@ public class Herbivore : MonoBehaviour
             }
             moveDir += wanderDir;
         }
-
-        Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
-        foreach (var n in neighbors)
+        
+        if (!isEating)
         {
-            if (n.gameObject == gameObject) continue;
-            if (n.GetComponent<Herbivore>() == null) continue;
+            Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
+            foreach (var n in neighbors)
+            {
+                if (n.gameObject == gameObject) continue;
+                if (n.GetComponent<Herbivore>() == null) continue;
 
-            Vector3 away = transform.position - n.transform.position;
-            away.y = 0f;
-            if (away.sqrMagnitude > 0.001f)
-                moveDir += away.normalized;
+                Vector3 away = transform.position - n.transform.position;
+                away.y = 0f;
+                if (away.sqrMagnitude > 0.001f)
+                    moveDir += away.normalized;
+            }
         }
 
-        if (moveDir.sqrMagnitude > 0.001f)
+        if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
             transform.position += dir * moveSpeed * Time.deltaTime;
@@ -102,8 +119,16 @@ public class Herbivore : MonoBehaviour
             .FirstOrDefault();
     }
 
+    public void TakeDamage(float amount)
+    {
+        health -= amount;
+        if (health <= 0f)
+            Die();
+    }
     void Die()
     {
+        if (meatPrefab != null)
+            Instantiate(meatPrefab, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 }
