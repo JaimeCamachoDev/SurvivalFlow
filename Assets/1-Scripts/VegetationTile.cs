@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class VegetationTile : MonoBehaviour
 {
-    public float growth = 100f;
     public float maxGrowth = 100f;
     public float growthRate = 2f;
+    [Range(0f, 1f)] public float initialGrowthPercent = 0.05f;
+    public float reproductionCost = 30f;
+
+    public float growth;
 
     public bool isAlive => growth > 0f;
+    public bool IsMature => growth >= maxGrowth;
 
     void Start()
     {
-        // Registrar la vegetación una vez que el manager esté listo
+        growth = maxGrowth * initialGrowthPercent;
         VegetationManager.Instance?.Register(this);
     }
 
@@ -41,5 +45,12 @@ public class VegetationTile : MonoBehaviour
             Destroy(gameObject);
 
         return consumed;
+    }
+
+    public void ReduceGrowthAfterReproduction()
+    {
+        growth -= reproductionCost;
+        if (growth <= 0f)
+            Destroy(gameObject);
     }
 }

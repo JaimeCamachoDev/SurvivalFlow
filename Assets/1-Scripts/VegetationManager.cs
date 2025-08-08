@@ -14,6 +14,7 @@ public class VegetationManager : MonoBehaviour
     public float reproductionInterval = 10f;
     public int maxVegetation = 200;
     public float minDistanceBetweenPlants = 1f;
+    public float reproductionRadius = 3f;
 
     float timer;
 
@@ -47,20 +48,32 @@ public class VegetationManager : MonoBehaviour
         if (vegetationPrefab == null || activeVegetation.Count >= maxVegetation)
             return;
 
+        var maturePlants = activeVegetation.Where(v => v.IsMature).ToList();
+        if (maturePlants.Count == 0)
+            return;
+
         for (int i = 0; i < 10; i++)
         {
-            Vector3 pos = new Vector3(
-                Random.Range(-areaSize.x / 2, areaSize.x / 2),
-                0f,
-                Random.Range(-areaSize.y / 2, areaSize.y / 2)
-            );
+            var parent = maturePlants[Random.Range(0, maturePlants.Count)];
+            Vector2 offset2 = Random.insideUnitCircle.normalized * Random.Range(minDistanceBetweenPlants, reproductionRadius);
+            Vector3 pos = parent.transform.position + new Vector3(offset2.x, 0f, offset2.y);
+
+            if (!InsideArea(pos))
+                continue;
 
             bool occupied = activeVegetation.Any(v => Vector3.Distance(v.transform.position, pos) < minDistanceBetweenPlants);
             if (!occupied)
             {
                 Instantiate(vegetationPrefab, pos, Quaternion.identity);
+                parent.ReduceGrowthAfterReproduction();
+
                 break;
             }
         }
+    }
+
+    bool InsideArea(Vector3 pos)
+    {
+        return Mathf.Abs(pos.x) <= areaSize.x / 2 && Mathf.Abs(pos.z) <= areaSize.y / 2;
     }
 }
