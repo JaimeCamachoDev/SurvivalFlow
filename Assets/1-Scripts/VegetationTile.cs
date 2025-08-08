@@ -8,13 +8,16 @@ public class VegetationTile : MonoBehaviour
     public float reproductionCost = 30f;
 
     public float growth;
+    Vector3 baseScale;
 
     public bool isAlive => growth > 0f;
     public bool IsMature => growth >= maxGrowth;
 
     void Start()
     {
+        baseScale = transform.localScale;
         growth = maxGrowth * initialGrowthPercent;
+        UpdateScale();
         VegetationManager.Instance?.Register(this);
     }
 
@@ -33,6 +36,7 @@ public class VegetationTile : MonoBehaviour
         {
             growth += growthRate * Time.deltaTime;
             growth = Mathf.Min(growth, maxGrowth);
+            UpdateScale();
         }
     }
 
@@ -40,6 +44,7 @@ public class VegetationTile : MonoBehaviour
     {
         float consumed = Mathf.Min(amount, growth);
         growth -= consumed;
+        UpdateScale();
 
         if (growth <= 0f)
             Destroy(gameObject);
@@ -50,7 +55,14 @@ public class VegetationTile : MonoBehaviour
     public void ReduceGrowthAfterReproduction()
     {
         growth -= reproductionCost;
+        UpdateScale();
         if (growth <= 0f)
             Destroy(gameObject);
+    }
+
+    void UpdateScale()
+    {
+        float t = Mathf.Max(growth / maxGrowth, 0f);
+        transform.localScale = baseScale * t;
     }
 }

@@ -10,6 +10,7 @@ public class Herbivore : MonoBehaviour
     public float eatRate = 10f;
     public float wanderChangeInterval = 3f;
     public float avoidanceRadius = 0.5f;
+    public float detectionRadius = 5f;
 
     public VegetationTile targetPlant;
 
@@ -26,7 +27,8 @@ public class Herbivore : MonoBehaviour
             return;
         }
 
-        if (targetPlant == null || !targetPlant.isAlive)
+        if (targetPlant == null || !targetPlant.isAlive ||
+            Vector3.Distance(transform.position, targetPlant.transform.position) > detectionRadius)
             FindNewTarget();
 
         Vector3 moveDir = Vector3.zero;
@@ -67,7 +69,11 @@ public class Herbivore : MonoBehaviour
         }
 
         if (moveDir.sqrMagnitude > 0.001f)
-            transform.position += moveDir.normalized * moveSpeed * Time.deltaTime;
+        {
+            Vector3 dir = moveDir.normalized;
+            transform.position += dir * moveSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
     }
 
     void FindNewTarget()
@@ -77,14 +83,14 @@ public class Herbivore : MonoBehaviour
         if (VegetationManager.Instance != null && VegetationManager.Instance.activeVegetation.Count > 0)
         {
             candidates = VegetationManager.Instance.activeVegetation
-                .Where(p => p.isAlive)
+                .Where(p => p.isAlive && Vector3.Distance(transform.position, p.transform.position) <= detectionRadius)
                 .ToArray();
         }
         else
         {
             // Fallback por si el manager aún no se ha inicializado
             candidates = FindObjectsOfType<VegetationTile>()
-                .Where(p => p.isAlive)
+                .Where(p => p.isAlive && Vector3.Distance(transform.position, p.transform.position) <= detectionRadius)
                 .ToArray();
         }
 
