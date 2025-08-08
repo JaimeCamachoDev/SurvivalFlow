@@ -10,6 +10,7 @@ public class Herbivore : MonoBehaviour
 {
     public float maxHunger = 100f;
     public float hunger = 100f;
+
     public float hungerRate = 5f;               // Velocidad a la que pierde hambre
     public float hungerDeathThreshold = 0f;      // Umbral de muerte por hambre
     public float seekThreshold = 50f;            // Por debajo de este porcentaje busca comida
@@ -32,6 +33,9 @@ public class Herbivore : MonoBehaviour
     Vector3 wanderDir;                           // Dirección de deambular
     float wanderTimer;                           // Temporizador de cambio de dirección
     float reproductionTimer;                     // Controla el enfriamiento de reproducción
+
+    Vector3 wanderDir;
+    float wanderTimer;
 
     void Update()
     {
@@ -82,7 +86,6 @@ public class Herbivore : MonoBehaviour
             }
             moveDir += wanderDir;
         }
-
         if (!isEating)
         {
             Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
@@ -115,6 +118,13 @@ public class Herbivore : MonoBehaviour
                 ReproduceWith(partner);
             }
         }
+
+        if (moveDir.sqrMagnitude > 0.001f && !isEating)
+        {
+            Vector3 dir = moveDir.normalized;
+            transform.position += dir * moveSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
     }
 
     // Busca la planta viva más cercana dentro del radio de detección
@@ -132,6 +142,7 @@ public class Herbivore : MonoBehaviour
         {
             // Búsqueda de respaldo en caso de que el manager no esté listo
             candidates = FindObjectsByType<VegetationTile>(FindObjectsSortMode.None)
+
                 .Where(p => p.isAlive && Vector3.Distance(transform.position, p.transform.position) <= detectionRadius)
                 .ToArray();
         }
@@ -174,11 +185,11 @@ public class Herbivore : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+
         health -= amount;
         if (health <= 0f)
             Die();
     }
-
     void Die()
     {
         if (meatPrefab != null)

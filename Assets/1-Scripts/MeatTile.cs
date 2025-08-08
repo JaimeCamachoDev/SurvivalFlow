@@ -22,6 +22,7 @@ public class MeatTile : MonoBehaviour
     }
 
     // Permite a un carnívoro consumir parte de la carne disponible
+
     public float Consume(float amount)
     {
         float eaten = Mathf.Min(amount, nutrition);

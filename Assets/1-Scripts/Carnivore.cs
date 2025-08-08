@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Linq;
 
+
 /// <summary>
 /// Gestiona a los carnívoros: buscan carne o presas, atacan y se mueven
 /// imitando un depredador sencillo. Comentarios en español explican cada paso.
@@ -131,10 +132,12 @@ public class Carnivore : MonoBehaviour
             .FirstOrDefault();
     }
 
+
     // Busca carne disponible en el suelo
     void FindMeat()
     {
         MeatTile[] meats = FindObjectsByType<MeatTile>(FindObjectsSortMode.None)
+        
             .Where(m => m.isAlive && Vector3.Distance(transform.position, m.transform.position) <= detectionRadius)
             .ToArray();
         if (meats.Length == 0) return;

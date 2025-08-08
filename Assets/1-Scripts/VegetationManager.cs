@@ -23,6 +23,17 @@ public class VegetationManager : MonoBehaviour
 
     float timer;
 
+    [Header("Reproducción")]
+    public GameObject vegetationPrefab;
+    public Vector2 areaSize = new Vector2(50, 50);
+    public float reproductionInterval = 10f;
+    public int maxVegetation = 200;
+    public float minDistanceBetweenPlants = 1f;
+    public float reproductionRadius = 3f;
+    [Range(0f,1f)] public float randomSpawnChance = 0.1f;
+
+    float timer;
+
     void Awake()
     {
         // Patrón singleton simple para acceder al manager
