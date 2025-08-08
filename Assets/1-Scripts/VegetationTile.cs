@@ -8,8 +8,9 @@ public class VegetationTile : MonoBehaviour
 
     public bool isAlive => growth > 0f;
 
-    void Awake()
+    void Start()
     {
+        // Registrar la vegetación una vez que el manager esté listo
         VegetationManager.Instance?.Register(this);
     }
 
@@ -21,16 +22,13 @@ public class VegetationTile : MonoBehaviour
 
     void Update()
     {
+        if (growth <= 0f)
+            return;
+
         if (growth < maxGrowth)
         {
             growth += growthRate * Time.deltaTime;
             growth = Mathf.Min(growth, maxGrowth);
-        }
-
-        if (growth <= 1)
-        {
-              Destroy(this.gameObject);
-            Debug.Log("holii");
         }
     }
 
@@ -38,6 +36,10 @@ public class VegetationTile : MonoBehaviour
     {
         float consumed = Mathf.Min(amount, growth);
         growth -= consumed;
+
+        if (growth <= 0f)
+            Destroy(gameObject);
+
         return consumed;
     }
 }

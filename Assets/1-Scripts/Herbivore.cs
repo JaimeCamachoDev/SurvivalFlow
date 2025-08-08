@@ -38,11 +38,26 @@ public class Herbivore : MonoBehaviour
 
     void FindNewTarget()
     {
-        if (VegetationManager.Instance == null || VegetationManager.Instance.activeVegetation.Count == 0)
+        VegetationTile[] candidates = null;
+
+        if (VegetationManager.Instance != null && VegetationManager.Instance.activeVegetation.Count > 0)
+        {
+            candidates = VegetationManager.Instance.activeVegetation
+                .Where(p => p.isAlive)
+                .ToArray();
+        }
+        else
+        {
+            // Fallback por si el manager aún no se ha inicializado
+            candidates = FindObjectsOfType<VegetationTile>()
+                .Where(p => p.isAlive)
+                .ToArray();
+        }
+
+        if (candidates.Length == 0)
             return;
 
-        targetPlant = VegetationManager.Instance.activeVegetation
-            .Where(p => p.isAlive)
+        targetPlant = candidates
             .OrderBy(p => Vector3.Distance(transform.position, p.transform.position))
             .FirstOrDefault();
     }
