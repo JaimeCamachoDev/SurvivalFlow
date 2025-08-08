@@ -15,7 +15,6 @@ public class Herbivore : MonoBehaviour
     public float detectionRadius = 5f;
     public float health = 50f;
     public GameObject meatPrefab;
-
     public VegetationTile targetPlant;
 
     Vector3 wanderDir;
@@ -70,7 +69,7 @@ public class Herbivore : MonoBehaviour
             }
             moveDir += wanderDir;
         }
-
+        
         if (!isEating)
         {
             Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
@@ -126,7 +125,6 @@ public class Herbivore : MonoBehaviour
         if (health <= 0f)
             Die();
     }
-
     void Die()
     {
         if (meatPrefab != null)
