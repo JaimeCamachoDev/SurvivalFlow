@@ -121,8 +121,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7498f350f5e22c469fe7ecd23470fb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHunger: 100
   hunger: 100
   hungerRate: 5
   hungerDeathThreshold: 0
+  seekThreshold: 50
   moveSpeed: 2
   eatRate: 10
+  wanderChangeInterval: 3
+  avoidanceRadius: 0.5
+  detectionRadius: 5
+  health: 50
+  meatPrefab: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
+  targetPlant: {fileID: 0}
