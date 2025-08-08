@@ -66,6 +66,7 @@ public class VegetationManager : MonoBehaviour
             {
                 Instantiate(vegetationPrefab, pos, Quaternion.identity);
                 parent.ReduceGrowthAfterReproduction();
+
                 break;
             }
         }
