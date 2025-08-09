@@ -28,6 +28,8 @@ public class Herbivore : MonoBehaviour
     public float reproductionThreshold = 80f;    // Hambre necesaria para reproducirse
     public float reproductionDistance = 2f;      // Distancia para encontrar pareja
     public float reproductionCooldown = 20f;     // Tiempo entre reproducciones
+    public int minOffspring = 1;
+    public int maxOffspring = 1;
 
     public VegetationTile targetPlant;           // Planta objetivo actual
 
@@ -186,13 +188,23 @@ public class Herbivore : MonoBehaviour
     {
         if (herbivorePrefab == null) return;
 
-        Vector3 spawnPos = (transform.position + partner.transform.position) / 2f;
-        GameObject child = Instantiate(herbivorePrefab, spawnPos, Quaternion.identity);
-        Herbivore baby = child.GetComponent<Herbivore>();
-        if (baby != null)
-            baby.hunger = baby.maxHunger * 0.5f; // La cría empieza medio hambrienta
+        int offspring = Random.Range(minOffspring, maxOffspring + 1);
+        for (int i = 0; i < offspring; i++)
+        {
+            Vector3 spawnPos = (transform.position + partner.transform.position) / 2f;
+            spawnPos += Random.insideUnitSphere * 0.5f;
+            spawnPos.y = 0f;
+            GameObject child = Instantiate(herbivorePrefab, spawnPos, Quaternion.identity);
+            Herbivore baby = child.GetComponent<Herbivore>();
+            if (baby != null)
+            {
+                baby.hunger = baby.maxHunger * 0.5f;
+                baby.herbivorePrefab = herbivorePrefab;
+                baby.minOffspring = minOffspring;
+                baby.maxOffspring = maxOffspring;
+            }
+        }
 
-        // Coste energético para los padres (pierden un 30% de su hambre máxima)
         float cost = maxHunger * 0.3f;
         hunger = Mathf.Max(hunger - cost, 0f);
         partner.hunger = Mathf.Max(partner.hunger - cost, 0f);
