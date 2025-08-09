@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Linq;
 
-
 /// <summary>
 /// Gestiona a los carnívoros: buscan carne o presas, atacan y se mueven
 /// imitando un depredador sencillo. Comentarios en español explican cada paso.
@@ -13,7 +12,8 @@ public class Carnivore : MonoBehaviour
     public float hungerRate = 5f;           // Pérdida de hambre por segundo
     public float hungerDeathThreshold = 0f; // Umbral de muerte
     public float seekThreshold = 50f;       // Empieza a buscar comida por debajo de este valor
-    public float moveSpeed = 2.5f;          // Velocidad de movimiento
+    public float calmSpeed = 2.5f;          // Velocidad cuando está satisfecho
+    public float runSpeed = 4f;             // Velocidad al tener hambre o perseguir
     public float attackRate = 15f;          // Daño por segundo
     public float eatRate = 20f;             // Nutrición ganada por segundo al comer
     public float wanderChangeInterval = 3f; // Cada cuánto cambia de dirección al vagar
@@ -33,17 +33,15 @@ public class Carnivore : MonoBehaviour
             Die();
             return;
         }
-
-        bool hungry = hunger <= seekThreshold;
+        bool hungry = hunger <= seekThreshold;      // Necesita comida
         if (hunger >= maxHunger)
-            hunger = maxHunger;
-
-        if (!hungry)
         {
+            hunger = maxHunger;
             targetPrey = null;
             targetMeat = null;
         }
 
+        // Si tiene hambre y no tiene objetivos válidos, buscar carne o presas
         if (hungry)
         {
             if (targetMeat == null || !targetMeat.isAlive ||
@@ -56,8 +54,9 @@ public class Carnivore : MonoBehaviour
 
         Vector3 moveDir = Vector3.zero;
         bool isEating = false;
+        bool pursuing = targetPrey != null || targetMeat != null; // Para ajustar velocidad
 
-        if (hungry && targetMeat != null)
+        if (pursuing && targetMeat != null)
         {
             Vector3 toMeat = targetMeat.transform.position - transform.position;
             toMeat.y = 0f;
@@ -66,13 +65,18 @@ public class Carnivore : MonoBehaviour
                 float eaten = targetMeat.Consume(eatRate * Time.deltaTime);
                 hunger = Mathf.Min(hunger + eaten, maxHunger);
                 isEating = true;
+                if (hunger >= maxHunger || !targetMeat.isAlive)
+                {
+                    targetMeat = null;
+                    pursuing = targetPrey != null;
+                }
             }
             else
             {
                 moveDir += toMeat.normalized;
             }
         }
-        else if (hungry && targetPrey != null)
+        else if (pursuing && targetPrey != null)
         {
             Vector3 toPrey = targetPrey.transform.position - transform.position;
             toPrey.y = 0f;
@@ -80,6 +84,11 @@ public class Carnivore : MonoBehaviour
             {
                 targetPrey.TakeDamage(attackRate * Time.deltaTime);
                 isEating = true;
+                if (hunger >= maxHunger || targetPrey == null)
+                {
+                    targetPrey = null;
+                    pursuing = targetMeat != null;
+                }
             }
             else
             {
@@ -115,7 +124,8 @@ public class Carnivore : MonoBehaviour
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
-            transform.position += dir * moveSpeed * Time.deltaTime;
+            float speed = (hungry || pursuing) ? runSpeed : calmSpeed;
+            transform.position += dir * speed * Time.deltaTime;
             transform.rotation = Quaternion.LookRotation(dir);
         }
     }
@@ -132,12 +142,10 @@ public class Carnivore : MonoBehaviour
             .FirstOrDefault();
     }
 
-
     // Busca carne disponible en el suelo
     void FindMeat()
     {
         MeatTile[] meats = FindObjectsByType<MeatTile>(FindObjectsSortMode.None)
-        
             .Where(m => m.isAlive && Vector3.Distance(transform.position, m.transform.position) <= detectionRadius)
             .ToArray();
         if (meats.Length == 0) return;

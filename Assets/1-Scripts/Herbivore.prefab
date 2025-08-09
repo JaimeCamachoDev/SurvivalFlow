@@ -126,11 +126,16 @@ MonoBehaviour:
   hungerRate: 5
   hungerDeathThreshold: 0
   seekThreshold: 50
-  moveSpeed: 2
+  calmSpeed: 1.5
+  runSpeed: 3
   eatRate: 10
   wanderChangeInterval: 3
   avoidanceRadius: 0.5
   detectionRadius: 5
+  predatorDetection: 6
   health: 50
-  meatPrefab: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
-  targetPlant: {fileID: 0}
+  meatPrefab: {fileID: 0}
+  herbivorePrefab: {fileID: 0}
+  reproductionThreshold: 80
+  reproductionDistance: 2
+  reproductionCooldown: 20
