@@ -95,9 +95,9 @@ public class VegetationTile : MonoBehaviour
             cachedRenderer.material.color = Color.red;                // Consumida
         else if (growth >= maxGrowth)
             cachedRenderer.material.color = Color.green;              // Madura
-        else if (growth < maxGrowth * 0.5f)
+        else if (growth < maxGrowth * 0.99)
             cachedRenderer.material.color = Color.yellow;             // Creciendo
-        else
-            cachedRenderer.material.color = baseColor;                // Estado intermedio
+        //else
+        //    cachedRenderer.material.color = baseColor;                // Estado intermedio
     }
 }

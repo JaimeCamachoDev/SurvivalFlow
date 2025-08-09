@@ -137,8 +137,8 @@ MonoBehaviour:
   meatPrefab: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
   herbivorePrefab: {fileID: 3027782994385362168}
   reproductionThreshold: 80
-  reproductionDistance: 5
-  reproductionCooldown: 20
+  reproductionDistance: 2
+  reproductionCooldown: 30
   reproductionSeekRadius: 6
   minOffspring: 1
   maxOffspring: 3

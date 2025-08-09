@@ -273,9 +273,9 @@ public class Herbivore : MonoBehaviour
             return;
 
         if (isEating)
-            cachedRenderer.material.color = Color.green;   // Comiendo
+            cachedRenderer.material.color = Color.blue;   // Comiendo
         else if (isRunning)
-            cachedRenderer.material.color = Color.red;     // Huyendo o apurado
+            cachedRenderer.material.color = Color.gray;     // Huyendo o apurado
         else
             cachedRenderer.material.color = baseColor;     // Tranquilo
     }
