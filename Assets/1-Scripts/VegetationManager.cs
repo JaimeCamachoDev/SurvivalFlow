@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -56,7 +55,13 @@ public class VegetationManager : MonoBehaviour
             return;
 
         // Intentamos generar alrededor de plantas maduras
-        var maturePlants = activeVegetation.Where(v => v.IsMature).ToList();
+        List<VegetationTile> maturePlants = new List<VegetationTile>();
+        for (int i = 0; i < activeVegetation.Count; i++)
+        {
+            var v = activeVegetation[i];
+            if (v != null && v.IsMature)
+                maturePlants.Add(v);
+        }
         if (maturePlants.Count > 0)
         {
             for (int i = 0; i < 10; i++)
@@ -70,7 +75,15 @@ public class VegetationManager : MonoBehaviour
                 if (!InsideArea(pos))
                     continue;
 
-                bool occupied = activeVegetation.Any(v => Vector3.Distance(v.transform.position, pos) < minDistanceBetweenPlants);
+                bool occupied = false;
+                for (int j = 0; j < activeVegetation.Count; j++)
+                {
+                    if (Vector3.Distance(activeVegetation[j].transform.position, pos) < minDistanceBetweenPlants)
+                    {
+                        occupied = true;
+                        break;
+                    }
+                }
                 if (!occupied)
                 {
                     Instantiate(vegetationPrefab, pos, Quaternion.identity);
@@ -91,7 +104,15 @@ public class VegetationManager : MonoBehaviour
                     0f,
                     Random.Range(-areaSize.y / 2, areaSize.y / 2));
 
-                bool occupied = activeVegetation.Any(v => Vector3.Distance(v.transform.position, pos) < minDistanceBetweenPlants);
+                bool occupied = false;
+                for (int j = 0; j < activeVegetation.Count; j++)
+                {
+                    if (Vector3.Distance(activeVegetation[j].transform.position, pos) < minDistanceBetweenPlants)
+                    {
+                        occupied = true;
+                        break;
+                    }
+                }
                 if (!occupied)
                 {
                     Instantiate(vegetationPrefab, pos, Quaternion.identity);
@@ -118,7 +139,15 @@ public class VegetationManager : MonoBehaviour
             if (!InsideArea(pos))
                 continue;
 
-            bool occupied = activeVegetation.Any(v => Vector3.Distance(v.transform.position, pos) < minDistanceBetweenPlants);
+            bool occupied = false;
+            for (int j = 0; j < activeVegetation.Count; j++)
+            {
+                if (Vector3.Distance(activeVegetation[j].transform.position, pos) < minDistanceBetweenPlants)
+                {
+                    occupied = true;
+                    break;
+                }
+            }
             if (!occupied)
                 Instantiate(vegetationPrefab, pos, Quaternion.identity);
         }
