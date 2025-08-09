@@ -134,11 +134,13 @@ MonoBehaviour:
   eatRate: 20
   wanderChangeInterval: 3
   avoidanceRadius: 0.5
-  detectionRadius: 100
+  detectionRadius: 50
   carnivorePrefab: {fileID: 8140725196869243394}
-  reproductionThreshold: 50
+  reproductionThreshold: 80
   reproductionDistance: 2
   reproductionCooldown: 40
   reproductionSeekRadius: 6
   minOffspring: 0
   maxOffspring: 1
+  maxHealth: 80
+  health: 0
