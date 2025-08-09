@@ -36,6 +36,22 @@ public class Carnivore : MonoBehaviour
     float wanderTimer;                      // Temporizador de cambio de dirección
     float reproductionTimer;
     Carnivore partnerTarget;               // Pareja con la que intenta reproducirse
+    Renderer cachedRenderer;               // Renderer cacheado para colores
+    Color baseColor;                       // Color original del material
+    Vector3 baseScale;                     // Escala base para crecimiento
+    public float maxHealth = 80f;          // Vida máxima
+    public float health;                   // Vida actual
+    bool wasHurt;                          // Señal cuando recibe daño
+
+    void Awake()
+    {
+        cachedRenderer = GetComponent<Renderer>();
+        if (cachedRenderer != null)
+            baseColor = cachedRenderer.material.color;
+        baseScale = transform.localScale;
+        health = maxHealth * 0.2f; // Nacen con 20% de vida
+        UpdateScale();
+    }
 
     void Update()
     {
@@ -67,6 +83,7 @@ public class Carnivore : MonoBehaviour
         Vector3 moveDir = Vector3.zero;
         bool isEating = false;
         bool pursuing = targetPrey != null || targetMeat != null; // Para ajustar velocidad
+        bool isReproducing = hunger >= reproductionThreshold && reproductionTimer <= 0f;
 
         if (pursuing && targetMeat != null)
         {
@@ -76,6 +93,8 @@ public class Carnivore : MonoBehaviour
             {
                 float eaten = targetMeat.Consume(eatRate * Time.deltaTime);
                 hunger = Mathf.Min(hunger + eaten, maxHunger);
+                health = Mathf.Min(health + eaten, maxHealth);
+                UpdateScale();
                 isEating = true;
                 if (hunger >= maxHunger || !targetMeat.isAlive)
                 {
@@ -94,7 +113,11 @@ public class Carnivore : MonoBehaviour
             toPrey.y = 0f;
             if (toPrey.magnitude < 1.5f)
             {
-                targetPrey.TakeDamage(attackRate * Time.deltaTime);
+                float bite = attackRate * Time.deltaTime;
+                targetPrey.TakeDamage(bite);
+                hunger = Mathf.Min(hunger + bite, maxHunger);
+                health = Mathf.Min(health + bite, maxHealth);
+                UpdateScale();
                 isEating = true;
                 if (hunger >= maxHunger || targetPrey == null)
                 {
@@ -165,6 +188,8 @@ public class Carnivore : MonoBehaviour
             partnerTarget = null;
         }
 
+        UpdateColor(isEating, pursuing, hungry && !pursuing, isReproducing);
+
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
@@ -184,6 +209,42 @@ public class Carnivore : MonoBehaviour
                 ReproduceWith(partner);
             }
         }
+    }
+
+    // Ajusta el color según el estado
+    void UpdateColor(bool isEating, bool pursuing, bool fleeing, bool isReproducing)
+    {
+        if (!VisualCueSettings.enableVisualCues || cachedRenderer == null || VisualCueSettings.Instance == null)
+            return;
+
+        if (wasHurt)
+            cachedRenderer.material.color = VisualCueSettings.Instance.carnivoreInjuredColor;       // Herido
+        else if (isReproducing)
+            cachedRenderer.material.color = VisualCueSettings.Instance.carnivoreReproducingColor;   // Reproducción
+        else if (isEating)
+            cachedRenderer.material.color = VisualCueSettings.Instance.carnivoreEatingColor;        // Comiendo
+        else if (fleeing)
+            cachedRenderer.material.color = VisualCueSettings.Instance.carnivoreFleeingColor;       // Huyendo
+        else if (pursuing)
+            cachedRenderer.material.color = VisualCueSettings.Instance.carnivorePursuingColor;      // Persiguiendo
+        else
+            cachedRenderer.material.color = baseColor;                                            // Calmado
+        wasHurt = false;
+    }
+
+    public void TakeDamage(float amount)
+    {
+        health -= amount;
+        wasHurt = true;
+        UpdateScale();
+        if (health <= 0f)
+            Die();
+    }
+
+    void UpdateScale()
+    {
+        float t = Mathf.Clamp01(health / maxHealth);
+        transform.localScale = baseScale * t;
     }
 
     // Busca el herbívoro vivo más cercano dentro del radio de detección

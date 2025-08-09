@@ -20,7 +20,8 @@ public class Herbivore : MonoBehaviour
     public float avoidanceRadius = 0.5f;        // Distancia mínima con otros herbívoros
     public float detectionRadius = 5f;          // Radio para detectar comida
     public float predatorDetection = 6f;        // Radio para detectar depredadores
-    public float health = 50f;                   // Vida del herbívoro
+    public float maxHealth = 50f;            // Vida máxima
+    public float health;                     // Vida actual
     public GameObject meatPrefab;                // Prefab que deja al morir
 
     [Header("Reproducción")]
@@ -38,6 +39,20 @@ public class Herbivore : MonoBehaviour
     float wanderTimer;                           // Temporizador de cambio de dirección
     float reproductionTimer;                     // Controla el enfriamiento de reproducción
     Herbivore partnerTarget;                     // Pareja con la que intenta reproducirse
+    Renderer cachedRenderer;                     // Renderer cacheado para cambiar color
+    Color baseColor;                             // Color original
+    Vector3 baseScale;                          // Escala base para crecimiento
+    bool wasHurt;                               // Señal cuando recibe daño
+
+    void Awake()
+    {
+        cachedRenderer = GetComponent<Renderer>();
+        if (cachedRenderer != null)
+            baseColor = cachedRenderer.material.color;
+        baseScale = transform.localScale;
+        health = maxHealth * 0.2f; // Nacen con 20% de vida
+        UpdateScale();
+    }
 
     void Update()
     {
@@ -59,6 +74,7 @@ public class Herbivore : MonoBehaviour
         Vector3 moveDir = Vector3.zero;
         bool isEating = false;
         bool isRunning = false;                // Indica si debe ir más rápido
+        bool isReproducing = hunger >= reproductionThreshold && reproductionTimer <= 0f;
 
         if (targetPlant != null)
         {
@@ -69,6 +85,8 @@ public class Herbivore : MonoBehaviour
             {
                 float eaten = targetPlant.Consume(eatRate * Time.deltaTime);
                 hunger = Mathf.Min(hunger + eaten, maxHunger);
+                health = Mathf.Min(health + eaten, maxHealth);
+                UpdateScale();
                 isEating = true;
                 // Si estamos llenos o la planta murió, liberamos el objetivo
                 if (hunger >= maxHunger || !targetPlant.isAlive)
@@ -153,6 +171,8 @@ public class Herbivore : MonoBehaviour
             partnerTarget = null;
         }
 
+        UpdateColor(isEating, isRunning, isReproducing);
+
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
@@ -233,6 +253,8 @@ public class Herbivore : MonoBehaviour
     public void TakeDamage(float amount)
     {
         health -= amount;
+        wasHurt = true;
+        UpdateScale();
         if (health <= 0f)
             Die();
     }
@@ -253,6 +275,31 @@ public class Herbivore : MonoBehaviour
         pos.x = Mathf.Clamp(pos.x, -size.x / 2f, size.x / 2f);
         pos.z = Mathf.Clamp(pos.z, -size.y / 2f, size.y / 2f);
         transform.position = pos;
+    }
+
+    // Cambia el color según el estado actual
+    void UpdateColor(bool isEating, bool isRunning, bool isReproducing)
+    {
+        if (!VisualCueSettings.enableVisualCues || cachedRenderer == null || VisualCueSettings.Instance == null)
+            return;
+
+        if (wasHurt)
+            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreInjuredColor;        // Herido
+        else if (isReproducing)
+            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreReproducingColor;    // Reproducción
+        else if (isEating)
+            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreEatingColor;         // Comiendo
+        else if (isRunning)
+            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreFleeingColor;        // Huyendo
+        else
+            cachedRenderer.material.color = baseColor;                                                // Tranquilo
+        wasHurt = false;
+    }
+
+    void UpdateScale()
+    {
+        float t = Mathf.Clamp01(health / maxHealth);
+        transform.localScale = baseScale * t;
     }
 }
 
