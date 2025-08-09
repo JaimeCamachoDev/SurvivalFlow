@@ -88,16 +88,16 @@ public class VegetationTile : MonoBehaviour
     // Cambia el color según el estado de crecimiento
     void UpdateColor()
     {
-        if (!VisualCueSettings.enableVisualCues || cachedRenderer == null)
+        if (!VisualCueSettings.enableVisualCues || cachedRenderer == null || VisualCueSettings.Instance == null)
             return;
 
         if (shrinking)
-            cachedRenderer.material.color = Color.red;                // Consumida
+            cachedRenderer.material.color = VisualCueSettings.Instance.plantConsumedColor; // Consumida
         else if (growth >= maxGrowth)
-            cachedRenderer.material.color = Color.green;              // Madura
-        else if (growth < maxGrowth * 0.99)
-            cachedRenderer.material.color = Color.yellow;             // Creciendo
-        //else
-        //    cachedRenderer.material.color = baseColor;                // Estado intermedio
+            cachedRenderer.material.color = VisualCueSettings.Instance.plantMatureColor;   // Madura
+        else if (growth < maxGrowth * 0.5f)
+            cachedRenderer.material.color = VisualCueSettings.Instance.plantGrowingColor;  // Creciendo
+        else
+            cachedRenderer.material.color = baseColor;                                     // Estado intermedio
     }
 }
