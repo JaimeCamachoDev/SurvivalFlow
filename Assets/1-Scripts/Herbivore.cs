@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Linq;
+using System.Collections.Generic;
 
 /// <summary>
 /// Controla el comportamiento de un herbívoro: búsqueda de plantas,
@@ -8,6 +8,10 @@ using System.Linq;
 /// </summary>
 public class Herbivore : MonoBehaviour
 {
+    public static readonly List<Herbivore> All = new List<Herbivore>();
+    static readonly Collider[] predatorBuffer = new Collider[32];
+    static readonly Collider[] neighborBuffer = new Collider[32];
+    static readonly Collider[] plantCheckBuffer = new Collider[32];
     public float maxHunger = 100f;
     public float hunger = 100f;
     public float hungerRate = 5f;               // Velocidad a la que pierde hambre
@@ -43,6 +47,10 @@ public class Herbivore : MonoBehaviour
     Color baseColor;                             // Color original
     Vector3 baseScale;                          // Escala base para crecimiento
     bool wasHurt;                               // Señal cuando recibe daño
+    [Header("Rendimiento")]
+    [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
+    [Range(0.02f, 1f)] public float updateInterval = 0.1f;
+    float updateTimer;
 
     enum HerbivoreState { Wandering, Eating, Fleeing, SeekingMate }
     HerbivoreState state = HerbivoreState.Wandering;
@@ -55,12 +63,24 @@ public class Herbivore : MonoBehaviour
         baseScale = transform.localScale;
         health = maxHealth * 0.2f; // Nacen con 20% de vida
         UpdateScale();
+        All.Add(this);
+    }
+
+    void OnDestroy()
+    {
+        All.Remove(this);
     }
 
     void Update()
     {
+        updateTimer += Time.deltaTime;
+        if (updateTimer < updateInterval)
+            return;
+        float dt = updateTimer;
+        updateTimer = 0f;
+
         // Actualizar hambre y comprobar muerte
-        hunger -= hungerRate * Time.deltaTime;
+        hunger -= hungerRate * dt;
         if (hunger <= hungerDeathThreshold)
         {
             Die();
@@ -71,7 +91,7 @@ public class Herbivore : MonoBehaviour
             hunger = maxHunger;
 
         // Actualizar enfriamientos y objetivos
-        reproductionTimer -= Time.deltaTime;
+        reproductionTimer -= dt;
         if (hunger <= seekThreshold && targetPlant == null)
             FindNewTarget();
 
@@ -79,12 +99,13 @@ public class Herbivore : MonoBehaviour
         HerbivoreState newState = HerbivoreState.Wandering;
 
         // 1. Depredadores cercanos -> huir en dirección opuesta a todos ellos
-        Collider[] predators = Physics.OverlapSphere(transform.position, predatorDetection);
+        int predatorCount = Physics.OverlapSphereNonAlloc(transform.position, predatorDetection, predatorBuffer);
         Vector3 fleeDirection = Vector3.zero;
         bool predatorNearby = false;
-        foreach (var p in predators)
+        for (int i = 0; i < predatorCount; i++)
         {
-            if (p.GetComponent<Carnivore>() == null) continue;
+            var p = predatorBuffer[i];
+            if (p == null || p.GetComponent<Carnivore>() == null) continue;
             predatorNearby = true;
             Vector3 away = transform.position - p.transform.position;
             away.y = 0f;
@@ -129,7 +150,7 @@ public class Herbivore : MonoBehaviour
                 toPlant.y = 0f;
                 if (toPlant.magnitude < 1.5f)
                 {
-                    float eaten = targetPlant.Consume(eatRate * Time.deltaTime);
+                    float eaten = targetPlant.Consume(eatRate * dt);
                     hunger = Mathf.Min(hunger + eaten, maxHunger);
                     health = Mathf.Min(health + eaten, maxHealth);
                     UpdateScale();
@@ -164,7 +185,7 @@ public class Herbivore : MonoBehaviour
                 break;
 
             case HerbivoreState.Wandering:
-                wanderTimer -= Time.deltaTime;
+                wanderTimer -= dt;
                 if (wanderTimer <= 0f)
                 {
                     wanderDir = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
@@ -177,10 +198,11 @@ public class Herbivore : MonoBehaviour
         // Evitar superposición con otros herbívoros
         if (state != HerbivoreState.Eating)
         {
-            Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
-            foreach (var n in neighbors)
+            int neighborCount = Physics.OverlapSphereNonAlloc(transform.position, avoidanceRadius, neighborBuffer);
+            for (int i = 0; i < neighborCount; i++)
             {
-                if (n.gameObject == gameObject) continue;
+                var n = neighborBuffer[i];
+                if (n == null || n.gameObject == gameObject) continue;
                 if (n.GetComponent<Herbivore>() == null) continue;
 
                 Vector3 away = transform.position - n.transform.position;
@@ -198,7 +220,7 @@ public class Herbivore : MonoBehaviour
                 speed = runSpeed;
 
             Vector3 dir = moveDir.normalized;
-            transform.position += dir * speed * Time.deltaTime;
+            transform.position += dir * speed * dt;
             transform.rotation = Quaternion.LookRotation(dir);
             ClampToBounds();
         }
@@ -209,45 +231,60 @@ public class Herbivore : MonoBehaviour
     // Busca la planta viva más cercana dentro del radio de detección
     void FindNewTarget()
     {
-        VegetationTile[] candidates = null;
-
-        if (VegetationManager.Instance != null && VegetationManager.Instance.activeVegetation.Count > 0)
-        {
-            candidates = VegetationManager.Instance.activeVegetation
-                .Where(p => p.isAlive &&
-                       Vector3.Distance(transform.position, p.transform.position) <= detectionRadius &&
-                       !Physics.OverlapSphere(p.transform.position, predatorDetection)
-                           .Any(c => c.GetComponent<Carnivore>() != null))
-                .ToArray();
-        }
-        else
-        {
-            // Búsqueda de respaldo en caso de que el manager no esté listo
-            candidates = FindObjectsByType<VegetationTile>(FindObjectsSortMode.None)
-                .Where(p => p.isAlive &&
-                       Vector3.Distance(transform.position, p.transform.position) <= detectionRadius &&
-                       !Physics.OverlapSphere(p.transform.position, predatorDetection)
-                           .Any(c => c.GetComponent<Carnivore>() != null))
-                .ToArray();
-        }
-
-        if (candidates.Length == 0)
+        if (VegetationManager.Instance == null)
+            return;
+        var plants = VegetationManager.Instance.activeVegetation;
+        if (plants == null || plants.Count == 0)
             return;
 
-        targetPlant = candidates
-            .OrderBy(p => Vector3.Distance(transform.position, p.transform.position))
-            .FirstOrDefault();
+        float closest = float.MaxValue;
+        VegetationTile closestPlant = null;
+        for (int i = 0; i < plants.Count; i++)
+        {
+            var p = plants[i];
+            if (p == null || !p.isAlive)
+                continue;
+            float dist = Vector3.Distance(transform.position, p.transform.position);
+            if (dist > detectionRadius)
+                continue;
+            int count = Physics.OverlapSphereNonAlloc(p.transform.position, predatorDetection, plantCheckBuffer);
+            bool danger = false;
+            for (int j = 0; j < count; j++)
+            {
+                if (plantCheckBuffer[j] != null && plantCheckBuffer[j].GetComponent<Carnivore>() != null)
+                {
+                    danger = true;
+                    break;
+                }
+            }
+            if (danger)
+                continue;
+            if (dist < closest)
+            {
+                closest = dist;
+                closestPlant = p;
+            }
+        }
+        targetPlant = closestPlant;
     }
 
     // Busca un compañero disponible dentro del radio de búsqueda
     Herbivore FindPartner()
     {
-        Herbivore[] herd = FindObjectsByType<Herbivore>(FindObjectsSortMode.None)
-            .Where(h => h != this && h.hunger >= reproductionThreshold && h.reproductionTimer <= 0f &&
-                   Vector3.Distance(transform.position, h.transform.position) <= reproductionSeekRadius)
-            .ToArray();
-        if (herd.Length == 0) return null;
-        return herd.OrderBy(h => Vector3.Distance(transform.position, h.transform.position)).FirstOrDefault();
+        Herbivore best = null;
+        float bestDist = float.MaxValue;
+        foreach (var h in All)
+        {
+            if (h == this) continue;
+            if (h.hunger < reproductionThreshold || h.reproductionTimer > 0f) continue;
+            float dist = Vector3.Distance(transform.position, h.transform.position);
+            if (dist <= reproductionSeekRadius && dist < bestDist)
+            {
+                bestDist = dist;
+                best = h;
+            }
+        }
+        return best;
     }
 
     // Instancia una nueva cría y reduce el hambre de los padres

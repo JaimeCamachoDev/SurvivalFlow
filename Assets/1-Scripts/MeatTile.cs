@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
 /// Tile de carne que dejan los herbívoros al morir. Se degrada con el tiempo
@@ -6,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public class MeatTile : MonoBehaviour
 {
+    public static readonly List<MeatTile> All = new List<MeatTile>();
     public float nutrition = 50f;   // Cantidad de comida disponible
     public float decayRate = 1f;     // Velocidad a la que se pudre
 
@@ -16,6 +18,11 @@ public class MeatTile : MonoBehaviour
     float timer;
 
     public bool isAlive => nutrition > 0f; // Sigue existiendo mientras tenga comida
+
+    void Awake()
+    {
+        All.Add(this);
+    }
 
     void Update()
     {
@@ -48,5 +55,10 @@ public class MeatTile : MonoBehaviour
             Destroy(gameObject);
         }
         return eaten;
+    }
+
+    void OnDestroy()
+    {
+        All.Remove(this);
     }
 }
