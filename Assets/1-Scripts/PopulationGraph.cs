@@ -15,7 +15,6 @@ public class PopulationGraph : MonoBehaviour
     public int maxSamples = 200;      // Muestras visibles en el gráfico
 
     float timer;
-    int samples;
     readonly List<Vector3> plantPoints = new List<Vector3>();
     readonly List<Vector3> herbPoints = new List<Vector3>();
     readonly List<Vector3> carnPoints = new List<Vector3>();
@@ -25,7 +24,6 @@ public class PopulationGraph : MonoBehaviour
         timer += Time.deltaTime;
         if (timer < sampleInterval) return;
         timer = 0f;
-        samples++;
 
         int plantCount = VegetationManager.Instance != null ? VegetationManager.Instance.activeVegetation.Count : 0;
         int herbCount = Herbivore.All.Count;
@@ -39,18 +37,17 @@ public class PopulationGraph : MonoBehaviour
     void AddPoint(LineRenderer lr, List<Vector3> list, float value)
     {
         if (lr == null) return;
-        Vector3 point = new Vector3(samples, value * yScale, 0f);
-        list.Add(point);
 
+        // Añade una muestra y reajusta los puntos para que siempre estén anclados al origen
+        list.Add(new Vector3(0f, value * yScale, 0f));
         if (list.Count > maxSamples)
-        {
             list.RemoveAt(0);
-            for (int i = 0; i < list.Count; i++)
-            {
-                Vector3 p = list[i];
-                p.x -= 1f; // Desplaza las muestras para mantenerlas visibles
-                list[i] = p;
-            }
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            Vector3 p = list[i];
+            p.x = i;
+            list[i] = p;
         }
 
         lr.positionCount = list.Count;

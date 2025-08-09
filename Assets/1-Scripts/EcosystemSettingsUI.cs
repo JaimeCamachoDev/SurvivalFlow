@@ -10,6 +10,7 @@ public class EcosystemSettingsUI : MonoBehaviour
     [Header("Referencias")]
     public VegetationManager vegetationManager;
     public PopulationBalancer populationBalancer;
+    public GeneticManager geneticManager;
 
     [Header("UI")]
     public Slider plantReproductionSlider;
@@ -18,6 +19,10 @@ public class EcosystemSettingsUI : MonoBehaviour
     public TextMeshProUGUI herbivoreMinText;
     public Slider carnivoreMinSlider;
     public TextMeshProUGUI carnivoreMinText;
+    public Toggle managerToggle;
+    public Toggle geneticsToggle;
+    public Slider mutationSlider;
+    public TextMeshProUGUI mutationText;
 
     void Start()
     {
@@ -58,6 +63,33 @@ public class EcosystemSettingsUI : MonoBehaviour
                     UpdateTexts();
                 });
             }
+
+            if (managerToggle != null)
+            {
+                managerToggle.isOn = populationBalancer.enabledManager;
+                managerToggle.onValueChanged.AddListener(v => populationBalancer.SetEnabledManager(v));
+            }
+        }
+
+        if (geneticManager != null)
+        {
+            if (geneticsToggle != null)
+            {
+                geneticsToggle.isOn = geneticManager.geneticsEnabled;
+                geneticsToggle.onValueChanged.AddListener(v => geneticManager.SetGeneticsEnabled(v));
+            }
+
+            if (mutationSlider != null)
+            {
+                mutationSlider.minValue = 0f;
+                mutationSlider.maxValue = 1f;
+                mutationSlider.value = geneticManager.mutationStrength;
+                mutationSlider.onValueChanged.AddListener(v =>
+                {
+                    geneticManager.SetMutationStrength(v);
+                    UpdateTexts();
+                });
+            }
         }
 
         UpdateTexts();
@@ -73,5 +105,8 @@ public class EcosystemSettingsUI : MonoBehaviour
 
         if (carnivoreMinText != null && populationBalancer != null)
             carnivoreMinText.text = $"Carnívoros mínimos: {populationBalancer.minCarnivores}";
+
+        if (mutationText != null && geneticManager != null)
+            mutationText.text = $"Mutación: {geneticManager.mutationStrength:0.00}";
     }
 }

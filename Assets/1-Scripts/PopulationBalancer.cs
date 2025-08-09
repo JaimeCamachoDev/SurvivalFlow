@@ -115,5 +115,20 @@ public class PopulationBalancer : MonoBehaviour
             Instantiate(prefab, pos, Quaternion.identity);
         }
     }
+
+    public void SetEnabledManager(bool enabled)
+    {
+        enabledManager = enabled;
+        if (!enabled)
+            ResetThresholds();
+    }
+
+    void ResetThresholds()
+    {
+        foreach (var h in Herbivore.All)
+            h.reproductionThreshold = herbivoreNormalThreshold;
+        foreach (var c in Carnivore.All)
+            c.reproductionThreshold = carnivoreNormalThreshold;
+    }
 }
 

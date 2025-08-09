@@ -50,6 +50,7 @@ public class Herbivore : MonoBehaviour
     Color baseColor;                             // Color original
     Vector3 baseScale;                          // Escala base para crecimiento
     bool wasHurt;                               // Señal cuando recibe daño
+    float baseMaxHunger, baseHungerRate, baseCalmSpeed, baseRunSpeed, baseDetectionRadius, basePredatorDetection;
     [Header("Rendimiento")]
     [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
     [Range(0.02f, 1f)] public float updateInterval = 0.2f;
@@ -67,6 +68,14 @@ public class Herbivore : MonoBehaviour
         health = maxHealth * 0.2f; // Nacen con 20% de vida
         UpdateScale();
         All.Add(this);
+
+        baseMaxHunger = maxHunger;
+        baseHungerRate = hungerRate;
+        baseCalmSpeed = calmSpeed;
+        baseRunSpeed = runSpeed;
+        baseDetectionRadius = detectionRadius;
+        basePredatorDetection = predatorDetection;
+        ApplyGenetics();
     }
 
     void OnDestroy()
@@ -313,10 +322,11 @@ public class Herbivore : MonoBehaviour
             Herbivore baby = child.GetComponent<Herbivore>();
             if (baby != null)
             {
-                baby.hunger = baby.maxHunger * 0.5f;
                 baby.herbivorePrefab = herbivorePrefab;
                 baby.minOffspring = minOffspring;
                 baby.maxOffspring = maxOffspring;
+                baby.InheritFromParents(this, partner);
+                baby.hunger = baby.maxHunger * 0.5f;
             }
         }
 
@@ -325,6 +335,40 @@ public class Herbivore : MonoBehaviour
         partner.hunger = Mathf.Max(partner.hunger - cost, 0f);
         reproductionTimer = reproductionCooldown;
         partner.reproductionTimer = partner.reproductionCooldown;
+    }
+
+    public void ApplyGenetics()
+    {
+        GeneticManager gm = GeneticManager.Instance;
+        if (gm != null && gm.geneticsEnabled)
+        {
+            maxHunger = gm.Mutate(baseMaxHunger);
+            hungerRate = gm.Mutate(baseHungerRate);
+            calmSpeed = gm.Mutate(baseCalmSpeed);
+            runSpeed = gm.Mutate(baseRunSpeed);
+            detectionRadius = gm.Mutate(baseDetectionRadius);
+            predatorDetection = gm.Mutate(basePredatorDetection);
+        }
+        else
+        {
+            maxHunger = baseMaxHunger;
+            hungerRate = baseHungerRate;
+            calmSpeed = baseCalmSpeed;
+            runSpeed = baseRunSpeed;
+            detectionRadius = baseDetectionRadius;
+            predatorDetection = basePredatorDetection;
+        }
+    }
+
+    public void InheritFromParents(Herbivore a, Herbivore b)
+    {
+        baseMaxHunger = (a.maxHunger + b.maxHunger) * 0.5f;
+        baseHungerRate = (a.hungerRate + b.hungerRate) * 0.5f;
+        baseCalmSpeed = (a.calmSpeed + b.calmSpeed) * 0.5f;
+        baseRunSpeed = (a.runSpeed + b.runSpeed) * 0.5f;
+        baseDetectionRadius = (a.detectionRadius + b.detectionRadius) * 0.5f;
+        basePredatorDetection = (a.predatorDetection + b.predatorDetection) * 0.5f;
+        ApplyGenetics();
     }
 
     public void TakeDamage(float amount)

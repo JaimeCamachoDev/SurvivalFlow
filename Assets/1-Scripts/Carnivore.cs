@@ -44,6 +44,7 @@ public class Carnivore : MonoBehaviour
     public float maxHealth = 80f;          // Vida máxima
     public float health;                   // Vida actual
     bool wasHurt;                          // Señal cuando recibe daño
+    float baseMaxHunger, baseHungerRate, baseCalmSpeed, baseRunSpeed, baseDetectionRadius;
     [Header("Rendimiento")]
     [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
     [Range(0.02f, 1f)] public float updateInterval = 0.1f;
@@ -58,6 +59,13 @@ public class Carnivore : MonoBehaviour
         health = maxHealth * 0.2f; // Nacen con 20% de vida
         UpdateScale();
         All.Add(this);
+
+        baseMaxHunger = maxHunger;
+        baseHungerRate = hungerRate;
+        baseCalmSpeed = calmSpeed;
+        baseRunSpeed = runSpeed;
+        baseDetectionRadius = detectionRadius;
+        ApplyGenetics();
     }
 
     void OnDestroy()
@@ -337,6 +345,7 @@ public class Carnivore : MonoBehaviour
                 baby.carnivorePrefab = carnivorePrefab;
                 baby.minOffspring = minOffspring;
                 baby.maxOffspring = maxOffspring;
+                baby.InheritFromParents(this, partner);
                 baby.hunger = baby.maxHunger * 0.5f;
             }
         }
@@ -345,6 +354,37 @@ public class Carnivore : MonoBehaviour
         partner.hunger = Mathf.Max(partner.hunger - cost, 0f);
         reproductionTimer = reproductionCooldown;
         partner.reproductionTimer = partner.reproductionCooldown;
+    }
+
+    public void ApplyGenetics()
+    {
+        GeneticManager gm = GeneticManager.Instance;
+        if (gm != null && gm.geneticsEnabled)
+        {
+            maxHunger = gm.Mutate(baseMaxHunger);
+            hungerRate = gm.Mutate(baseHungerRate);
+            calmSpeed = gm.Mutate(baseCalmSpeed);
+            runSpeed = gm.Mutate(baseRunSpeed);
+            detectionRadius = gm.Mutate(baseDetectionRadius);
+        }
+        else
+        {
+            maxHunger = baseMaxHunger;
+            hungerRate = baseHungerRate;
+            calmSpeed = baseCalmSpeed;
+            runSpeed = baseRunSpeed;
+            detectionRadius = baseDetectionRadius;
+        }
+    }
+
+    public void InheritFromParents(Carnivore a, Carnivore b)
+    {
+        baseMaxHunger = (a.maxHunger + b.maxHunger) * 0.5f;
+        baseHungerRate = (a.hungerRate + b.hungerRate) * 0.5f;
+        baseCalmSpeed = (a.calmSpeed + b.calmSpeed) * 0.5f;
+        baseRunSpeed = (a.runSpeed + b.runSpeed) * 0.5f;
+        baseDetectionRadius = (a.detectionRadius + b.detectionRadius) * 0.5f;
+        ApplyGenetics();
     }
 
     void Die()
