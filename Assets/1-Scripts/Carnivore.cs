@@ -20,7 +20,7 @@ public class Carnivore : MonoBehaviour
     public float avoidanceRadius = 0.5f;    // Distancia mínima con otros carnívoros
     public float detectionRadius = 6f;      // Radio para detectar presas o carne
 
-    [Header(\"Reproducción\")]
+    [Header("Reproducción")]
     public GameObject carnivorePrefab;
     public float reproductionThreshold = 80f;
     public float reproductionDistance = 2f;
