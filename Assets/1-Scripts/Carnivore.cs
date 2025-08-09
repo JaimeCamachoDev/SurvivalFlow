@@ -25,6 +25,7 @@ public class Carnivore : MonoBehaviour
     public float reproductionThreshold = 80f;
     public float reproductionDistance = 2f;
     public float reproductionCooldown = 25f;
+    public float reproductionSeekRadius = 6f;    // Radio para buscar pareja activamente
     public int minOffspring = 1;
     public int maxOffspring = 1;
 
@@ -34,6 +35,7 @@ public class Carnivore : MonoBehaviour
     Vector3 wanderDir;                      // Dirección al deambular
     float wanderTimer;                      // Temporizador de cambio de dirección
     float reproductionTimer;
+    Carnivore partnerTarget;               // Pareja con la que intenta reproducirse
 
     void Update()
     {
@@ -131,12 +133,45 @@ public class Carnivore : MonoBehaviour
             }
         }
 
+        // Lógica de reproducción: buscar pareja y acercarse
+        reproductionTimer -= Time.deltaTime;
+        if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
+        {
+            if (partnerTarget == null || partnerTarget.hunger < reproductionThreshold || partnerTarget.reproductionTimer > 0f)
+            {
+                partnerTarget = FindPartner();
+                if (partnerTarget != null && partnerTarget.partnerTarget == null)
+                    partnerTarget.partnerTarget = this;
+            }
+
+            if (partnerTarget != null)
+            {
+                Vector3 toMate = partnerTarget.transform.position - transform.position;
+                toMate.y = 0f;
+                if (toMate.magnitude < reproductionDistance)
+                {
+                    ReproduceWith(partnerTarget);
+                    partnerTarget = null;
+                }
+                else
+                {
+                    moveDir += toMate.normalized;
+                    pursuing = true; // Moverse rápido hacia la pareja
+                }
+            }
+        }
+        else
+        {
+            partnerTarget = null;
+        }
+
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
             float speed = (hungry || pursuing) ? runSpeed : calmSpeed;
             transform.position += dir * speed * Time.deltaTime;
             transform.rotation = Quaternion.LookRotation(dir);
+            ClampToBounds();
         }
 
         // Lógica de reproducción
@@ -175,11 +210,12 @@ public class Carnivore : MonoBehaviour
             .FirstOrDefault();
     }
 
-    // Busca un compañero para reproducirse
+    // Busca un compañero disponible dentro del radio de búsqueda
     Carnivore FindPartner()
     {
         Carnivore[] pack = FindObjectsByType<Carnivore>(FindObjectsSortMode.None)
-            .Where(c => c != this && Vector3.Distance(transform.position, c.transform.position) <= reproductionDistance)
+            .Where(c => c != this && c.hunger >= reproductionThreshold && c.reproductionTimer <= 0f &&
+                   Vector3.Distance(transform.position, c.transform.position) <= reproductionSeekRadius)
             .ToArray();
         if (pack.Length == 0) return null;
         return pack.OrderBy(c => Vector3.Distance(transform.position, c.transform.position)).FirstOrDefault();
@@ -215,5 +251,16 @@ public class Carnivore : MonoBehaviour
     void Die()
     {
         Destroy(gameObject);
+    }
+
+    // Mantiene al carnívoro dentro de los límites del mapa definido por VegetationManager
+    void ClampToBounds()
+    {
+        if (VegetationManager.Instance == null) return;
+        Vector2 size = VegetationManager.Instance.areaSize;
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, -size.x / 2f, size.x / 2f);
+        pos.z = Mathf.Clamp(pos.z, -size.y / 2f, size.y / 2f);
+        transform.position = pos;
     }
 }
