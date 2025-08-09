@@ -18,7 +18,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 22
   m_IsActive: 1
 --- !u!4 &3735268988891752529
 Transform:
@@ -123,6 +123,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nutrition: 100
   decayRate: 1
-  fertilizeInterval: 0
-  fertilizeRadius: 0
-  fertilizePlants: 0

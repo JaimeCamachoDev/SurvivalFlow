@@ -18,7 +18,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 22
   m_IsActive: 1
 --- !u!4 &8295602470168182098
 Transform:
@@ -133,6 +133,7 @@ MonoBehaviour:
   avoidanceRadius: 0.5
   detectionRadius: 50
   predatorDetection: 20
+  fleeDuration: 2
   maxHealth: 50
   health: 50
   meatPrefab: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
@@ -144,3 +145,4 @@ MonoBehaviour:
   minOffspring: 1
   maxOffspring: 3
   targetPlant: {fileID: 0}
+  updateInterval: 0.2
