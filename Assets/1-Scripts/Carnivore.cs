@@ -33,7 +33,6 @@ public class Carnivore : MonoBehaviour
             Die();
             return;
         }
-
         bool hungry = hunger <= seekThreshold;      // Necesita comida
         if (hunger >= maxHunger)
         {

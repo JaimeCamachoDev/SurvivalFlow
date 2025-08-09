@@ -85,7 +85,6 @@ public class Herbivore : MonoBehaviour
             }
             moveDir += wanderDir;
         }
-
         if (!isEating)
         {
             Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
@@ -135,6 +134,31 @@ public class Herbivore : MonoBehaviour
             {
                 ReproduceWith(partner);
             }
+        }
+
+        if (moveDir.sqrMagnitude > 0.001f && !isEating)
+        {
+            Vector3 dir = moveDir.normalized;
+            transform.position += dir * moveSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
+
+        // Lógica de reproducción
+        reproductionTimer -= Time.deltaTime;
+        if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
+        {
+            Herbivore partner = FindPartner();
+            if (partner != null && partner.hunger >= reproductionThreshold && partner.reproductionTimer <= 0f)
+            {
+                ReproduceWith(partner);
+            }
+        }
+
+        if (moveDir.sqrMagnitude > 0.001f && !isEating)
+        {
+            Vector3 dir = moveDir.normalized;
+            transform.position += dir * moveSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.LookRotation(dir);
         }
     }
 
@@ -201,6 +225,31 @@ public class Herbivore : MonoBehaviour
             Die();
     }
 
+    // Instancia una nueva cría y reduce el hambre de los padres
+    void ReproduceWith(Herbivore partner)
+    {
+        if (herbivorePrefab == null) return;
+
+        Vector3 spawnPos = (transform.position + partner.transform.position) / 2f;
+        GameObject child = Instantiate(herbivorePrefab, spawnPos, Quaternion.identity);
+        Herbivore baby = child.GetComponent<Herbivore>();
+        if (baby != null)
+            baby.hunger = baby.maxHunger * 0.5f; // La cría empieza medio hambrienta
+
+        // Coste energético para los padres
+        hunger *= 0.5f;
+        partner.hunger *= 0.5f;
+        reproductionTimer = reproductionCooldown;
+        partner.reproductionTimer = partner.reproductionCooldown;
+    }
+
+    public void TakeDamage(float amount)
+    {
+
+        health -= amount;
+        if (health <= 0f)
+            Die();
+    }
     void Die()
     {
         if (meatPrefab != null)

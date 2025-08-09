@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3027782994385362168
+--- !u!1 &7614501880655567535
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,48 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8295602470168182098}
-  - component: {fileID: 3203899514734000584}
-  - component: {fileID: 4315580219689107419}
-  - component: {fileID: 5973695777077902661}
-  - component: {fileID: 6858892380678236638}
+  - component: {fileID: 3735268988891752529}
+  - component: {fileID: 8025622810538656653}
+  - component: {fileID: 3638976933618677340}
+  - component: {fileID: 6399393690789607319}
+  - component: {fileID: 3900487610715102430}
   m_Layer: 0
-  m_Name: Herbivore
+  m_Name: Meat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8295602470168182098
+--- !u!4 &3735268988891752529
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3027782994385362168}
+  m_GameObject: {fileID: 7614501880655567535}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.46193978, y: 0.19134173, z: 0.19134173, w: 0.84462327}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &3203899514734000584
+  m_LocalEulerAnglesHint: {x: 45, y: 45, z: 45}
+--- !u!33 &8025622810538656653
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3027782994385362168}
+  m_GameObject: {fileID: 7614501880655567535}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &4315580219689107419
+--- !u!23 &3638976933618677340
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3027782994385362168}
+  m_GameObject: {fileID: 7614501880655567535}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -66,7 +66,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4dfd55ca50a6d4e4bb9c57f249bc7e02, type: 2}
+  - {fileID: 2100000, guid: ca187afeb6ecec249be87bb52fd6e394, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -88,13 +88,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5973695777077902661
+--- !u!65 &6399393690789607319
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3027782994385362168}
+  m_GameObject: {fileID: 7614501880655567535}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -109,33 +109,17 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6858892380678236638
+--- !u!114 &3900487610715102430
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3027782994385362168}
+  m_GameObject: {fileID: 7614501880655567535}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7498f350f5e22c469fe7ecd23470fb1, type: 3}
+  m_Script: {fileID: 11500000, guid: a29b8f23d0964d6ab3c599001e2e7f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHunger: 100
-  hunger: 100
-  hungerRate: 5
-  hungerDeathThreshold: 0
-  seekThreshold: 50
-  calmSpeed: 1.5
-  runSpeed: 3
-  eatRate: 10
-  wanderChangeInterval: 3
-  avoidanceRadius: 0.5
-  detectionRadius: 5
-  predatorDetection: 6
-  health: 50
-  meatPrefab: {fileID: 0}
-  herbivorePrefab: {fileID: 0}
-  reproductionThreshold: 80
-  reproductionDistance: 2
-  reproductionCooldown: 20
+  nutrition: 50
+  decayRate: 1

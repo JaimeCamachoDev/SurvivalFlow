@@ -57,7 +57,6 @@ public class VegetationTile : MonoBehaviour
 
         return consumed;
     }
-
     // Llamado por el manager cuando esta planta genera una hija
     public void ReduceGrowthAfterReproduction()
     {
@@ -66,7 +65,6 @@ public class VegetationTile : MonoBehaviour
         if (growth <= 0f)
             Destroy(gameObject);
     }
-
     // Ajusta la escala visual de la planta según su crecimiento
     void UpdateScale()
     {
