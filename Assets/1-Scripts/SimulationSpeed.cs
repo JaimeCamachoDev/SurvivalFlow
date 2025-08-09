@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
-
+using TMPro;
 public class SimulationSpeed : MonoBehaviour
 {
     [Range(0.1f, 10f)]
     public float timeScale = 1f;
 
-    [Header("UI")] public Text timeScaleText;
+    [Header("UI")] public TextMeshProUGUI timeScaleText;
     public Slider timeScaleSlider;
 
     void Start()

@@ -121,6 +121,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f816908646393468fb98bea18e21de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  growth: 20
   maxGrowth: 100
-  growthRate: 5
+  growthRate: 0.9
+  initialGrowthPercent: 0.05
+  reproductionCost: 30
+  growth: 20

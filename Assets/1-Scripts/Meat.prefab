@@ -123,3 +123,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nutrition: 100
   decayRate: 1
+  fertilizeInterval: 0
+  fertilizeRadius: 0
+  fertilizePlants: 0
