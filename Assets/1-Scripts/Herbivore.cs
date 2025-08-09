@@ -44,6 +44,9 @@ public class Herbivore : MonoBehaviour
     Vector3 baseScale;                          // Escala base para crecimiento
     bool wasHurt;                               // Señal cuando recibe daño
 
+    enum HerbivoreState { Wandering, Eating, Fleeing, SeekingMate }
+    HerbivoreState state = HerbivoreState.Wandering;
+
     void Awake()
     {
         cachedRenderer = GetComponent<Renderer>();
@@ -67,91 +70,80 @@ public class Herbivore : MonoBehaviour
         if (hunger >= maxHunger)
             hunger = maxHunger;
 
-        // Buscar una nueva planta solo si estamos por debajo del umbral y no tenemos objetivo
+        // Actualizar enfriamientos y objetivos
+        reproductionTimer -= Time.deltaTime;
         if (hunger <= seekThreshold && targetPlant == null)
             FindNewTarget();
 
-        Vector3 moveDir = Vector3.zero;
-        bool isEating = false;
-        bool isRunning = false;                // Indica si debe ir más rápido
-        bool isReproducing = hunger >= reproductionThreshold && reproductionTimer <= 0f;
+        // Determinar el estado actual con prioridades exclusivas
+        HerbivoreState newState = HerbivoreState.Wandering;
 
-        if (targetPlant != null)
+        // 1. Depredadores cercanos -> huir
+        Collider[] predators = Physics.OverlapSphere(transform.position, predatorDetection);
+        Collider predator = predators.FirstOrDefault(p => p.GetComponent<Carnivore>() != null);
+        if (predator != null)
         {
-            Vector3 toPlant = targetPlant.transform.position - transform.position;
-            toPlant.y = 0f;
-
-            if (toPlant.magnitude < 1.5f)
-            {
-                float eaten = targetPlant.Consume(eatRate * Time.deltaTime);
-                hunger = Mathf.Min(hunger + eaten, maxHunger);
-                health = Mathf.Min(health + eaten, maxHealth);
-                UpdateScale();
-                isEating = true;
-                // Si estamos llenos o la planta murió, liberamos el objetivo
-                if (hunger >= maxHunger || !targetPlant.isAlive)
-                    targetPlant = null;
-            }
-            else
-            {
-                moveDir += toPlant.normalized;
-            }
+            newState = HerbivoreState.Fleeing;
         }
         else
         {
-            wanderTimer -= Time.deltaTime;
-            if (wanderTimer <= 0f)
+            // 2. Reproducción
+            if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
             {
-                wanderDir = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
-                wanderTimer = wanderChangeInterval;
-            }
-            moveDir += wanderDir;
-        }
-        if (!isEating)
-        {
-            Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
-            foreach (var n in neighbors)
-            {
-                if (n.gameObject == gameObject) continue;
-                if (n.GetComponent<Herbivore>() == null) continue;
-
-                Vector3 away = transform.position - n.transform.position;
-                away.y = 0f;
-                if (away.sqrMagnitude > 0.001f)
-                    moveDir += away.normalized;
+                if (partnerTarget == null || partnerTarget.hunger < reproductionThreshold || partnerTarget.reproductionTimer > 0f)
+                {
+                    partnerTarget = FindPartner();
+                    if (partnerTarget != null && partnerTarget.partnerTarget == null)
+                        partnerTarget.partnerTarget = this;
+                }
+                if (partnerTarget != null)
+                    newState = HerbivoreState.SeekingMate;
             }
 
-            // Comprobar depredadores cercanos para huir
-            Collider[] predators = Physics.OverlapSphere(transform.position, predatorDetection);
-            foreach (var p in predators)
-            {
-                if (p.GetComponent<Carnivore>() == null) continue;
-
-                Vector3 away = transform.position - p.transform.position;
-                away.y = 0f;
-                if (away.sqrMagnitude > 0.001f)
-                    moveDir += away.normalized;
-                isRunning = true; // Al detectar un depredador, aumenta la velocidad
-            }
+            // 3. Comer
+            if (newState == HerbivoreState.Wandering && targetPlant != null)
+                newState = HerbivoreState.Eating;
         }
 
-        // Determinar si debe moverse rápido: hambre o depredadores
-        if (hunger <= seekThreshold)
-            isRunning = true;
+        state = newState;
 
-        // Lógica de reproducción: buscar pareja y dirigirse hacia ella
-        reproductionTimer -= Time.deltaTime;
-        if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
+        // Movimiento según el estado
+        Vector3 moveDir = Vector3.zero;
+
+        switch (state)
         {
-            if (partnerTarget == null || partnerTarget.hunger < reproductionThreshold || partnerTarget.reproductionTimer > 0f)
-            {
-                partnerTarget = FindPartner();
-                if (partnerTarget != null && partnerTarget.partnerTarget == null)
-                    partnerTarget.partnerTarget = this; // Asegurar que ambos se buscan
-            }
+            case HerbivoreState.Eating:
+                if (targetPlant == null)
+                    break;
+                Vector3 toPlant = targetPlant.transform.position - transform.position;
+                toPlant.y = 0f;
+                if (toPlant.magnitude < 1.5f)
+                {
+                    float eaten = targetPlant.Consume(eatRate * Time.deltaTime);
+                    hunger = Mathf.Min(hunger + eaten, maxHunger);
+                    health = Mathf.Min(health + eaten, maxHealth);
+                    UpdateScale();
+                    if (hunger >= maxHunger || !targetPlant.isAlive)
+                        targetPlant = null;
+                }
+                else
+                {
+                    moveDir = toPlant.normalized;
+                }
+                break;
 
-            if (partnerTarget != null)
-            {
+            case HerbivoreState.Fleeing:
+                if (predator != null)
+                {
+                    Vector3 away = transform.position - predator.transform.position;
+                    away.y = 0f;
+                    moveDir = away.normalized;
+                }
+                break;
+
+            case HerbivoreState.SeekingMate:
+                if (partnerTarget == null)
+                    break;
                 Vector3 toMate = partnerTarget.transform.position - transform.position;
                 toMate.y = 0f;
                 if (toMate.magnitude < reproductionDistance)
@@ -161,26 +153,35 @@ public class Herbivore : MonoBehaviour
                 }
                 else
                 {
-                    moveDir += toMate.normalized;
-                    isRunning = true; // Moverse más rápido para alcanzar a la pareja
+                    moveDir = toMate.normalized;
                 }
-            }
-        }
-        else
-        {
-            partnerTarget = null;
+                break;
+
+            case HerbivoreState.Wandering:
+                wanderTimer -= Time.deltaTime;
+                if (wanderTimer <= 0f)
+                {
+                    wanderDir = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
+                    wanderTimer = wanderChangeInterval;
+                }
+                moveDir = wanderDir;
+                break;
         }
 
-        UpdateColor(isEating, isRunning, isReproducing);
-
-        if (moveDir.sqrMagnitude > 0.001f && !isEating)
+        // Movimiento final
+        if (moveDir.sqrMagnitude > 0.001f)
         {
+            float speed = calmSpeed;
+            if (state == HerbivoreState.Fleeing || state == HerbivoreState.SeekingMate || (state == HerbivoreState.Eating && hunger <= seekThreshold))
+                speed = runSpeed;
+
             Vector3 dir = moveDir.normalized;
-            float speed = isRunning ? runSpeed : calmSpeed;
             transform.position += dir * speed * Time.deltaTime;
             transform.rotation = Quaternion.LookRotation(dir);
             ClampToBounds();
         }
+
+        UpdateColor(state);
     }
 
     // Busca la planta viva más cercana dentro del radio de detección
@@ -278,21 +279,31 @@ public class Herbivore : MonoBehaviour
     }
 
     // Cambia el color según el estado actual
-    void UpdateColor(bool isEating, bool isRunning, bool isReproducing)
+    void UpdateColor(HerbivoreState currentState)
     {
         if (!VisualCueSettings.enableVisualCues || cachedRenderer == null || VisualCueSettings.Instance == null)
             return;
 
         if (wasHurt)
-            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreInjuredColor;        // Herido
-        else if (isReproducing)
-            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreReproducingColor;    // Reproducción
-        else if (isEating)
-            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreEatingColor;         // Comiendo
-        else if (isRunning)
-            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreFleeingColor;        // Huyendo
+            cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreInjuredColor;
         else
-            cachedRenderer.material.color = baseColor;                                                // Tranquilo
+        {
+            switch (currentState)
+            {
+                case HerbivoreState.SeekingMate:
+                    cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreReproducingColor;
+                    break;
+                case HerbivoreState.Eating:
+                    cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreEatingColor;
+                    break;
+                case HerbivoreState.Fleeing:
+                    cachedRenderer.material.color = VisualCueSettings.Instance.herbivoreFleeingColor;
+                    break;
+                default:
+                    cachedRenderer.material.color = baseColor;
+                    break;
+            }
+        }
         wasHurt = false;
     }
 
