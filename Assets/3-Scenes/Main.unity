@@ -119,6 +119,63 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &123811280
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
 --- !u!1 &132141570
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,6 +284,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &377651156
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (10)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
 --- !u!1 &604739758
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,8 +372,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vegetationPrefab: {fileID: 7366876730310698998, guid: 2af6080cb1d52d548a8ab621afdeb701, type: 3}
-  count: 10
-  areaSize: {x: 50, y: 50}
+  count: 100
+  areaSize: {x: 200, y: 200}
 --- !u!4 &604739760
 Transform:
   m_ObjectHideFlags: 0
@@ -289,12 +403,183 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeVegetation: []
   vegetationPrefab: {fileID: 7366876730310698998, guid: 2af6080cb1d52d548a8ab621afdeb701, type: 3}
-  areaSize: {x: 50, y: 50}
-  reproductionInterval: 10
-  maxVegetation: 20
+  areaSize: {x: 400, y: 400}
+  reproductionInterval: 5
+  maxVegetation: 200
   minDistanceBetweenPlants: 1
-  reproductionRadius: 3
-  randomSpawnChance: 0.1
+  reproductionRadius: 1
+  randomSpawnChance: 0.5
+--- !u!1001 &610738357
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+--- !u!1001 &680693579
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+--- !u!1001 &770386429
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
 --- !u!1 &954153389
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,6 +717,234 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!1001 &1022021373
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (9)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+--- !u!1001 &1072645587
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (8)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+--- !u!1001 &1122316674
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+--- !u!1001 &1340432874
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
 --- !u!1 &1441283089
 GameObject:
   m_ObjectHideFlags: 0
@@ -469,7 +982,8 @@ MonoBehaviour:
   hungerRate: 5
   hungerDeathThreshold: 0
   seekThreshold: 50
-  moveSpeed: 2.5
+  calmSpeed: 2.5
+  runSpeed: 4
   attackRate: 15
   eatRate: 20
   wanderChangeInterval: 3
@@ -630,7 +1144,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 9da59d30dc963414ebc65a7a16fb1f7a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -675,6 +1189,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1940996096
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_Name
+      value: Herbivore (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
 --- !u!1 &1978970603
 GameObject:
   m_ObjectHideFlags: 0
@@ -796,83 +1367,6 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!1001 &6109485662101656572
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_Name
-      value: Herbivore
-      objectReference: {fileID: 0}
-    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: eatRate
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: moveSpeed
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: hungerRate
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: detectionRadius
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -8.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -44.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
 --- !u!1001 &6508380119186532262
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -938,7 +1432,16 @@ SceneRoots:
   - {fileID: 1978970605}
   - {fileID: 1448500333}
   - {fileID: 604739760}
-  - {fileID: 6109485662101656572}
+  - {fileID: 610738357}
+  - {fileID: 1340432874}
+  - {fileID: 1940996096}
+  - {fileID: 123811280}
+  - {fileID: 1122316674}
+  - {fileID: 680693579}
+  - {fileID: 770386429}
+  - {fileID: 1072645587}
+  - {fileID: 1022021373}
+  - {fileID: 377651156}
   - {fileID: 132141574}
   - {fileID: 6508380119186532262}
   - {fileID: 1441283094}

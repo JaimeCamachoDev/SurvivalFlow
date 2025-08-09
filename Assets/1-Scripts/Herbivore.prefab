@@ -123,19 +123,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHunger: 100
   hunger: 100
-  hungerRate: 5
+  hungerRate: 1
   hungerDeathThreshold: 0
   seekThreshold: 50
   calmSpeed: 1.5
   runSpeed: 3
-  eatRate: 10
+  eatRate: 20
   wanderChangeInterval: 3
   avoidanceRadius: 0.5
-  detectionRadius: 5
-  predatorDetection: 6
-  health: 50
-  meatPrefab: {fileID: 0}
-  herbivorePrefab: {fileID: 0}
+  detectionRadius: 25
+  predatorDetection: 10
+  health: 20
+  meatPrefab: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
+  herbivorePrefab: {fileID: 3027782994385362168}
   reproductionThreshold: 80
   reproductionDistance: 2
   reproductionCooldown: 20
+  targetPlant: {fileID: 0}
