@@ -13,6 +13,7 @@ public class FpsCounter : MonoBehaviour
     void Update()
     {
         frames++;
+        // Time.unscaledDeltaTime evita que el contador se vea afectado por la escala de tiempo
         timer += Time.unscaledDeltaTime;
         if (timer >= 1f)
         {
