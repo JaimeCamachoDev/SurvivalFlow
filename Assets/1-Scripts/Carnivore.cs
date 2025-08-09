@@ -20,10 +20,22 @@ public class Carnivore : MonoBehaviour
     public float avoidanceRadius = 0.5f;    // Distancia mínima con otros carnívoros
     public float detectionRadius = 6f;      // Radio para detectar presas o carne
 
+    [Header(\"Reproducción\")]
+    public GameObject carnivorePrefab;
+    public float reproductionThreshold = 80f;
+    public float reproductionDistance = 2f;
+    public float reproductionCooldown = 25f;
+    public float reproductionSeekRadius = 6f;    // Radio para buscar pareja activamente
+    public int minOffspring = 1;
+    public int maxOffspring = 1;
+
+
     Herbivore targetPrey;                  // Herbívoro seleccionado como presa
     MeatTile targetMeat;                    // Carne en el suelo
     Vector3 wanderDir;                      // Dirección al deambular
     float wanderTimer;                      // Temporizador de cambio de dirección
+    float reproductionTimer;
+    Carnivore partnerTarget;               // Pareja con la que intenta reproducirse
 
     void Update()
     {
@@ -121,12 +133,45 @@ public class Carnivore : MonoBehaviour
             }
         }
 
+        // Lógica de reproducción: buscar pareja y acercarse
+        reproductionTimer -= Time.deltaTime;
+        if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
+        {
+            if (partnerTarget == null || partnerTarget.hunger < reproductionThreshold || partnerTarget.reproductionTimer > 0f)
+            {
+                partnerTarget = FindPartner();
+                if (partnerTarget != null && partnerTarget.partnerTarget == null)
+                    partnerTarget.partnerTarget = this;
+            }
+
+            if (partnerTarget != null)
+            {
+                Vector3 toMate = partnerTarget.transform.position - transform.position;
+                toMate.y = 0f;
+                if (toMate.magnitude < reproductionDistance)
+                {
+                    ReproduceWith(partnerTarget);
+                    partnerTarget = null;
+                }
+                else
+                {
+                    moveDir += toMate.normalized;
+                    pursuing = true; // Moverse rápido hacia la pareja
+                }
+            }
+        }
+        else
+        {
+            partnerTarget = null;
+        }
+
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
             float speed = (hungry || pursuing) ? runSpeed : calmSpeed;
             transform.position += dir * speed * Time.deltaTime;
             transform.rotation = Quaternion.LookRotation(dir);
+            ClampToBounds();
         }
     }
 
@@ -154,8 +199,57 @@ public class Carnivore : MonoBehaviour
             .FirstOrDefault();
     }
 
+    // Busca un compañero disponible dentro del radio de búsqueda
+    Carnivore FindPartner()
+    {
+        Carnivore[] pack = FindObjectsByType<Carnivore>(FindObjectsSortMode.None)
+            .Where(c => c != this && c.hunger >= reproductionThreshold && c.reproductionTimer <= 0f &&
+                   Vector3.Distance(transform.position, c.transform.position) <= reproductionSeekRadius)
+            .ToArray();
+        if (pack.Length == 0) return null;
+        return pack.OrderBy(c => Vector3.Distance(transform.position, c.transform.position)).FirstOrDefault();
+    }
+
+    // Crea nuevas crías y aplica el coste energético
+    void ReproduceWith(Carnivore partner)
+    {
+        if (carnivorePrefab == null) return;
+        int offspring = Random.Range(minOffspring, maxOffspring + 1);
+        for (int i = 0; i < offspring; i++)
+        {
+            Vector3 spawnPos = (transform.position + partner.transform.position) / 2f;
+            spawnPos += Random.insideUnitSphere * 0.5f;
+            spawnPos.y = 0f;
+            GameObject child = Instantiate(carnivorePrefab, spawnPos, Quaternion.identity);
+            Carnivore baby = child.GetComponent<Carnivore>();
+            if (baby != null)
+            {
+                baby.carnivorePrefab = carnivorePrefab;
+                baby.minOffspring = minOffspring;
+                baby.maxOffspring = maxOffspring;
+                baby.hunger = baby.maxHunger * 0.5f;
+            }
+        }
+        float cost = maxHunger * 0.3f;
+        hunger = Mathf.Max(hunger - cost, 0f);
+        partner.hunger = Mathf.Max(partner.hunger - cost, 0f);
+        reproductionTimer = reproductionCooldown;
+        partner.reproductionTimer = partner.reproductionCooldown;
+    }
+
     void Die()
     {
         Destroy(gameObject);
+    }
+
+    // Mantiene al carnívoro dentro de los límites del mapa definido por VegetationManager
+    void ClampToBounds()
+    {
+        if (VegetationManager.Instance == null) return;
+        Vector2 size = VegetationManager.Instance.areaSize;
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, -size.x / 2f, size.x / 2f);
+        pos.z = Mathf.Clamp(pos.z, -size.y / 2f, size.y / 2f);
+        transform.position = pos;
     }
 }

@@ -28,12 +28,16 @@ public class Herbivore : MonoBehaviour
     public float reproductionThreshold = 80f;    // Hambre necesaria para reproducirse
     public float reproductionDistance = 2f;      // Distancia para encontrar pareja
     public float reproductionCooldown = 20f;     // Tiempo entre reproducciones
+    public float reproductionSeekRadius = 6f;    // Radio para buscar pareja activamente
+    public int minOffspring = 1;
+    public int maxOffspring = 1;
 
     public VegetationTile targetPlant;           // Planta objetivo actual
 
     Vector3 wanderDir;                           // Dirección de deambular
     float wanderTimer;                           // Temporizador de cambio de dirección
     float reproductionTimer;                     // Controla el enfriamiento de reproducción
+    Herbivore partnerTarget;                     // Pareja con la que intenta reproducirse
 
     void Update()
     {
@@ -117,30 +121,45 @@ public class Herbivore : MonoBehaviour
         if (hunger <= seekThreshold)
             isRunning = true;
 
+        // Lógica de reproducción: buscar pareja y dirigirse hacia ella
+        reproductionTimer -= Time.deltaTime;
+        if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
+        {
+            if (partnerTarget == null || partnerTarget.hunger < reproductionThreshold || partnerTarget.reproductionTimer > 0f)
+            {
+                partnerTarget = FindPartner();
+                if (partnerTarget != null && partnerTarget.partnerTarget == null)
+                    partnerTarget.partnerTarget = this; // Asegurar que ambos se buscan
+            }
+
+            if (partnerTarget != null)
+            {
+                Vector3 toMate = partnerTarget.transform.position - transform.position;
+                toMate.y = 0f;
+                if (toMate.magnitude < reproductionDistance)
+                {
+                    ReproduceWith(partnerTarget);
+                    partnerTarget = null;
+                }
+                else
+                {
+                    moveDir += toMate.normalized;
+                    isRunning = true; // Moverse más rápido para alcanzar a la pareja
+                }
+            }
+        }
+        else
+        {
+            partnerTarget = null;
+        }
+
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
             float speed = isRunning ? runSpeed : calmSpeed;
             transform.position += dir * speed * Time.deltaTime;
             transform.rotation = Quaternion.LookRotation(dir);
-        }
-
-        // Lógica de reproducción
-        reproductionTimer -= Time.deltaTime;
-        if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
-        {
-            Herbivore partner = FindPartner();
-            if (partner != null && partner.hunger >= reproductionThreshold && partner.reproductionTimer <= 0f)
-            {
-                ReproduceWith(partner);
-            }
-        }
-
-        if (moveDir.sqrMagnitude > 0.001f && !isEating)
-        {
-            Vector3 dir = moveDir.normalized;
-            transform.position += dir * runSpeed * Time.deltaTime;
-            transform.rotation = Quaternion.LookRotation(dir);
+            ClampToBounds();
         }
     }
 
@@ -171,11 +190,12 @@ public class Herbivore : MonoBehaviour
             .FirstOrDefault();
     }
 
-    // Busca un compañero para reproducirse dentro del radio especificado
+    // Busca un compañero disponible dentro del radio de búsqueda
     Herbivore FindPartner()
     {
         Herbivore[] herd = FindObjectsByType<Herbivore>(FindObjectsSortMode.None)
-            .Where(h => h != this && Vector3.Distance(transform.position, h.transform.position) <= reproductionDistance)
+            .Where(h => h != this && h.hunger >= reproductionThreshold && h.reproductionTimer <= 0f &&
+                   Vector3.Distance(transform.position, h.transform.position) <= reproductionSeekRadius)
             .ToArray();
         if (herd.Length == 0) return null;
         return herd.OrderBy(h => Vector3.Distance(transform.position, h.transform.position)).FirstOrDefault();
@@ -186,13 +206,23 @@ public class Herbivore : MonoBehaviour
     {
         if (herbivorePrefab == null) return;
 
-        Vector3 spawnPos = (transform.position + partner.transform.position) / 2f;
-        GameObject child = Instantiate(herbivorePrefab, spawnPos, Quaternion.identity);
-        Herbivore baby = child.GetComponent<Herbivore>();
-        if (baby != null)
-            baby.hunger = baby.maxHunger * 0.5f; // La cría empieza medio hambrienta
+        int offspring = Random.Range(minOffspring, maxOffspring + 1);
+        for (int i = 0; i < offspring; i++)
+        {
+            Vector3 spawnPos = (transform.position + partner.transform.position) / 2f;
+            spawnPos += Random.insideUnitSphere * 0.5f;
+            spawnPos.y = 0f;
+            GameObject child = Instantiate(herbivorePrefab, spawnPos, Quaternion.identity);
+            Herbivore baby = child.GetComponent<Herbivore>();
+            if (baby != null)
+            {
+                baby.hunger = baby.maxHunger * 0.5f;
+                baby.herbivorePrefab = herbivorePrefab;
+                baby.minOffspring = minOffspring;
+                baby.maxOffspring = maxOffspring;
+            }
+        }
 
-        // Coste energético para los padres (pierden un 30% de su hambre máxima)
         float cost = maxHunger * 0.3f;
         hunger = Mathf.Max(hunger - cost, 0f);
         partner.hunger = Mathf.Max(partner.hunger - cost, 0f);
@@ -212,6 +242,17 @@ public class Herbivore : MonoBehaviour
         if (meatPrefab != null)
             Instantiate(meatPrefab, transform.position, Quaternion.identity);
         Destroy(gameObject);
+    }
+
+    // Mantiene al herbívoro dentro de los límites definidos por el VegetationManager
+    void ClampToBounds()
+    {
+        if (VegetationManager.Instance == null) return;
+        Vector2 size = VegetationManager.Instance.areaSize;
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, -size.x / 2f, size.x / 2f);
+        pos.z = Mathf.Clamp(pos.z, -size.y / 2f, size.y / 2f);
+        transform.position = pos;
     }
 }
 
