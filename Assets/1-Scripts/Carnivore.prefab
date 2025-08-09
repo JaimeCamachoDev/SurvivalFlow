@@ -125,7 +125,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHunger: 100
   hunger: 100
-  hungerRate: 1
+  hungerRate: 1.1
   hungerDeathThreshold: 0
   seekThreshold: 70
   calmSpeed: 2.5
@@ -144,3 +144,4 @@ MonoBehaviour:
   maxOffspring: 1
   maxHealth: 80
   health: 0
+  updateInterval: 0.1
