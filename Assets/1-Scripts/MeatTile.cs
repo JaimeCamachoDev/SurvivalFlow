@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
 /// Tile de carne que dejan los herbívoros al morir. Se degrada con el tiempo
@@ -6,16 +7,16 @@ using UnityEngine;
 /// </summary>
 public class MeatTile : MonoBehaviour
 {
+    public static readonly List<MeatTile> All = new List<MeatTile>();
     public float nutrition = 50f;   // Cantidad de comida disponible
     public float decayRate = 1f;     // Velocidad a la que se pudre
 
-    [Header("Fertilización")] public float fertilizeInterval = 5f;
-    public float fertilizeRadius = 3f;
-    public int fertilizePlants = 1;
-
-    float timer;
-
     public bool isAlive => nutrition > 0f; // Sigue existiendo mientras tenga comida
+
+    void Awake()
+    {
+        All.Add(this);
+    }
 
     void Update()
     {
@@ -23,16 +24,10 @@ public class MeatTile : MonoBehaviour
             return;
 
         nutrition -= decayRate * Time.deltaTime;
-        timer += Time.deltaTime;
-        if (timer >= fertilizeInterval)
-        {
-            timer = 0f;
-            VegetationManager.Instance?.FertilizeArea(transform.position, fertilizeRadius, fertilizePlants);
-        }
 
         if (nutrition <= 0f)
         {
-            VegetationManager.Instance?.FertilizeArea(transform.position, fertilizeRadius, fertilizePlants);
+            VegetationManager.Instance?.SpawnVegetationAt(transform.position);
             Destroy(gameObject);
         }
     }
@@ -44,9 +39,14 @@ public class MeatTile : MonoBehaviour
         nutrition -= eaten;
         if (nutrition <= 0f)
         {
-            VegetationManager.Instance?.FertilizeArea(transform.position, fertilizeRadius, fertilizePlants);
+            VegetationManager.Instance?.SpawnVegetationAt(transform.position);
             Destroy(gameObject);
         }
         return eaten;
+    }
+
+    void OnDestroy()
+    {
+        All.Remove(this);
     }
 }

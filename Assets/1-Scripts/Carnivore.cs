@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Linq;
+using System.Collections.Generic;
 
 /// <summary>
 /// Gestiona a los carnívoros: buscan carne o presas, atacan y se mueven
@@ -7,6 +7,8 @@ using System.Linq;
 /// </summary>
 public class Carnivore : MonoBehaviour
 {
+    public static readonly List<Carnivore> All = new List<Carnivore>();
+    static readonly Collider[] neighborBuffer = new Collider[32];
     public float maxHunger = 100f;
     public float hunger = 100f;
     public float hungerRate = 5f;           // Pérdida de hambre por segundo
@@ -42,6 +44,10 @@ public class Carnivore : MonoBehaviour
     public float maxHealth = 80f;          // Vida máxima
     public float health;                   // Vida actual
     bool wasHurt;                          // Señal cuando recibe daño
+    [Header("Rendimiento")]
+    [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
+    [Range(0.02f, 1f)] public float updateInterval = 0.1f;
+    float updateTimer;
 
     void Awake()
     {
@@ -51,11 +57,23 @@ public class Carnivore : MonoBehaviour
         baseScale = transform.localScale;
         health = maxHealth * 0.2f; // Nacen con 20% de vida
         UpdateScale();
+        All.Add(this);
+    }
+
+    void OnDestroy()
+    {
+        All.Remove(this);
     }
 
     void Update()
     {
-        hunger -= hungerRate * Time.deltaTime;
+        updateTimer += Time.deltaTime;
+        if (updateTimer < updateInterval)
+            return;
+        float dt = updateTimer;
+        updateTimer = 0f;
+
+        hunger -= hungerRate * dt;
         if (hunger <= hungerDeathThreshold)
         {
             Die();
@@ -91,7 +109,7 @@ public class Carnivore : MonoBehaviour
             toMeat.y = 0f;
             if (toMeat.magnitude < 1.5f)
             {
-                float eaten = targetMeat.Consume(eatRate * Time.deltaTime);
+                float eaten = targetMeat.Consume(eatRate * dt);
                 hunger = Mathf.Min(hunger + eaten, maxHunger);
                 health = Mathf.Min(health + eaten, maxHealth);
                 UpdateScale();
@@ -113,7 +131,7 @@ public class Carnivore : MonoBehaviour
             toPrey.y = 0f;
             if (toPrey.magnitude < 1.5f)
             {
-                float bite = attackRate * Time.deltaTime;
+                float bite = attackRate * dt;
                 targetPrey.TakeDamage(bite);
                 hunger = Mathf.Min(hunger + bite, maxHunger);
                 health = Mathf.Min(health + bite, maxHealth);
@@ -132,7 +150,7 @@ public class Carnivore : MonoBehaviour
         }
         else
         {
-            wanderTimer -= Time.deltaTime;
+            wanderTimer -= dt;
             if (wanderTimer <= 0f)
             {
                 wanderDir = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
@@ -143,10 +161,11 @@ public class Carnivore : MonoBehaviour
 
         if (!isEating)
         {
-            Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
-            foreach (var n in neighbors)
+            int neighborCount = Physics.OverlapSphereNonAlloc(transform.position, avoidanceRadius, neighborBuffer);
+            for (int i = 0; i < neighborCount; i++)
             {
-                if (n.gameObject == gameObject) continue;
+                var n = neighborBuffer[i];
+                if (n == null || n.gameObject == gameObject) continue;
                 if (n.GetComponent<Carnivore>() == null) continue;
 
                 Vector3 away = transform.position - n.transform.position;
@@ -157,7 +176,7 @@ public class Carnivore : MonoBehaviour
         }
 
         // Lógica de reproducción: buscar pareja y acercarse
-        reproductionTimer -= Time.deltaTime;
+        reproductionTimer -= dt;
         if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
         {
             if (partnerTarget == null || partnerTarget.hunger < reproductionThreshold || partnerTarget.reproductionTimer > 0f)
@@ -194,13 +213,13 @@ public class Carnivore : MonoBehaviour
         {
             Vector3 dir = moveDir.normalized;
             float speed = (hungry || pursuing) ? runSpeed : calmSpeed;
-            transform.position += dir * speed * Time.deltaTime;
+            transform.position += dir * speed * dt;
             transform.rotation = Quaternion.LookRotation(dir);
             ClampToBounds();
         }
 
         // Lógica de reproducción
-        reproductionTimer -= Time.deltaTime;
+        reproductionTimer -= dt;
         if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
         {
             Carnivore partner = FindPartner();
@@ -250,36 +269,55 @@ public class Carnivore : MonoBehaviour
     // Busca el herbívoro vivo más cercano dentro del radio de detección
     void FindPrey()
     {
-        Herbivore[] candidates = FindObjectsByType<Herbivore>(FindObjectsSortMode.None)
-            .Where(h => Vector3.Distance(transform.position, h.transform.position) <= detectionRadius)
-            .ToArray();
-        if (candidates.Length == 0) return;
-        targetPrey = candidates
-            .OrderBy(h => Vector3.Distance(transform.position, h.transform.position))
-            .FirstOrDefault();
+        Herbivore best = null;
+        float bestDist = float.MaxValue;
+        foreach (var h in Herbivore.All)
+        {
+            float dist = Vector3.Distance(transform.position, h.transform.position);
+            if (dist <= detectionRadius && dist < bestDist)
+            {
+                bestDist = dist;
+                best = h;
+            }
+        }
+        targetPrey = best;
     }
 
     // Busca carne disponible en el suelo
     void FindMeat()
     {
-        MeatTile[] meats = FindObjectsByType<MeatTile>(FindObjectsSortMode.None)
-            .Where(m => m.isAlive && Vector3.Distance(transform.position, m.transform.position) <= detectionRadius)
-            .ToArray();
-        if (meats.Length == 0) return;
-        targetMeat = meats
-            .OrderBy(m => Vector3.Distance(transform.position, m.transform.position))
-            .FirstOrDefault();
+        MeatTile best = null;
+        float bestDist = float.MaxValue;
+        foreach (var m in MeatTile.All)
+        {
+            if (!m.isAlive) continue;
+            float dist = Vector3.Distance(transform.position, m.transform.position);
+            if (dist <= detectionRadius && dist < bestDist)
+            {
+                bestDist = dist;
+                best = m;
+            }
+        }
+        targetMeat = best;
     }
 
     // Busca un compañero disponible dentro del radio de búsqueda
     Carnivore FindPartner()
     {
-        Carnivore[] pack = FindObjectsByType<Carnivore>(FindObjectsSortMode.None)
-            .Where(c => c != this && c.hunger >= reproductionThreshold && c.reproductionTimer <= 0f &&
-                   Vector3.Distance(transform.position, c.transform.position) <= reproductionSeekRadius)
-            .ToArray();
-        if (pack.Length == 0) return null;
-        return pack.OrderBy(c => Vector3.Distance(transform.position, c.transform.position)).FirstOrDefault();
+        Carnivore best = null;
+        float bestDist = float.MaxValue;
+        foreach (var c in All)
+        {
+            if (c == this) continue;
+            if (c.hunger < reproductionThreshold || c.reproductionTimer > 0f) continue;
+            float dist = Vector3.Distance(transform.position, c.transform.position);
+            if (dist <= reproductionSeekRadius && dist < bestDist)
+            {
+                bestDist = dist;
+                best = c;
+            }
+        }
+        return best;
     }
 
     // Crea nuevas crías y aplica el coste energético

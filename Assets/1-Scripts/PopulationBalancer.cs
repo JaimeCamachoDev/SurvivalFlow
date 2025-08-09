@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
 /// Monitors the populations of plants, herbivores and carnivores and
@@ -16,6 +17,10 @@ public class PopulationBalancer : MonoBehaviour
     [Header("Population minimums")]
     public int minHerbivores = 5;
     public int minCarnivores = 3;
+
+    [Header("Population maximums")]
+    public int maxHerbivores = 30;
+    public int maxCarnivores = 10;
 
     [Header("Reproduction thresholds")]
     public float herbivoreNormalThreshold = 80f;
@@ -49,16 +54,20 @@ public class PopulationBalancer : MonoBehaviour
         // Sample populations (similar to PopulationGraph.Update)
         currentPlants = VegetationManager.Instance != null ?
             VegetationManager.Instance.activeVegetation.Count : 0;
-        Herbivore[] herbArray = FindObjectsByType<Herbivore>(FindObjectsSortMode.None);
-        Carnivore[] carnArray = FindObjectsByType<Carnivore>(FindObjectsSortMode.None);
-        currentHerbivores = herbArray.Length;
-        currentCarnivores = carnArray.Length;
+        List<Herbivore> herbArray = Herbivore.All;
+        List<Carnivore> carnArray = Carnivore.All;
+        currentHerbivores = herbArray.Count;
+        currentCarnivores = carnArray.Count;
 
         // Herbivore balancing
         if (currentHerbivores < minHerbivores)
         {
             AdjustHerbivoreReproduction(herbArray, herbivoreBoostedThreshold);
-            SpawnNearExisting(herbivorePrefab, herbArray);
+            SpawnNearExisting(herbivorePrefab, herbArray, currentHerbivores, maxHerbivores);
+        }
+        else if (currentHerbivores >= maxHerbivores)
+        {
+            AdjustHerbivoreReproduction(herbArray, float.MaxValue);
         }
         else
         {
@@ -69,7 +78,11 @@ public class PopulationBalancer : MonoBehaviour
         if (currentCarnivores < minCarnivores)
         {
             AdjustCarnivoreReproduction(carnArray, carnivoreBoostedThreshold);
-            SpawnNearExisting(carnivorePrefab, carnArray);
+            SpawnNearExisting(carnivorePrefab, carnArray, currentCarnivores, maxCarnivores);
+        }
+        else if (currentCarnivores >= maxCarnivores)
+        {
+            AdjustCarnivoreReproduction(carnArray, float.MaxValue);
         }
         else
         {
@@ -77,26 +90,26 @@ public class PopulationBalancer : MonoBehaviour
         }
     }
 
-    void AdjustHerbivoreReproduction(Herbivore[] herd, float threshold)
+    void AdjustHerbivoreReproduction(List<Herbivore> herd, float threshold)
     {
         foreach (var h in herd)
             h.reproductionThreshold = threshold;
     }
 
-    void AdjustCarnivoreReproduction(Carnivore[] pack, float threshold)
+    void AdjustCarnivoreReproduction(List<Carnivore> pack, float threshold)
     {
         foreach (var c in pack)
             c.reproductionThreshold = threshold;
     }
 
-    void SpawnNearExisting(GameObject prefab, Component[] existing)
+    void SpawnNearExisting<T>(GameObject prefab, List<T> existing, int currentCount, int maxCount) where T : MonoBehaviour
     {
-        if (prefab == null || existing == null || existing.Length == 0)
+        if (prefab == null || existing == null || existing.Count == 0 || currentCount >= maxCount)
             return;
 
-        for (int i = 0; i < spawnAmount; i++)
+        for (int i = 0; i < spawnAmount && currentCount < maxCount; i++, currentCount++)
         {
-            Vector3 origin = existing[Random.Range(0, existing.Length)].transform.position;
+            Vector3 origin = existing[Random.Range(0, existing.Count)].transform.position;
             Vector3 pos = origin + new Vector3(Random.Range(-spawnRadius, spawnRadius), 0f,
                                               Random.Range(-spawnRadius, spawnRadius));
             Instantiate(prefab, pos, Quaternion.identity);
