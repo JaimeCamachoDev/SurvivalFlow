@@ -127,7 +127,7 @@ MonoBehaviour:
   hungerDeathThreshold: 0
   seekThreshold: 50
   calmSpeed: 1.5
-  runSpeed: 3
+  runSpeed: 5
   eatRate: 20
   wanderChangeInterval: 3
   avoidanceRadius: 0.5
