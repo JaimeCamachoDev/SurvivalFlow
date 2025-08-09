@@ -123,34 +123,25 @@ public class VegetationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Siembra nuevas plantas alrededor de un punto dado, usado por la carne al descomponerse.
+    /// Intenta sembrar una planta en la posición indicada.
     /// </summary>
-    public void FertilizeArea(Vector3 center, float radius, int attempts = 1)
+    public void SpawnVegetationAt(Vector3 pos)
     {
         if (vegetationPrefab == null || activeVegetation.Count >= maxVegetation)
             return;
 
-        for (int i = 0; i < attempts; i++)
-        {
-            Vector2 offset = Random.insideUnitCircle * radius;
-            Vector3 pos = center + new Vector3(offset.x, 0f, offset.y);
-            pos.x = Mathf.Clamp(pos.x, -areaSize.x / 2, areaSize.x / 2);
-            pos.z = Mathf.Clamp(pos.z, -areaSize.y / 2, areaSize.y / 2);
-            if (!InsideArea(pos))
-                continue;
+        pos.x = Mathf.Clamp(pos.x, -areaSize.x / 2, areaSize.x / 2);
+        pos.z = Mathf.Clamp(pos.z, -areaSize.y / 2, areaSize.y / 2);
+        if (!InsideArea(pos))
+            return;
 
-            bool occupied = false;
-            for (int j = 0; j < activeVegetation.Count; j++)
-            {
-                if (Vector3.Distance(activeVegetation[j].transform.position, pos) < minDistanceBetweenPlants)
-                {
-                    occupied = true;
-                    break;
-                }
-            }
-            if (!occupied)
-                Instantiate(vegetationPrefab, pos, Quaternion.identity);
+        for (int j = 0; j < activeVegetation.Count; j++)
+        {
+            if (Vector3.Distance(activeVegetation[j].transform.position, pos) < minDistanceBetweenPlants)
+                return;
         }
+
+        Instantiate(vegetationPrefab, pos, Quaternion.identity);
     }
 
     void OnDrawGizmosSelected()

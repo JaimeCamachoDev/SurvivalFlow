@@ -24,6 +24,7 @@ public class Herbivore : MonoBehaviour
     public float avoidanceRadius = 0.5f;        // Distancia mínima con otros herbívoros
     public float detectionRadius = 5f;          // Radio para detectar comida
     public float predatorDetection = 6f;        // Radio para detectar depredadores
+    public float fleeDuration = 2f;             // Tiempo que permanece huyendo tras detectar
     public float maxHealth = 50f;            // Vida máxima
     public float health;                     // Vida actual
     public GameObject meatPrefab;                // Prefab que deja al morir
@@ -42,6 +43,8 @@ public class Herbivore : MonoBehaviour
     Vector3 wanderDir;                           // Dirección de deambular
     float wanderTimer;                           // Temporizador de cambio de dirección
     float reproductionTimer;                     // Controla el enfriamiento de reproducción
+    float fleeTimer;                             // Tiempo restante de huida
+    Vector3 fleeDir;                             // Dirección actual de huida
     Herbivore partnerTarget;                     // Pareja con la que intenta reproducirse
     Renderer cachedRenderer;                     // Renderer cacheado para cambiar color
     Color baseColor;                             // Color original
@@ -49,7 +52,7 @@ public class Herbivore : MonoBehaviour
     bool wasHurt;                               // Señal cuando recibe daño
     [Header("Rendimiento")]
     [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
-    [Range(0.02f, 1f)] public float updateInterval = 0.1f;
+    [Range(0.02f, 1f)] public float updateInterval = 0.2f;
     float updateTimer;
 
     enum HerbivoreState { Wandering, Eating, Fleeing, SeekingMate }
@@ -92,15 +95,13 @@ public class Herbivore : MonoBehaviour
 
         // Actualizar enfriamientos y objetivos
         reproductionTimer -= dt;
-        if (hunger <= seekThreshold && targetPlant == null)
+        if (hunger <= seekThreshold && targetPlant == null && fleeTimer <= 0f)
             FindNewTarget();
 
         // Determinar el estado actual con prioridades exclusivas
         HerbivoreState newState = HerbivoreState.Wandering;
-
-        // 1. Depredadores cercanos -> huir en dirección opuesta a todos ellos
         int predatorCount = Physics.OverlapSphereNonAlloc(transform.position, predatorDetection, predatorBuffer);
-        Vector3 fleeDirection = Vector3.zero;
+        Vector3 fleeSum = Vector3.zero;
         bool predatorNearby = false;
         for (int i = 0; i < predatorCount; i++)
         {
@@ -110,11 +111,21 @@ public class Herbivore : MonoBehaviour
             Vector3 away = transform.position - p.transform.position;
             away.y = 0f;
             if (away.sqrMagnitude > 0.001f)
-                fleeDirection += away.normalized;
+                fleeSum += away.normalized;
         }
         if (predatorNearby)
         {
+            if (fleeSum.sqrMagnitude > 0.001f)
+                fleeDir = fleeSum.normalized;
+            fleeTimer = fleeDuration;
+            targetPlant = null;
+            partnerTarget = null;
+        }
+
+        if (fleeTimer > 0f)
+        {
             newState = HerbivoreState.Fleeing;
+            fleeTimer -= dt;
         }
         else
         {
@@ -164,8 +175,8 @@ public class Herbivore : MonoBehaviour
                 break;
 
             case HerbivoreState.Fleeing:
-                if (fleeDirection.sqrMagnitude > 0.001f)
-                    moveDir = fleeDirection.normalized;
+                if (fleeDir.sqrMagnitude > 0.001f)
+                    moveDir = fleeDir;
                 break;
 
             case HerbivoreState.SeekingMate:

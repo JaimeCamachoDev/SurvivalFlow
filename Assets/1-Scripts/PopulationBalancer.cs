@@ -18,6 +18,10 @@ public class PopulationBalancer : MonoBehaviour
     public int minHerbivores = 5;
     public int minCarnivores = 3;
 
+    [Header("Population maximums")]
+    public int maxHerbivores = 30;
+    public int maxCarnivores = 10;
+
     [Header("Reproduction thresholds")]
     public float herbivoreNormalThreshold = 80f;
     public float herbivoreBoostedThreshold = 40f;
@@ -59,7 +63,11 @@ public class PopulationBalancer : MonoBehaviour
         if (currentHerbivores < minHerbivores)
         {
             AdjustHerbivoreReproduction(herbArray, herbivoreBoostedThreshold);
-            SpawnNearExisting(herbivorePrefab, herbArray);
+            SpawnNearExisting(herbivorePrefab, herbArray, currentHerbivores, maxHerbivores);
+        }
+        else if (currentHerbivores >= maxHerbivores)
+        {
+            AdjustHerbivoreReproduction(herbArray, float.MaxValue);
         }
         else
         {
@@ -70,7 +78,11 @@ public class PopulationBalancer : MonoBehaviour
         if (currentCarnivores < minCarnivores)
         {
             AdjustCarnivoreReproduction(carnArray, carnivoreBoostedThreshold);
-            SpawnNearExisting(carnivorePrefab, carnArray);
+            SpawnNearExisting(carnivorePrefab, carnArray, currentCarnivores, maxCarnivores);
+        }
+        else if (currentCarnivores >= maxCarnivores)
+        {
+            AdjustCarnivoreReproduction(carnArray, float.MaxValue);
         }
         else
         {
@@ -90,12 +102,12 @@ public class PopulationBalancer : MonoBehaviour
             c.reproductionThreshold = threshold;
     }
 
-    void SpawnNearExisting<T>(GameObject prefab, List<T> existing) where T : MonoBehaviour
+    void SpawnNearExisting<T>(GameObject prefab, List<T> existing, int currentCount, int maxCount) where T : MonoBehaviour
     {
-        if (prefab == null || existing == null || existing.Count == 0)
+        if (prefab == null || existing == null || existing.Count == 0 || currentCount >= maxCount)
             return;
 
-        for (int i = 0; i < spawnAmount; i++)
+        for (int i = 0; i < spawnAmount && currentCount < maxCount; i++, currentCount++)
         {
             Vector3 origin = existing[Random.Range(0, existing.Count)].transform.position;
             Vector3 pos = origin + new Vector3(Random.Range(-spawnRadius, spawnRadius), 0f,
