@@ -47,6 +47,10 @@ public class Herbivore : MonoBehaviour
     Color baseColor;                             // Color original
     Vector3 baseScale;                          // Escala base para crecimiento
     bool wasHurt;                               // Señal cuando recibe daño
+    [Header("Rendimiento")]
+    [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
+    [Range(0.02f, 1f)] public float updateInterval = 0.1f;
+    float updateTimer;
 
     enum HerbivoreState { Wandering, Eating, Fleeing, SeekingMate }
     HerbivoreState state = HerbivoreState.Wandering;
@@ -69,8 +73,14 @@ public class Herbivore : MonoBehaviour
 
     void Update()
     {
+        updateTimer += Time.deltaTime;
+        if (updateTimer < updateInterval)
+            return;
+        float dt = updateTimer;
+        updateTimer = 0f;
+
         // Actualizar hambre y comprobar muerte
-        hunger -= hungerRate * Time.deltaTime;
+        hunger -= hungerRate * dt;
         if (hunger <= hungerDeathThreshold)
         {
             Die();
@@ -81,7 +91,7 @@ public class Herbivore : MonoBehaviour
             hunger = maxHunger;
 
         // Actualizar enfriamientos y objetivos
-        reproductionTimer -= Time.deltaTime;
+        reproductionTimer -= dt;
         if (hunger <= seekThreshold && targetPlant == null)
             FindNewTarget();
 
@@ -140,7 +150,7 @@ public class Herbivore : MonoBehaviour
                 toPlant.y = 0f;
                 if (toPlant.magnitude < 1.5f)
                 {
-                    float eaten = targetPlant.Consume(eatRate * Time.deltaTime);
+                    float eaten = targetPlant.Consume(eatRate * dt);
                     hunger = Mathf.Min(hunger + eaten, maxHunger);
                     health = Mathf.Min(health + eaten, maxHealth);
                     UpdateScale();
@@ -175,7 +185,7 @@ public class Herbivore : MonoBehaviour
                 break;
 
             case HerbivoreState.Wandering:
-                wanderTimer -= Time.deltaTime;
+                wanderTimer -= dt;
                 if (wanderTimer <= 0f)
                 {
                     wanderDir = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
@@ -210,7 +220,7 @@ public class Herbivore : MonoBehaviour
                 speed = runSpeed;
 
             Vector3 dir = moveDir.normalized;
-            transform.position += dir * speed * Time.deltaTime;
+            transform.position += dir * speed * dt;
             transform.rotation = Quaternion.LookRotation(dir);
             ClampToBounds();
         }

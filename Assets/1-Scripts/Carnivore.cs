@@ -44,6 +44,10 @@ public class Carnivore : MonoBehaviour
     public float maxHealth = 80f;          // Vida máxima
     public float health;                   // Vida actual
     bool wasHurt;                          // Señal cuando recibe daño
+    [Header("Rendimiento")]
+    [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
+    [Range(0.02f, 1f)] public float updateInterval = 0.1f;
+    float updateTimer;
 
     void Awake()
     {
@@ -63,7 +67,13 @@ public class Carnivore : MonoBehaviour
 
     void Update()
     {
-        hunger -= hungerRate * Time.deltaTime;
+        updateTimer += Time.deltaTime;
+        if (updateTimer < updateInterval)
+            return;
+        float dt = updateTimer;
+        updateTimer = 0f;
+
+        hunger -= hungerRate * dt;
         if (hunger <= hungerDeathThreshold)
         {
             Die();
@@ -99,7 +109,7 @@ public class Carnivore : MonoBehaviour
             toMeat.y = 0f;
             if (toMeat.magnitude < 1.5f)
             {
-                float eaten = targetMeat.Consume(eatRate * Time.deltaTime);
+                float eaten = targetMeat.Consume(eatRate * dt);
                 hunger = Mathf.Min(hunger + eaten, maxHunger);
                 health = Mathf.Min(health + eaten, maxHealth);
                 UpdateScale();
@@ -121,7 +131,7 @@ public class Carnivore : MonoBehaviour
             toPrey.y = 0f;
             if (toPrey.magnitude < 1.5f)
             {
-                float bite = attackRate * Time.deltaTime;
+                float bite = attackRate * dt;
                 targetPrey.TakeDamage(bite);
                 hunger = Mathf.Min(hunger + bite, maxHunger);
                 health = Mathf.Min(health + bite, maxHealth);
@@ -140,7 +150,7 @@ public class Carnivore : MonoBehaviour
         }
         else
         {
-            wanderTimer -= Time.deltaTime;
+            wanderTimer -= dt;
             if (wanderTimer <= 0f)
             {
                 wanderDir = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
@@ -166,7 +176,7 @@ public class Carnivore : MonoBehaviour
         }
 
         // Lógica de reproducción: buscar pareja y acercarse
-        reproductionTimer -= Time.deltaTime;
+        reproductionTimer -= dt;
         if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
         {
             if (partnerTarget == null || partnerTarget.hunger < reproductionThreshold || partnerTarget.reproductionTimer > 0f)
@@ -203,13 +213,13 @@ public class Carnivore : MonoBehaviour
         {
             Vector3 dir = moveDir.normalized;
             float speed = (hungry || pursuing) ? runSpeed : calmSpeed;
-            transform.position += dir * speed * Time.deltaTime;
+            transform.position += dir * speed * dt;
             transform.rotation = Quaternion.LookRotation(dir);
             ClampToBounds();
         }
 
         // Lógica de reproducción
-        reproductionTimer -= Time.deltaTime;
+        reproductionTimer -= dt;
         if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
         {
             Carnivore partner = FindPartner();
