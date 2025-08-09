@@ -135,3 +135,10 @@ MonoBehaviour:
   wanderChangeInterval: 3
   avoidanceRadius: 0.5
   detectionRadius: 100
+  carnivorePrefab: {fileID: 8140725196869243394}
+  reproductionThreshold: 80
+  reproductionDistance: 2
+  reproductionCooldown: 25
+  reproductionSeekRadius: 6
+  minOffspring: 1
+  maxOffspring: 1

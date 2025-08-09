@@ -131,12 +131,15 @@ MonoBehaviour:
   eatRate: 20
   wanderChangeInterval: 3
   avoidanceRadius: 0.5
-  detectionRadius: 25
-  predatorDetection: 10
-  health: 20
+  detectionRadius: 50
+  predatorDetection: 20
+  health: 50
   meatPrefab: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
   herbivorePrefab: {fileID: 3027782994385362168}
   reproductionThreshold: 80
-  reproductionDistance: 2
+  reproductionDistance: 5
   reproductionCooldown: 20
+  reproductionSeekRadius: 6
+  minOffspring: 1
+  maxOffspring: 3
   targetPlant: {fileID: 0}
