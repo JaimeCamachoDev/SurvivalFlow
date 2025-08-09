@@ -125,7 +125,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHunger: 100
   hunger: 100
-  hungerRate: 1.5
+  hungerRate: 1
   hungerDeathThreshold: 0
   seekThreshold: 70
   calmSpeed: 2.5
@@ -136,7 +136,7 @@ MonoBehaviour:
   avoidanceRadius: 0.5
   detectionRadius: 50
   carnivorePrefab: {fileID: 8140725196869243394}
-  reproductionThreshold: 80
+  reproductionThreshold: 70
   reproductionDistance: 2
   reproductionCooldown: 40
   reproductionSeekRadius: 3

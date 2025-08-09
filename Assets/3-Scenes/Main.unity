@@ -516,7 +516,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: hungerRate
-      value: 1.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: minOffspring
@@ -536,7 +536,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionThreshold
-      value: 80
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionSeekRadius
@@ -1940,7 +1940,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: hungerRate
-      value: 1.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: minOffspring
@@ -1952,7 +1952,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionThreshold
-      value: 80
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionSeekRadius
@@ -2025,7 +2025,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: hungerRate
-      value: 1.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: minOffspring
@@ -2045,7 +2045,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionThreshold
-      value: 80
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionSeekRadius
@@ -3342,7 +3342,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: hungerRate
-      value: 1.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: minOffspring
@@ -3362,7 +3362,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionThreshold
-      value: 80
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: reproductionSeekRadius
