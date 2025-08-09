@@ -100,7 +100,6 @@ public class Herbivore : MonoBehaviour
 
         // Determinar el estado actual con prioridades exclusivas
         HerbivoreState newState = HerbivoreState.Wandering;
-
         int predatorCount = Physics.OverlapSphereNonAlloc(transform.position, predatorDetection, predatorBuffer);
         Vector3 fleeSum = Vector3.zero;
         bool predatorNearby = false;
