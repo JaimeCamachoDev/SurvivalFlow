@@ -12,6 +12,7 @@ public class PopulationGraph : MonoBehaviour
     public LineRenderer carnivoresLine;
     public float sampleInterval = 1f; // Tiempo entre muestras
     public float yScale = 0.1f;       // Escala vertical para las cantidades
+    public int maxSamples = 200;      // Muestras visibles en el gráfico
 
     float timer;
     int samples;
@@ -40,6 +41,18 @@ public class PopulationGraph : MonoBehaviour
         if (lr == null) return;
         Vector3 point = new Vector3(samples, value * yScale, 0f);
         list.Add(point);
+
+        if (list.Count > maxSamples)
+        {
+            list.RemoveAt(0);
+            for (int i = 0; i < list.Count; i++)
+            {
+                Vector3 p = list[i];
+                p.x -= 1f; // Desplaza las muestras para mantenerlas visibles
+                list[i] = p;
+            }
+        }
+
         lr.positionCount = list.Count;
         lr.SetPositions(list.ToArray());
     }
