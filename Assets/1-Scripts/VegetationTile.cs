@@ -13,6 +13,9 @@ public class VegetationTile : MonoBehaviour
 
     public float growth;
     Vector3 baseScale;
+    Renderer cachedRenderer;                          // Cache del Renderer
+    Color baseColor;                                   // Color original del material
+    bool shrinking;                                    // Indica si fue consumida recientemente
 
     public bool isAlive => growth > 0f;                // Sigue en el mundo
     public bool IsMature => growth >= maxGrowth;       // Puede reproducirse
@@ -20,8 +23,12 @@ public class VegetationTile : MonoBehaviour
     void Start()
     {
         baseScale = transform.localScale;                         // Escala base del prefab
+        cachedRenderer = GetComponent<Renderer>();                // Obtenemos y guardamos el Renderer
+        if (cachedRenderer != null)
+            baseColor = cachedRenderer.material.color;
         growth = maxGrowth * initialGrowthPercent;                // Se inicia como plántula
         UpdateScale();
+        UpdateColor();
         VegetationManager.Instance?.Register(this);               // Se registra en el manager
     }
 
@@ -43,6 +50,8 @@ public class VegetationTile : MonoBehaviour
             growth = Mathf.Min(growth, maxGrowth);
             UpdateScale();
         }
+        UpdateColor();
+        shrinking = false; // Solo se mantiene roja un frame tras ser consumida
     }
 
     // Reduce el crecimiento al ser comida y devuelve cuánto se consumió
@@ -51,6 +60,8 @@ public class VegetationTile : MonoBehaviour
         float consumed = Mathf.Min(amount, growth);
         growth -= consumed;
         UpdateScale();
+        shrinking = true;
+        UpdateColor();
 
         if (growth <= 0f)
             Destroy(gameObject);
@@ -62,6 +73,8 @@ public class VegetationTile : MonoBehaviour
     {
         growth -= reproductionCost;
         UpdateScale();
+        shrinking = true;
+        UpdateColor();
         if (growth <= 0f)
             Destroy(gameObject);
     }
@@ -70,5 +83,21 @@ public class VegetationTile : MonoBehaviour
     {
         float t = Mathf.Max(growth / maxGrowth, 0f);
         transform.localScale = baseScale * t;
+    }
+
+    // Cambia el color según el estado de crecimiento
+    void UpdateColor()
+    {
+        if (!VisualCueSettings.enableVisualCues || cachedRenderer == null)
+            return;
+
+        if (shrinking)
+            cachedRenderer.material.color = Color.red;                // Consumida
+        else if (growth >= maxGrowth)
+            cachedRenderer.material.color = Color.green;              // Madura
+        else if (growth < maxGrowth * 0.5f)
+            cachedRenderer.material.color = Color.yellow;             // Creciendo
+        else
+            cachedRenderer.material.color = baseColor;                // Estado intermedio
     }
 }

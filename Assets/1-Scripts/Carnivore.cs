@@ -36,6 +36,15 @@ public class Carnivore : MonoBehaviour
     float wanderTimer;                      // Temporizador de cambio de dirección
     float reproductionTimer;
     Carnivore partnerTarget;               // Pareja con la que intenta reproducirse
+    Renderer cachedRenderer;               // Renderer cacheado para colores
+    Color baseColor;                       // Color original del material
+
+    void Awake()
+    {
+        cachedRenderer = GetComponent<Renderer>();
+        if (cachedRenderer != null)
+            baseColor = cachedRenderer.material.color;
+    }
 
     void Update()
     {
@@ -165,6 +174,8 @@ public class Carnivore : MonoBehaviour
             partnerTarget = null;
         }
 
+        UpdateColor(isEating, pursuing, hungry && !pursuing);
+
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
@@ -184,6 +195,22 @@ public class Carnivore : MonoBehaviour
                 ReproduceWith(partner);
             }
         }
+    }
+
+    // Ajusta el color según el estado
+    void UpdateColor(bool isEating, bool pursuing, bool fleeing)
+    {
+        if (!VisualCueSettings.enableVisualCues || cachedRenderer == null)
+            return;
+
+        if (isEating)
+            cachedRenderer.material.color = Color.green;      // Comiendo
+        else if (fleeing)
+            cachedRenderer.material.color = Color.red;        // Huyendo/buscando
+        else if (pursuing)
+            cachedRenderer.material.color = Color.yellow;     // Persiguiendo presa
+        else
+            cachedRenderer.material.color = baseColor;        // Calmado
     }
 
     // Busca el herbívoro vivo más cercano dentro del radio de detección

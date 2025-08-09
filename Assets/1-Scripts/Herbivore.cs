@@ -38,6 +38,15 @@ public class Herbivore : MonoBehaviour
     float wanderTimer;                           // Temporizador de cambio de dirección
     float reproductionTimer;                     // Controla el enfriamiento de reproducción
     Herbivore partnerTarget;                     // Pareja con la que intenta reproducirse
+    Renderer cachedRenderer;                     // Renderer cacheado para cambiar color
+    Color baseColor;                             // Color original
+
+    void Awake()
+    {
+        cachedRenderer = GetComponent<Renderer>();
+        if (cachedRenderer != null)
+            baseColor = cachedRenderer.material.color;
+    }
 
     void Update()
     {
@@ -153,6 +162,8 @@ public class Herbivore : MonoBehaviour
             partnerTarget = null;
         }
 
+        UpdateColor(isEating, isRunning);
+
         if (moveDir.sqrMagnitude > 0.001f && !isEating)
         {
             Vector3 dir = moveDir.normalized;
@@ -253,6 +264,20 @@ public class Herbivore : MonoBehaviour
         pos.x = Mathf.Clamp(pos.x, -size.x / 2f, size.x / 2f);
         pos.z = Mathf.Clamp(pos.z, -size.y / 2f, size.y / 2f);
         transform.position = pos;
+    }
+
+    // Cambia el color según el estado actual
+    void UpdateColor(bool isEating, bool isRunning)
+    {
+        if (!VisualCueSettings.enableVisualCues || cachedRenderer == null)
+            return;
+
+        if (isEating)
+            cachedRenderer.material.color = Color.green;   // Comiendo
+        else if (isRunning)
+            cachedRenderer.material.color = Color.red;     // Huyendo o apurado
+        else
+            cachedRenderer.material.color = baseColor;     // Tranquilo
     }
 }
 
