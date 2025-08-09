@@ -9,6 +9,12 @@ public class MeatTile : MonoBehaviour
     public float nutrition = 50f;   // Cantidad de comida disponible
     public float decayRate = 1f;     // Velocidad a la que se pudre
 
+    [Header("Fertilización")] public float fertilizeInterval = 5f;
+    public float fertilizeRadius = 3f;
+    public int fertilizePlants = 1;
+
+    float timer;
+
     public bool isAlive => nutrition > 0f; // Sigue existiendo mientras tenga comida
 
     void Update()
@@ -17,8 +23,18 @@ public class MeatTile : MonoBehaviour
             return;
 
         nutrition -= decayRate * Time.deltaTime;
+        timer += Time.deltaTime;
+        if (timer >= fertilizeInterval)
+        {
+            timer = 0f;
+            VegetationManager.Instance?.FertilizeArea(transform.position, fertilizeRadius, fertilizePlants);
+        }
+
         if (nutrition <= 0f)
+        {
+            VegetationManager.Instance?.FertilizeArea(transform.position, fertilizeRadius, fertilizePlants);
             Destroy(gameObject);
+        }
     }
 
     // Permite a un carnívoro consumir parte de la carne disponiblen
@@ -27,7 +43,10 @@ public class MeatTile : MonoBehaviour
         float eaten = Mathf.Min(amount, nutrition);
         nutrition -= eaten;
         if (nutrition <= 0f)
+        {
+            VegetationManager.Instance?.FertilizeArea(transform.position, fertilizeRadius, fertilizePlants);
             Destroy(gameObject);
+        }
         return eaten;
     }
 }
