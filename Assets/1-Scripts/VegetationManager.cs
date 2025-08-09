@@ -64,6 +64,8 @@ public class VegetationManager : MonoBehaviour
                 var parent = maturePlants[Random.Range(0, maturePlants.Count)];
                 Vector2 offset2 = Random.insideUnitCircle.normalized * Random.Range(minDistanceBetweenPlants, reproductionRadius);
                 Vector3 pos = parent.transform.position + new Vector3(offset2.x, 0f, offset2.y);
+                pos.x = Mathf.Clamp(pos.x, -areaSize.x / 2, areaSize.x / 2);
+                pos.z = Mathf.Clamp(pos.z, -areaSize.y / 2, areaSize.y / 2);
 
                 if (!InsideArea(pos))
                     continue;
@@ -97,6 +99,35 @@ public class VegetationManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Siembra nuevas plantas alrededor de un punto dado, usado por la carne al descomponerse.
+    /// </summary>
+    public void FertilizeArea(Vector3 center, float radius, int attempts = 1)
+    {
+        if (vegetationPrefab == null || activeVegetation.Count >= maxVegetation)
+            return;
+
+        for (int i = 0; i < attempts; i++)
+        {
+            Vector2 offset = Random.insideUnitCircle * radius;
+            Vector3 pos = center + new Vector3(offset.x, 0f, offset.y);
+            pos.x = Mathf.Clamp(pos.x, -areaSize.x / 2, areaSize.x / 2);
+            pos.z = Mathf.Clamp(pos.z, -areaSize.y / 2, areaSize.y / 2);
+            if (!InsideArea(pos))
+                continue;
+
+            bool occupied = activeVegetation.Any(v => Vector3.Distance(v.transform.position, pos) < minDistanceBetweenPlants);
+            if (!occupied)
+                Instantiate(vegetationPrefab, pos, Quaternion.identity);
+        }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(areaSize.x, 0.1f, areaSize.y));
     }
 
     // Comprueba si una posición cae dentro del área válida de juego
