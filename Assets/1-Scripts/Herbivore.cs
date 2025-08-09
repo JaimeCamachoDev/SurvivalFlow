@@ -78,10 +78,20 @@ public class Herbivore : MonoBehaviour
         // Determinar el estado actual con prioridades exclusivas
         HerbivoreState newState = HerbivoreState.Wandering;
 
-        // 1. Depredadores cercanos -> huir
+        // 1. Depredadores cercanos -> huir en dirección opuesta a todos ellos
         Collider[] predators = Physics.OverlapSphere(transform.position, predatorDetection);
-        Collider predator = predators.FirstOrDefault(p => p.GetComponent<Carnivore>() != null);
-        if (predator != null)
+        Vector3 fleeDirection = Vector3.zero;
+        bool predatorNearby = false;
+        foreach (var p in predators)
+        {
+            if (p.GetComponent<Carnivore>() == null) continue;
+            predatorNearby = true;
+            Vector3 away = transform.position - p.transform.position;
+            away.y = 0f;
+            if (away.sqrMagnitude > 0.001f)
+                fleeDirection += away.normalized;
+        }
+        if (predatorNearby)
         {
             newState = HerbivoreState.Fleeing;
         }
@@ -133,12 +143,8 @@ public class Herbivore : MonoBehaviour
                 break;
 
             case HerbivoreState.Fleeing:
-                if (predator != null)
-                {
-                    Vector3 away = transform.position - predator.transform.position;
-                    away.y = 0f;
-                    moveDir = away.normalized;
-                }
+                if (fleeDirection.sqrMagnitude > 0.001f)
+                    moveDir = fleeDirection.normalized;
                 break;
 
             case HerbivoreState.SeekingMate:
@@ -168,6 +174,22 @@ public class Herbivore : MonoBehaviour
                 break;
         }
 
+        // Evitar superposición con otros herbívoros
+        if (state != HerbivoreState.Eating)
+        {
+            Collider[] neighbors = Physics.OverlapSphere(transform.position, avoidanceRadius);
+            foreach (var n in neighbors)
+            {
+                if (n.gameObject == gameObject) continue;
+                if (n.GetComponent<Herbivore>() == null) continue;
+
+                Vector3 away = transform.position - n.transform.position;
+                away.y = 0f;
+                if (away.sqrMagnitude > 0.001f)
+                    moveDir += away.normalized;
+            }
+        }
+
         // Movimiento final
         if (moveDir.sqrMagnitude > 0.001f)
         {
@@ -192,14 +214,20 @@ public class Herbivore : MonoBehaviour
         if (VegetationManager.Instance != null && VegetationManager.Instance.activeVegetation.Count > 0)
         {
             candidates = VegetationManager.Instance.activeVegetation
-                .Where(p => p.isAlive && Vector3.Distance(transform.position, p.transform.position) <= detectionRadius)
+                .Where(p => p.isAlive &&
+                       Vector3.Distance(transform.position, p.transform.position) <= detectionRadius &&
+                       !Physics.OverlapSphere(p.transform.position, predatorDetection)
+                           .Any(c => c.GetComponent<Carnivore>() != null))
                 .ToArray();
         }
         else
         {
             // Búsqueda de respaldo en caso de que el manager no esté listo
             candidates = FindObjectsByType<VegetationTile>(FindObjectsSortMode.None)
-                .Where(p => p.isAlive && Vector3.Distance(transform.position, p.transform.position) <= detectionRadius)
+                .Where(p => p.isAlive &&
+                       Vector3.Distance(transform.position, p.transform.position) <= detectionRadius &&
+                       !Physics.OverlapSphere(p.transform.position, predatorDetection)
+                           .Any(c => c.GetComponent<Carnivore>() != null))
                 .ToArray();
         }
 
