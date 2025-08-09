@@ -131,6 +131,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herbivore (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
       value: 5
@@ -207,6 +211,8 @@ GameObject:
   - component: {fileID: 263149261}
   - component: {fileID: 263149260}
   - component: {fileID: 263149262}
+  - component: {fileID: 263149263}
+  - component: {fileID: 263149264}
   m_Layer: 0
   m_Name: DIrector
   m_TagString: Untagged
@@ -259,6 +265,46 @@ MonoBehaviour:
   carnivoresLine: {fileID: 2024686610}
   sampleInterval: 1
   yScale: 0.1
+--- !u!114 &263149263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263149259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd3491cb8fbc95f44a284e0776c1ec91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showVisualCues: 1
+--- !u!114 &263149264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263149259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e8c3c2b8a2f4c5abf7a0123456789ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enabledManager: 1
+  checkInterval: 5
+  minHerbivores: 5
+  minCarnivores: 3
+  herbivoreNormalThreshold: 80
+  herbivoreBoostedThreshold: 40
+  carnivoreNormalThreshold: 50
+  carnivoreBoostedThreshold: 25
+  herbivorePrefab: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+  carnivorePrefab: {fileID: 0}
+  spawnRadius: 2
+  spawnAmount: 1
+  currentPlants: 0
+  currentHerbivores: 0
+  currentCarnivores: 0
 --- !u!1001 &312003713
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -330,6 +376,10 @@ PrefabInstance:
     - target: {fileID: 8140725196869243394, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: m_Name
       value: Carnivore (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8140725196869243394, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -557,6 +607,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herbivore (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
       value: 5
@@ -617,6 +671,10 @@ PrefabInstance:
     - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_Name
       value: Herbivore (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
@@ -695,6 +753,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herbivore (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
       value: 5
@@ -772,6 +834,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herbivore (15)
       objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
       value: 5
@@ -848,6 +914,10 @@ PrefabInstance:
     - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_Name
       value: Herbivore (11)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
@@ -1047,6 +1117,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herbivore (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
       value: 5
@@ -1164,6 +1238,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Carnivore (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8140725196869243394, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1241,6 +1319,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Carnivore (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 8140725196869243394, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1257,6 +1339,10 @@ PrefabInstance:
     - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_Name
       value: Herbivore (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
@@ -1334,6 +1420,10 @@ PrefabInstance:
     - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_Name
       value: Herbivore (13)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
@@ -1660,6 +1750,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herbivore (14)
       objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
       value: 5
@@ -1736,6 +1830,10 @@ PrefabInstance:
     - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_Name
       value: Herbivore (12)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
@@ -1821,6 +1919,10 @@ PrefabInstance:
     - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_Name
       value: Herbivore (16)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
@@ -1959,6 +2061,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Carnivore (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 8140725196869243394, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1975,6 +2081,10 @@ PrefabInstance:
     - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_Name
       value: Herbivore (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3027782994385362168, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
@@ -2352,6 +2462,10 @@ PrefabInstance:
     - target: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
       propertyPath: m_Name
       value: Meat
+      objectReference: {fileID: 0}
+    - target: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
