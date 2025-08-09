@@ -212,7 +212,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -228,7 +228,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -236,7 +236,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -512,7 +512,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: runSpeed
-      value: 10
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: hungerRate
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: minOffspring
@@ -814,7 +818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: predatorDetection
@@ -822,11 +826,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -895,7 +899,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -911,7 +915,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -919,7 +923,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -1192,7 +1196,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -1208,7 +1212,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -1216,7 +1220,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -1416,8 +1420,20 @@ PrefabInstance:
       value: Herbivore (15)
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: eatRate
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: predatorDetection
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: reproductionCooldown
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
+      propertyPath: reproductionThreshold
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 8295602470168182098, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1482,7 +1498,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: predatorDetection
@@ -1490,11 +1506,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -1720,7 +1736,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -1736,7 +1752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -1744,7 +1760,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -1919,6 +1935,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: runSpeed
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: hungerRate
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: minOffspring
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: detectionRadius
       value: 50
       objectReference: {fileID: 0}
@@ -1993,7 +2021,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: runSpeed
-      value: 10
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: hungerRate
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: minOffspring
@@ -2050,7 +2082,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -2066,7 +2098,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -2074,7 +2106,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -2143,7 +2175,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -2159,7 +2191,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -2167,7 +2199,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -2484,7 +2516,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -2500,7 +2532,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -2508,7 +2540,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -2924,7 +2956,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -2948,7 +2980,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -2956,7 +2988,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -3025,7 +3057,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -3041,7 +3073,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -3049,7 +3081,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius
@@ -3306,7 +3338,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: runSpeed
-      value: 10
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
+      propertyPath: hungerRate
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2865631752798975954, guid: a914f5b9f037f644d81bb7f0908c7c02, type: 3}
       propertyPath: minOffspring
@@ -3363,7 +3399,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: eatRate
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: runSpeed
@@ -3379,7 +3415,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionCooldown
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionDistance
@@ -3387,7 +3423,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionThreshold
-      value: 50
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6858892380678236638, guid: 894082ad5b0830f4c86ea38ae062f69f, type: 3}
       propertyPath: reproductionSeekRadius

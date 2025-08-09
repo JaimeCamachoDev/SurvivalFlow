@@ -128,7 +128,7 @@ MonoBehaviour:
   seekThreshold: 50
   calmSpeed: 1.5
   runSpeed: 5
-  eatRate: 5
+  eatRate: 20
   wanderChangeInterval: 3
   avoidanceRadius: 0.5
   detectionRadius: 50
@@ -137,9 +137,9 @@ MonoBehaviour:
   health: 50
   meatPrefab: {fileID: 7614501880655567535, guid: 384fe1d5cf761db47a89a90f95834341, type: 3}
   herbivorePrefab: {fileID: 3027782994385362168}
-  reproductionThreshold: 50
+  reproductionThreshold: 80
   reproductionDistance: 2
-  reproductionCooldown: 20
+  reproductionCooldown: 30
   reproductionSeekRadius: 10
   minOffspring: 1
   maxOffspring: 3

@@ -122,7 +122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxGrowth: 100
-  growthRate: 0.9
+  growthRate: 5
   initialGrowthPercent: 0.05
   reproductionCost: 30
   growth: 20
