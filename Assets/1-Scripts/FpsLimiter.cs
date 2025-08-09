@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 public class FpsLimiter : MonoBehaviour
 {
-    [Range(30, 240)] public int targetFps = 60;
+    [Range(1, 60)] public int targetFps = 60;
 
     void Awake()
     {
