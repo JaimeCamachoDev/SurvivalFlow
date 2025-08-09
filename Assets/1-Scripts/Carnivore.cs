@@ -173,6 +173,17 @@ public class Carnivore : MonoBehaviour
             transform.rotation = Quaternion.LookRotation(dir);
             ClampToBounds();
         }
+
+        // Lógica de reproducción
+        reproductionTimer -= Time.deltaTime;
+        if (hunger >= reproductionThreshold && reproductionTimer <= 0f)
+        {
+            Carnivore partner = FindPartner();
+            if (partner != null && partner.hunger >= reproductionThreshold && partner.reproductionTimer <= 0f)
+            {
+                ReproduceWith(partner);
+            }
+        }
     }
 
     // Busca el herbívoro vivo más cercano dentro del radio de detección
