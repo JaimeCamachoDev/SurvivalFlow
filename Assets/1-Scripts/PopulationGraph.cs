@@ -27,8 +27,8 @@ public class PopulationGraph : MonoBehaviour
         samples++;
 
         int plantCount = VegetationManager.Instance != null ? VegetationManager.Instance.activeVegetation.Count : 0;
-        int herbCount = FindObjectsByType<Herbivore>(FindObjectsSortMode.None).Length;
-        int carnCount = FindObjectsByType<Carnivore>(FindObjectsSortMode.None).Length;
+        int herbCount = Herbivore.All.Count;
+        int carnCount = Carnivore.All.Count;
 
         AddPoint(plantsLine, plantPoints, plantCount);
         AddPoint(herbivoresLine, herbPoints, herbCount);
