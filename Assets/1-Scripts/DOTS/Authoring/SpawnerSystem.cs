@@ -10,7 +10,7 @@ public partial struct SpawnerSystem : ISystem
     {
         var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
 
-        foreach (var spawner in SystemAPI.Query<RefRO<Spawner>>().WithEntityAccess())
+        foreach (var (spawner, entity) in SystemAPI.Query<RefRO<Spawner>>().WithEntityAccess())
         {
             var prefab = spawner.ValueRO.Prefab;
             var count = spawner.ValueRO.Count;
@@ -30,7 +30,7 @@ public partial struct SpawnerSystem : ISystem
                 ecb.AddComponent(e, new GridPosition());
             }
 
-            ecb.RemoveComponent<Spawner>(spawner.Entity);
+            ecb.RemoveComponent<Spawner>(entity);
         }
 
         ecb.Playback(state.EntityManager);
