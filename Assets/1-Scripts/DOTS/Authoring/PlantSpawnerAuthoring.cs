@@ -9,6 +9,10 @@ public class PlantSpawnerAuthoring : MonoBehaviour
     public int Count = 100;
     public Vector2 areaSize = new Vector2(50, 50);
 
+    [Header("Patch Settings")]
+    public int patchCount = 5;
+    public float patchRadius = 5f;
+
     class Baker : Baker<PlantSpawnerAuthoring>
     {
         public override void Bake(PlantSpawnerAuthoring authoring)
@@ -18,7 +22,9 @@ public class PlantSpawnerAuthoring : MonoBehaviour
             {
                 Prefab = GetEntity(authoring.PlantPrefab, TransformUsageFlags.Dynamic),
                 Count = authoring.Count,
-                AreaSize = new float2(authoring.areaSize.x, authoring.areaSize.y)
+                AreaSize = new float2(authoring.areaSize.x, authoring.areaSize.y),
+                PatchCount = authoring.patchCount,
+                PatchRadius = authoring.patchRadius
             });
         }
     }
@@ -29,4 +35,6 @@ public struct PlantSpawner : IComponentData
     public Entity Prefab;
     public int Count;
     public float2 AreaSize;
+    public int PatchCount;
+    public float PatchRadius;
 }
