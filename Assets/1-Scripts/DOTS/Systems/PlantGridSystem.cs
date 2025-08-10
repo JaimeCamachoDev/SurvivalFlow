@@ -28,11 +28,12 @@ public partial struct PlantGridSystem : ISystem
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
+        int births = 0;
         if (current < limit)
         {
             foreach (var (plant, gp) in SystemAPI.Query<RefRO<Plant>, RefRO<GridPosition>>())
             {
-                if (plant.ValueRO.Stage != PlantStage.Mature || current >= limit)
+                if (plant.ValueRO.Stage != PlantStage.Mature || current >= limit || births >= manager.ReproductionThreshold)
                     continue;
 
                 var rnd = Unity.Mathematics.Random.CreateFromIndex((uint)math.hash(gp.ValueRO.Cell));
@@ -65,6 +66,7 @@ public partial struct PlantGridSystem : ISystem
                             Stage = PlantStage.Growing
                         });
                         current++;
+                        births++;
                         break;
                     }
                 }
