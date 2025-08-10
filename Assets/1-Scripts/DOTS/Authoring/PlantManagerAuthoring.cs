@@ -10,20 +10,6 @@ public class PlantManagerAuthoring : MonoBehaviour
     public int reproductionThreshold = 4;
 
     public Vector2 areaSize = new Vector2(50, 50);
-    public float reproductionInterval = 10f;
-    public float minDistanceBetweenPlants = 1f;
-    public float reproductionRadius = 3f;
-    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
-
-    public Vector2 areaSize = new Vector2(50, 50);
-    public float reproductionInterval = 10f;
-    public int offspringCount = 1;
-    public int reproductionRadius = 1;
-    public float minDistanceBetweenPlants = 1f;
-    public float reproductionCost = 0.1f;
-    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
-
-    public Vector2 areaSize = new Vector2(50, 50);
     public float minDistanceBetweenPlants = 1f;
     public float reproductionCost = 0.1f;
     [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
