@@ -10,8 +10,17 @@ public partial struct PlantGridSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<PlantManager>(out var manager))
+        if (!SystemAPI.TryGetSingletonRW<PlantManager>(out var managerRw))
             return;
+
+        var manager = managerRw.ValueRO;
+        manager.Timer += SystemAPI.Time.DeltaTime;
+        if (manager.Timer < manager.ReproductionInterval)
+        {
+            managerRw.ValueRW = manager;
+            return;
+        }
+        manager.Timer = 0f;
 
         var query = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
         int current = query.CalculateEntityCount();
@@ -20,7 +29,6 @@ public partial struct PlantGridSystem : ISystem
         var occupancy = new NativeParallelHashSet<int2>(limit, Allocator.Temp);
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
             occupancy.Add(gp.ValueRO.Cell);
-
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
         int2 half = (int2)(manager.AreaSize / 2f);
@@ -57,6 +65,7 @@ public partial struct PlantGridSystem : ISystem
 
         ecb.Playback(state.EntityManager);
         occupancy.Dispose();
+
     }
 
     static bool IsFree(int2 cell, ref NativeParallelHashSet<int2> occ, int minDist)
