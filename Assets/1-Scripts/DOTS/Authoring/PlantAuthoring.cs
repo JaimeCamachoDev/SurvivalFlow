@@ -1,5 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Rendering;
+
 using Unity.Transforms;
 using UnityEngine;
 
@@ -20,10 +22,16 @@ public class PlantAuthoring : MonoBehaviour
             {
                 Growth = authoring.maxGrowth * authoring.initialGrowthPercent,
                 MaxGrowth = authoring.maxGrowth,
-                GrowthRate = authoring.growthRate
+                GrowthRate = authoring.growthRate,
+                ScaleStep = 1,
+                Stage = PlantStage.Growing
             });
 
-            AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, authoring.initialGrowthPercent));
+            float initialScale = math.max(authoring.initialGrowthPercent, 0.2f);
+            AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, initialScale));
+
+            // Color inicial para estado de crecimiento
+            AddComponent(entity, new URPMaterialPropertyBaseColor { Value = new float4(1f, 1f, 0f, 1f) });
         }
     }
 }
