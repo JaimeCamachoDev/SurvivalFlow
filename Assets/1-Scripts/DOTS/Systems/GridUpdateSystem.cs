@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+/// Actualiza la posición de celda de cada entidad según su transform.
 [BurstCompile]
 public partial struct GridUpdateSystem : ISystem
 {
@@ -13,6 +14,7 @@ public partial struct GridUpdateSystem : ISystem
 
         float cellSize = grid.CellSize;
 
+        // Recalculamos la celda para todas las entidades con GridPosition.
         foreach (var (gridPos, localToWorld) in
                  SystemAPI.Query<RefRW<GridPosition>, RefRO<LocalToWorld>>())
         {

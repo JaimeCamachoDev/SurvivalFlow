@@ -1,14 +1,12 @@
 using Unity.Entities;
 
-/// <summary>
-/// Basic health component.
-/// </summary>
+/// Componente que representa la salud de una entidad.
 public struct Health : IComponentData
 {
-    /// <summary>Current health.</summary>
+    /// Salud actual.
     public float Value;
 
-    /// <summary>Maximum health.</summary>
+    /// Salud máxima alcanzable.
     public float Max;
 }
 

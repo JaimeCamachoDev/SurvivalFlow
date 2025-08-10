@@ -1,7 +1,5 @@
 using Unity.Entities;
 
-/// <summary>
-/// Tag to mark carnivore entities.
-/// </summary>
+/// Etiqueta para identificar entidades carnívoras en el mundo.
 public struct CarnivoreTag : IComponentData { }
 

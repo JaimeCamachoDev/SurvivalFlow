@@ -1,23 +1,21 @@
 using Unity.Entities;
 
-/// <summary>
-/// Hunger data for an entity.
-/// </summary>
+/// Información de hambre de una entidad.
 public struct Hunger : IComponentData
 {
-    /// <summary>Current hunger value.</summary>
+    /// Hambre actual.
     public float Value;
 
-    /// <summary>Maximum hunger value.</summary>
+    /// Hambre máxima alcanzable.
     public float Max;
 
-    /// <summary>Rate at which hunger decreases per second.</summary>
+    /// Tasa a la que disminuye el hambre cada segundo.
     public float DecreaseRate;
 
-    /// <summary>Below this value the entity will start seeking food.</summary>
+    /// Umbral por debajo del cual la entidad buscará comida.
     public float SeekThreshold;
 
-    /// <summary>If hunger falls to or below this value the entity dies.</summary>
+    /// Umbral mínimo; si se alcanza la entidad muere.
     public float DeathThreshold;
 }
 

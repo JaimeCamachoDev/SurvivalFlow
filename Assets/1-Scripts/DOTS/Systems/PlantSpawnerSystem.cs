@@ -10,10 +10,12 @@ public partial struct PlantSpawnerSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
+        // Obtenemos el gestor de plantas y los datos de la cuadrícula.
         if (!SystemAPI.TryGetSingletonRW<PlantManager>(out var managerRw) ||
             !SystemAPI.TryGetSingleton<GridManager>(out var grid))
             return;
 
+        // Solo ejecutamos una vez al inicio.
         if (managerRw.ValueRO.Initialized != 0)
             return;
 
@@ -29,6 +31,7 @@ public partial struct PlantSpawnerSystem : ISystem
         var rand = Unity.Mathematics.Random.CreateFromIndex(1);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(prefab);
 
+        // Conjunto de celdas ocupadas y centros de cada parche.
         int2 half = (int2)(area / 2f);
         var used = new NativeParallelHashSet<int2>(count, Allocator.Temp);
         var centers = new NativeArray<float2>(patchCount, Allocator.Temp);
@@ -42,6 +45,8 @@ public partial struct PlantSpawnerSystem : ISystem
         int spawned = 0;
         int attempts = 0;
         int maxAttempts = count * 20;
+
+        // Intentamos poblar la cuadrícula con plantas repartidas en parches.
         while (spawned < count && attempts < maxAttempts)
         {
             var center = centers[rand.NextInt(patchCount)];
@@ -52,7 +57,7 @@ public partial struct PlantSpawnerSystem : ISystem
             attempts++;
 
             if (!used.Add(cell))
-                continue;
+                continue; // Ya hay una planta en esa celda
 
             var e = ecb.Instantiate(prefab);
             ecb.SetComponent(e, new LocalTransform
@@ -75,6 +80,7 @@ public partial struct PlantSpawnerSystem : ISystem
         manager.Initialized = 1;
         managerRw.ValueRW = manager;
 
+        // Ejecutamos todas las instancias pendientes.
         ecb.Playback(state.EntityManager);
     }
 }
