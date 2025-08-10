@@ -2,23 +2,19 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-/// Autoría que expone parámetros globales de las plantas.
+/// Autoría que configura la gestión de plantas y el primer conjunto que se generará.
 public class PlantManagerAuthoring : MonoBehaviour
 {
     public GameObject plantPrefab;
-    public int maxPlants = 1000;
-    public int reproductionThreshold = 4;
+    public int initialCount = 100;
 
-    public Vector2 areaSize = new Vector2(50, 50);
-    public float minDistanceBetweenPlants = 1f;
-    public float reproductionCost = 0.1f;
-    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
+    [Header("Patch Settings")]
+    public int patchCount = 5;
+    public float patchRadius = 5f;
 
-    public Vector2 areaSize = new Vector2(50, 50);
-    public float minDistanceBetweenPlants = 1f;
-    public float reproductionCost = 0.1f;
-    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
-    public float reproductionInterval = 5f;
+    [Header("Reproduction")]
+    [Range(0f,1f)]
+    public float reproductionCost = 0.2f;
 
     class Baker : Baker<PlantManagerAuthoring>
     {
@@ -28,14 +24,11 @@ public class PlantManagerAuthoring : MonoBehaviour
             AddComponent(entity, new PlantManager
             {
                 Prefab = GetEntity(authoring.plantPrefab, TransformUsageFlags.Dynamic),
-                MaxPlants = authoring.maxPlants,
-                AreaSize = new float2(authoring.areaSize.x, authoring.areaSize.y),
-                MinDistance = authoring.minDistanceBetweenPlants,
+                InitialCount = authoring.initialCount,
+                PatchCount = authoring.patchCount,
+                PatchRadius = authoring.patchRadius,
                 ReproductionCost = authoring.reproductionCost,
-                RandomSpawnChance = authoring.randomSpawnChance,
-                ReproductionInterval = authoring.reproductionInterval,
-                Timer = 0f
-
+                Initialized = 0
             });
         }
     }
@@ -44,11 +37,9 @@ public class PlantManagerAuthoring : MonoBehaviour
 public struct PlantManager : IComponentData
 {
     public Entity Prefab;
-    public int MaxPlants;
-    public float2 AreaSize;
-    public float MinDistance;
+    public int InitialCount;
+    public int PatchCount;
+    public float PatchRadius;
     public float ReproductionCost;
-    public float RandomSpawnChance;
-    public float ReproductionInterval;
-    public float Timer;
+    public byte Initialized;
 }
