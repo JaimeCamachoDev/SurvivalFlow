@@ -7,6 +7,8 @@ public class PlantManagerAuthoring : MonoBehaviour
 {
     public GameObject plantPrefab;
     [Range(0, 1f)] public float reproductionCost = 0.3f;
+    public int underpopulationLimit = 2;
+    public int reproductionThreshold = 3;
     public int overcrowdLimit = 5;
 
     class Baker : Baker<PlantManagerAuthoring>
@@ -18,7 +20,9 @@ public class PlantManagerAuthoring : MonoBehaviour
             {
                 Prefab = GetEntity(authoring.plantPrefab, TransformUsageFlags.Dynamic),
                 ReproductionCost = authoring.reproductionCost,
-                OvercrowdLimit = authoring.overcrowdLimit
+                UnderpopulationLimit = authoring.underpopulationLimit,
+                OvercrowdLimit = authoring.overcrowdLimit,
+                ReproductionThreshold = authoring.reproductionThreshold
             });
         }
     }
@@ -28,5 +32,7 @@ public struct PlantManager : IComponentData
 {
     public Entity Prefab;
     public float ReproductionCost;
+    public int UnderpopulationLimit;
     public int OvercrowdLimit;
+    public int ReproductionThreshold;
 }

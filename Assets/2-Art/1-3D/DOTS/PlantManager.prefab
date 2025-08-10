@@ -46,4 +46,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   plantPrefab: {fileID: 8311962731384735518, guid: 7bdfa0a76e3956b4eafd27fcefa04ecc, type: 3}
   reproductionCost: 0.3
+  underpopulationLimit: 2
+  reproductionThreshold: 3
   overcrowdLimit: 5
