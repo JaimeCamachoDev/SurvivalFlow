@@ -28,6 +28,9 @@ public class Herbivore : MonoBehaviour
     public float maxHealth = 50f;            // Vida máxima
     public float health;                     // Vida actual
     public GameObject meatPrefab;                // Prefab que deja al morir
+    [Header("Identidad")]
+    public string individualName;               // Nombre único
+    [HideInInspector] public float lifetime;    // Tiempo total vivido
 
     [Header("Reproducción")]
     public GameObject herbivorePrefab;           // Prefab de nuevas crías
@@ -68,7 +71,7 @@ public class Herbivore : MonoBehaviour
         health = maxHealth * 0.2f; // Nacen con 20% de vida
         UpdateScale();
         All.Add(this);
-
+        individualName = NameGenerator.GetHerbivoreName();
         baseMaxHunger = maxHunger;
         baseHungerRate = hungerRate;
         baseCalmSpeed = calmSpeed;
@@ -90,6 +93,7 @@ public class Herbivore : MonoBehaviour
             return;
         float dt = updateTimer;
         updateTimer = 0f;
+        lifetime += dt;
 
         // Actualizar hambre y comprobar muerte
         hunger -= hungerRate * dt;
@@ -384,6 +388,7 @@ public class Herbivore : MonoBehaviour
     {
         if (meatPrefab != null)
             Instantiate(meatPrefab, transform.position, Quaternion.identity);
+        SurvivorTracker.ReportDeath(this);
         Destroy(gameObject);
     }
 

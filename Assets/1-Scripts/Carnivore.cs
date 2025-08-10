@@ -45,6 +45,9 @@ public class Carnivore : MonoBehaviour
     public float health;                   // Vida actual
     bool wasHurt;                          // Señal cuando recibe daño
     float baseMaxHunger, baseHungerRate, baseCalmSpeed, baseRunSpeed, baseDetectionRadius;
+    [Header("Identidad")]
+    public string individualName;          // Nombre único
+    [HideInInspector] public float lifetime; // Tiempo total vivido
     [Header("Rendimiento")]
     [Tooltip("Tiempo en segundos entre actualizaciones de lógica")]
     [Range(0.02f, 1f)] public float updateInterval = 0.1f;
@@ -60,6 +63,7 @@ public class Carnivore : MonoBehaviour
         UpdateScale();
         All.Add(this);
 
+        individualName = NameGenerator.GetCarnivoreName();
         baseMaxHunger = maxHunger;
         baseHungerRate = hungerRate;
         baseCalmSpeed = calmSpeed;
@@ -80,6 +84,7 @@ public class Carnivore : MonoBehaviour
             return;
         float dt = updateTimer;
         updateTimer = 0f;
+        lifetime += dt;
 
         hunger -= hungerRate * dt;
         if (hunger <= hungerDeathThreshold)
@@ -389,6 +394,7 @@ public class Carnivore : MonoBehaviour
 
     void Die()
     {
+        SurvivorTracker.ReportDeath(this);
         Destroy(gameObject);
     }
 

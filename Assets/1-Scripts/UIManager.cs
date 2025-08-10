@@ -16,7 +16,8 @@ public class UIManager : MonoBehaviour
 
     [Header("Botones")]
     public TextMeshProUGUI toggleButtonText;
-
+    [Header("Cámara")]
+    public CameraController cameraController;
     bool hudVisible = true;
 
     /// <summary>
@@ -41,5 +42,23 @@ public class UIManager : MonoBehaviour
     {
         if (settingsPanel != null)
             settingsPanel.SetActive(!settingsPanel.activeSelf);
+    }
+
+    public void CameraFree()
+    {
+        if (cameraController != null)
+            cameraController.SetFreeMode();
+    }
+
+    public void CameraFollowHerbivore()
+    {
+        if (cameraController != null)
+            cameraController.FollowBestHerbivore();
+    }
+
+    public void CameraFollowCarnivore()
+    {
+        if (cameraController != null)
+            cameraController.FollowBestCarnivore();
     }
 }

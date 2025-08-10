@@ -12,6 +12,11 @@ public class CameraController : MonoBehaviour
     public float minZoom = 5f;
     public float maxZoom = 50f;
 
+    public enum Mode { Free, FollowHerbivore, FollowCarnivore }
+    public Mode mode = Mode.Free;
+    Transform followTarget;
+    Vector3 followOffset;
+
     Camera cam;
 
     void Awake()
@@ -21,11 +26,6 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
-        Vector3 move = new Vector3(h, 0f, v) * moveSpeed * Time.deltaTime;
-        transform.position += move;
-
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (cam.orthographic)
         {
@@ -37,5 +37,44 @@ public class CameraController : MonoBehaviour
             cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - scroll * zoomSpeed,
                                           minZoom, maxZoom);
         }
+
+        if (mode == Mode.Free)
+        {
+            float h = Input.GetAxis("Horizontal");
+            float v = Input.GetAxis("Vertical");
+            Vector3 move = new Vector3(h, 0f, v) * moveSpeed * Time.deltaTime;
+            transform.position += move;
+        }
+        else
+        {
+            if (followTarget == null)
+            {
+                followTarget = mode == Mode.FollowHerbivore ?
+                    SurvivorTracker.GetOldestHerbivoreTransform() :
+                    SurvivorTracker.GetOldestCarnivoreTransform();
+                if (followTarget != null)
+                    followOffset = transform.position - followTarget.position;
+            }
+            if (followTarget != null)
+                transform.position = followTarget.position + followOffset;
+        }
+    }
+
+    public void SetFreeMode()
+    {
+        mode = Mode.Free;
+        followTarget = null;
+    }
+
+    public void FollowBestHerbivore()
+    {
+        mode = Mode.FollowHerbivore;
+        followTarget = null;
+    }
+
+    public void FollowBestCarnivore()
+    {
+        mode = Mode.FollowCarnivore;
+        followTarget = null;
     }
 }
