@@ -23,6 +23,11 @@ public class PlantManagerAuthoring : MonoBehaviour
     public float reproductionCost = 0.1f;
     [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
 
+    public Vector2 areaSize = new Vector2(50, 50);
+    public float minDistanceBetweenPlants = 1f;
+    public float reproductionCost = 0.1f;
+    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
+
     class Baker : Baker<PlantManagerAuthoring>
     {
         public override void Bake(PlantManagerAuthoring authoring)
@@ -33,14 +38,9 @@ public class PlantManagerAuthoring : MonoBehaviour
                 Prefab = GetEntity(authoring.plantPrefab, TransformUsageFlags.Dynamic),
                 MaxPlants = authoring.maxPlants,
                 AreaSize = new float2(authoring.areaSize.x, authoring.areaSize.y),
-                ReproductionInterval = authoring.reproductionInterval,
-                OffspringCount = authoring.offspringCount,
-                ReproductionRadius = authoring.reproductionRadius,
                 MinDistance = authoring.minDistanceBetweenPlants,
                 ReproductionCost = authoring.reproductionCost,
-
-                RandomSpawnChance = authoring.randomSpawnChance,
-                Timer = 0f
+                RandomSpawnChance = authoring.randomSpawnChance
             });
         }
     }
@@ -51,11 +51,7 @@ public struct PlantManager : IComponentData
     public Entity Prefab;
     public int MaxPlants;
     public float2 AreaSize;
-    public float ReproductionInterval;
-    public int OffspringCount;
-    public int ReproductionRadius;
     public float MinDistance;
     public float ReproductionCost;
     public float RandomSpawnChance;
-    public float Timer;
 }
