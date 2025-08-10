@@ -15,17 +15,18 @@ public partial struct PlantGridSystem : ISystem
 
         var query = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
         int current = query.CalculateEntityCount();
-        var occupancy = new NativeParallelHashSet<int2>(current, Allocator.Temp);
+        int limit = manager.EnforceDensity
+            ? (int)math.round(manager.Density * manager.MaxPlants)
+            : manager.MaxPlants;
+        // Reserve capacity up to the population limit so new births fit without errors
+        var occupancy = new NativeParallelHashSet<int2>(limit, Allocator.Temp);
 
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
         {
             occupancy.Add(gp.ValueRO.Cell);
         }
-
-        int limit = manager.EnforceDensity
-            ? (int)math.round(manager.Density * manager.MaxPlants)
-            : manager.MaxPlants;
-
+        
+        // limit computed earlier
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
         int births = 0;
@@ -56,7 +57,8 @@ public partial struct PlantGridSystem : ISystem
                             Rotation = quaternion.identity,
                             Scale = 0.2f
                         });
-                        ecb.SetComponent(child, new GridPosition { Cell = cell });
+                        // Newly spawned plants need a GridPosition component
+                        ecb.AddComponent(child, new GridPosition { Cell = cell });
                         ecb.SetComponent(child, new Plant
                         {
                             Growth = prefabPlant.MaxGrowth * 0.2f,
