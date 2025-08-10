@@ -24,6 +24,8 @@ public partial struct PlantColorSystem : ISystem
                     c = new float4(1f, 0f, 0f, 1f); // Rojo
                     break;
             }
+
+            // Escribimos el nuevo color en el material.
             color.ValueRW.Value = c;
         }
     }

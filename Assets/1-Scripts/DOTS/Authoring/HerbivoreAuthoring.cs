@@ -4,18 +4,35 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
-/// Authoring for DOTS herbivore prefab.
+/// Authoring para el prefab de herbívoro en DOTS.
 public class HerbivoreAuthoring : MonoBehaviour
 {
     [Header("Stats")]
+    // Vida máxima del herbívoro.
     public float maxHealth = 50f;
+
+    // Hambre máxima que puede almacenar.
     public float maxHunger = 100f;
+
+    // Velocidad de movimiento.
     public float moveSpeed = 2f;
+
+    // Consumo de hambre por segundo cuando está quieto.
     public float idleHungerRate = 1f;
+
+    // Consumo adicional de hambre al moverse.
     public float moveHungerRate = 2f;
+
+    // Hambre recuperada al comer una planta.
     public float hungerGainOnEat = 40f;
+
+    // Porcentaje de vida restaurada al comer.
     [Range(0f,1f)] public float healthRestorePercent = 0.25f;
+
+    // Tiempo entre cambios de dirección aleatorios.
     public float changeDirectionInterval = 2f;
+
+    // Convierte el prefab en una entidad con todos sus componentes.
 
     class Baker : Baker<HerbivoreAuthoring>
     {
@@ -23,6 +40,8 @@ public class HerbivoreAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
+
+            // Datos de comportamiento del herbívoro.
             AddComponent(entity, new Herbivore
             {
                 MoveSpeed = authoring.moveSpeed,
@@ -34,6 +53,8 @@ public class HerbivoreAuthoring : MonoBehaviour
                 DirectionTimer = 0f,
                 MoveDirection = float3.zero
             });
+
+            // Componentes de salud y hambre iniciales.
 
             AddComponent(entity, new Health
             {
@@ -50,7 +71,11 @@ public class HerbivoreAuthoring : MonoBehaviour
                 DeathThreshold = 0f
             });
 
+            // Transform inicial del herbívoro.
             AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, 1f));
+
+            // Etiqueta y color inicial.
+
             AddComponent<HerbivoreTag>(entity);
             AddComponent(entity, new URPMaterialPropertyBaseColor { Value = new float4(0f, 1f, 0f, 1f) });
         }

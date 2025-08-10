@@ -1,17 +1,30 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
-/// <summary>
-/// Basic data for a DOTS herbivore.
-/// </summary>
+/// Datos básicos de un herbívoro en DOTS.
 public struct Herbivore : IComponentData
 {
-    public float MoveSpeed;             // Movement speed per second
-    public float IdleHungerRate;        // Hunger loss per second when idle
-    public float MoveHungerRate;        // Additional hunger loss per speed unit
-    public float HungerGain;            // Hunger gained when eating a plant
-    public float HealthRestorePercent;  // Percent of max health restored when eating (0-1)
-    public float ChangeDirectionInterval; // Seconds between direction changes
-    public float DirectionTimer;        // Time until next random direction change
-    public float3 MoveDirection;        // Current normalized movement direction
+    /// Velocidad de movimiento por segundo.
+    public float MoveSpeed;
+
+    /// Consumo de hambre por segundo cuando está quieto.
+    public float IdleHungerRate;
+
+    /// Consumo adicional de hambre por unidad de velocidad.
+    public float MoveHungerRate;
+
+    /// Hambre recuperada al comer una planta.
+    public float HungerGain;
+
+    /// Porcentaje de vida máxima que se restaura al comer (0-1).
+    public float HealthRestorePercent;
+
+    /// Intervalo en segundos entre cambios de dirección aleatorios.
+    public float ChangeDirectionInterval;
+
+    /// Tiempo restante para el próximo cambio de dirección.
+    public float DirectionTimer;
+
+    /// Dirección de movimiento normalizada actual.
+    public float3 MoveDirection;
 }

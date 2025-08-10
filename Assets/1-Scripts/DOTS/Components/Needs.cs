@@ -1,16 +1,25 @@
 using Unity.Entities;
 
-/// Valores de necesidades b·sicas.
+/// Valores de necesidades b√°sicas de una entidad.
 public struct Needs : IComponentData
 {
+    /// Hambre actual.
     public float Hunger;
+
+    /// Sed actual.
     public float Thirst;
+
+    /// Cantidad de sue√±o pendiente.
     public float Sleep;
 }
 
-/// Datos para escalonar los ìticksî de actualizaciÛn.
+/// Datos para controlar la actualizaci√≥n peri√≥dica de las necesidades.
 public struct NeedTick : IComponentData
 {
+    /// Tiempo restante hasta la siguiente actualizaci√≥n.
     public float TimeUntilNext;
+
+    /// Per√≠odo entre cada actualizaci√≥n.
     public float Period;
 }
+

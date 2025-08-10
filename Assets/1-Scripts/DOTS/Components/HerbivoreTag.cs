@@ -1,7 +1,5 @@
 using Unity.Entities;
 
-/// <summary>
-/// Tag to mark herbivore entities.
-/// </summary>
+/// Etiqueta para identificar entidades herbívoras.
 public struct HerbivoreTag : IComponentData { }
 
