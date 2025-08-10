@@ -71,9 +71,7 @@ public class Herbivore : MonoBehaviour
         health = maxHealth * 0.2f; // Nacen con 20% de vida
         UpdateScale();
         All.Add(this);
-
         individualName = NameGenerator.GetHerbivoreName();
-
         baseMaxHunger = maxHunger;
         baseHungerRate = hungerRate;
         baseCalmSpeed = calmSpeed;

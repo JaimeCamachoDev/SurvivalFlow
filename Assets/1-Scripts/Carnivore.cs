@@ -64,7 +64,6 @@ public class Carnivore : MonoBehaviour
         All.Add(this);
 
         individualName = NameGenerator.GetCarnivoreName();
-
         baseMaxHunger = maxHunger;
         baseHungerRate = hungerRate;
         baseCalmSpeed = calmSpeed;

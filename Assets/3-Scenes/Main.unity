@@ -587,6 +587,8 @@ MonoBehaviour:
   checkInterval: 5
   minHerbivores: 20
   minCarnivores: 3
+  maxHerbivores: 30
+  maxCarnivores: 10
   herbivoreNormalThreshold: 80
   herbivoreBoostedThreshold: 60
   carnivoreNormalThreshold: 50
@@ -3439,7 +3441,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b74beb6c0224dcda4841069a35f9872, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetFps: 6
+  targetFps: 30
 --- !u!114 &1852757419
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -16,10 +16,8 @@ public class UIManager : MonoBehaviour
 
     [Header("Botones")]
     public TextMeshProUGUI toggleButtonText;
-
     [Header("Cámara")]
     public CameraController cameraController;
-
     bool hudVisible = true;
 
     /// <summary>
