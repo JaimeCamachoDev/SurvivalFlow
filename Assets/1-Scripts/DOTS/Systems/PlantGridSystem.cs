@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-/// Gestiona la proliferación de plantas controlando la densidad global.
+/// Gestiona la reproducción y proliferación de plantas dentro de la cuadrícula.
 [BurstCompile]
 public partial struct PlantGridSystem : ISystem
 {
@@ -24,55 +24,37 @@ public partial struct PlantGridSystem : ISystem
 
         var query = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
         int current = query.CalculateEntityCount();
-        int limit = manager.EnforceDensity
-            ? (int)math.round(manager.Density * manager.MaxPlants)
-            : manager.MaxPlants;
+        int limit = manager.MaxPlants;
 
         var occupancy = new NativeParallelHashSet<int2>(limit, Allocator.Temp);
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
             occupancy.Add(gp.ValueRO.Cell);
-            
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
         int2 half = (int2)(manager.AreaSize / 2f);
         int minDist = (int)math.ceil(manager.MinDistance);
-
-        // gather mature plants
-        var mature = new NativeList<int2>(Allocator.Temp);
-        foreach (var (plant, gp) in SystemAPI.Query<RefRO<Plant>, RefRO<GridPosition>>())
-        {
-            if (plant.ValueRO.Stage == PlantStage.Mature)
-                mature.Add(gp.ValueRO.Cell);
-        }
-
         var rng = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 1));
 
-        if (current < limit && mature.Length > 0)
+        foreach (var (plant, gp) in SystemAPI.Query<RefRW<Plant>, RefRO<GridPosition>>())
         {
-            for (int attempt = 0; attempt < 10 && current < limit; attempt++)
-            {
-                var parentCell = mature[rng.NextInt(mature.Length)];
-                float angle = rng.NextFloat(0f, 2f * math.PI);
-                float dist = rng.NextFloat(manager.MinDistance, manager.ReproductionRadius);
-                int2 offset = new int2(
-                    (int)math.round(math.cos(angle) * dist),
-                    (int)math.round(math.sin(angle) * dist));
-                int2 cell = parentCell + offset;
-                cell = math.clamp(cell, -half, half);
+            if (plant.ValueRO.Stage != PlantStage.Mature)
+                continue;
 
-                if (IsFree(cell, ref occupancy, minDist))
-                {
-                    Spawn(cell, ref ecb, manager.Prefab, prefabPlant);
-                    occupancy.Add(cell);
-                    current++;
-                }
+            for (int i = 0; i < manager.OffspringCount && current < limit; i++)
+            {
+                if (!TrySpawnAround(gp.ValueRO.Cell, manager.ReproductionRadius, ref occupancy, minDist, half, ref ecb, manager.Prefab, prefabPlant, ref rng))
+                    break;
+
+                current++;
+                plant.ValueRW.Growth = math.max(0f, plant.ValueRO.Growth - manager.ReproductionCost);
+                if (plant.ValueRW.Growth < plant.ValueRO.MaxGrowth)
+                    plant.ValueRW.Stage = PlantStage.Growing;
             }
         }
 
         if (current < limit && (current == 0 || rng.NextFloat() < manager.RandomSpawnChance))
         {
             for (int attempt = 0; attempt < 10 && current < limit; attempt++)
-
             {
                 int2 cell = new int2(
                     rng.NextInt(-half.x, half.x),
@@ -99,7 +81,6 @@ public partial struct PlantGridSystem : ISystem
 
         ecb.Playback(state.EntityManager);
         occupancy.Dispose();
-        mature.Dispose();
         managerRw.ValueRW = manager;
     }
 
@@ -110,6 +91,41 @@ public partial struct PlantGridSystem : ISystem
                 if (occ.Contains(cell + new int2(x, y)))
                     return false;
         return true;
+    }
+
+    static bool TrySpawnAround(int2 parent, int radius, ref NativeParallelHashSet<int2> occ, int minDist, int2 half,
+        ref EntityCommandBuffer ecb, Entity prefab, in Plant template, ref Unity.Mathematics.Random rng)
+    {
+        var cells = new NativeList<int2>(Allocator.Temp);
+        for (int dx = -radius; dx <= radius; dx++)
+            for (int dy = -radius; dy <= radius; dy++)
+                if (dx != 0 || dy != 0)
+                    cells.Add(parent + new int2(dx, dy));
+
+        for (int i = 0; i < cells.Length; i++)
+        {
+            int j = rng.NextInt(i, cells.Length);
+            var tmp = cells[i];
+            cells[i] = cells[j];
+            cells[j] = tmp;
+        }
+
+        bool spawned = false;
+        for (int i = 0; i < cells.Length; i++)
+        {
+            int2 cell = math.clamp(cells[i], -half, half);
+            if (IsFree(cell, ref occ, minDist))
+            {
+                Spawn(cell, ref ecb, prefab, template);
+                occ.Add(cell);
+                spawned = true;
+                break;
+            }
+        }
+
+        cells.Dispose();
+        return spawned;
+
     }
 
     static void Spawn(int2 cell, ref EntityCommandBuffer ecb, Entity prefab, in Plant template)

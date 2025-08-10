@@ -6,8 +6,6 @@ using UnityEngine;
 public class PlantManagerAuthoring : MonoBehaviour
 {
     public GameObject plantPrefab;
-    [Range(0f, 1f)] public float density = 0.5f;
-    public bool enforceDensity = true;
     public int maxPlants = 1000;
     public int reproductionThreshold = 4;
 
@@ -15,6 +13,14 @@ public class PlantManagerAuthoring : MonoBehaviour
     public float reproductionInterval = 10f;
     public float minDistanceBetweenPlants = 1f;
     public float reproductionRadius = 3f;
+    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
+
+    public Vector2 areaSize = new Vector2(50, 50);
+    public float reproductionInterval = 10f;
+    public int offspringCount = 1;
+    public int reproductionRadius = 1;
+    public float minDistanceBetweenPlants = 1f;
+    public float reproductionCost = 0.1f;
     [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
 
     class Baker : Baker<PlantManagerAuthoring>
@@ -25,13 +31,14 @@ public class PlantManagerAuthoring : MonoBehaviour
             AddComponent(entity, new PlantManager
             {
                 Prefab = GetEntity(authoring.plantPrefab, TransformUsageFlags.Dynamic),
-                Density = authoring.density,
-                EnforceDensity = authoring.enforceDensity,
                 MaxPlants = authoring.maxPlants,
                 AreaSize = new float2(authoring.areaSize.x, authoring.areaSize.y),
                 ReproductionInterval = authoring.reproductionInterval,
-                MinDistance = authoring.minDistanceBetweenPlants,
+                OffspringCount = authoring.offspringCount,
                 ReproductionRadius = authoring.reproductionRadius,
+                MinDistance = authoring.minDistanceBetweenPlants,
+                ReproductionCost = authoring.reproductionCost,
+
                 RandomSpawnChance = authoring.randomSpawnChance,
                 Timer = 0f
             });
@@ -42,13 +49,13 @@ public class PlantManagerAuthoring : MonoBehaviour
 public struct PlantManager : IComponentData
 {
     public Entity Prefab;
-    public float Density;
-    public bool EnforceDensity;
     public int MaxPlants;
     public float2 AreaSize;
     public float ReproductionInterval;
+    public int OffspringCount;
+    public int ReproductionRadius;
     public float MinDistance;
-    public float ReproductionRadius;
+    public float ReproductionCost;
     public float RandomSpawnChance;
     public float Timer;
 }
