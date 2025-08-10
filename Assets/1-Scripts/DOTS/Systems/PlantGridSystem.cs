@@ -42,9 +42,14 @@ public partial struct PlantGridSystem : ISystem
                     }
                     else if (plant.ValueRO.Stage == PlantStage.Mature)
                     {
-                        ref var countRef = ref births.GetValueRef(check, out var exists);
-                        if (!exists) countRef = 0;
-                        countRef++;
+                        if (births.TryGetValue(check, out var existing))
+                        {
+                            births[check] = existing + 1;
+                        }
+                        else
+                        {
+                            births.TryAdd(check, 1);
+                        }
                         children++;
                     }
                 }
