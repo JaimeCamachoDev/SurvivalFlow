@@ -33,11 +33,13 @@ public class HerbivoreAuthoring : MonoBehaviour
     public float changeDirectionInterval = 2f;
 
     // Convierte el prefab en una entidad con todos sus componentes.
+
     class Baker : Baker<HerbivoreAuthoring>
     {
         public override void Bake(HerbivoreAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
+
 
             // Datos de comportamiento del herbívoro.
             AddComponent(entity, new Herbivore
@@ -53,6 +55,7 @@ public class HerbivoreAuthoring : MonoBehaviour
             });
 
             // Componentes de salud y hambre iniciales.
+
             AddComponent(entity, new Health
             {
                 Value = authoring.maxHealth,
@@ -72,6 +75,7 @@ public class HerbivoreAuthoring : MonoBehaviour
             AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, 1f));
 
             // Etiqueta y color inicial.
+
             AddComponent<HerbivoreTag>(entity);
             AddComponent(entity, new URPMaterialPropertyBaseColor { Value = new float4(0f, 1f, 0f, 1f) });
         }

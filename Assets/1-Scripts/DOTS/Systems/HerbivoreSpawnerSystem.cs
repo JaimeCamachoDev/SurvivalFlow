@@ -11,9 +11,11 @@ public partial struct HerbivoreSpawnerSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         // Obtenemos el gestor de herbívoros y la cuadrícula.
+
         if (!SystemAPI.TryGetSingletonRW<HerbivoreManager>(out var managerRw) ||
             !SystemAPI.TryGetSingleton<GridManager>(out var grid))
             return;
+
 
         // Si ya se inicializó no hacemos nada.
         if (managerRw.ValueRO.Initialized != 0)

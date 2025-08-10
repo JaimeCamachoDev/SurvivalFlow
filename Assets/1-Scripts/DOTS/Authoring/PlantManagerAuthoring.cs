@@ -22,6 +22,8 @@ public class PlantManagerAuthoring : MonoBehaviour
     // Porcentaje de crecimiento que se consume al reproducirse.
     [Range(0f,1f)]
     public float reproductionCost = 0.2f;
+    [Range(1,8)]
+    public int reproductionCount = 1;
 
     // Número de brotes que puede generar cada planta (1-8).
     [Range(1,8)]

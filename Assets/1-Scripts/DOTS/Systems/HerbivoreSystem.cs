@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+
 /// Gestiona el movimiento, hambre y alimentación de los herbívoros DOTS.
 [BurstCompile]
 public partial struct HerbivoreSystem : ISystem
@@ -56,7 +57,7 @@ public partial struct HerbivoreSystem : ISystem
             transform.ValueRW.Position += move;
             transform.ValueRW.Position.x = math.clamp(transform.ValueRO.Position.x, -half.x, half.x);
             transform.ValueRW.Position.z = math.clamp(transform.ValueRO.Position.z, -half.y, half.y);
-
+            
             // Celda en la que se encuentra actualmente.
             int2 cell = new int2(
                 (int)math.floor(transform.ValueRO.Position.x / grid.CellSize),
@@ -88,7 +89,6 @@ public partial struct HerbivoreSystem : ISystem
                 ecb.DestroyEntity(plantEntity); // La planta es consumida
             }
         }
-
         // Ejecutamos los cambios y liberamos la memoria usada.
         ecb.Playback(state.EntityManager);
         plants.Dispose();

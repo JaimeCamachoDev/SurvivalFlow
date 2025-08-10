@@ -1,6 +1,7 @@
 using Unity.Entities;
 using UnityEngine;
 
+
 /// Authoring que configura la aparición de herbívoros DOTS.
 public class HerbivoreManagerAuthoring : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class HerbivoreManagerAuthoring : MonoBehaviour
     public int initialCount = 20;
 
     // Convierte los datos de authoring en un componente de configuración.
+
     class Baker : Baker<HerbivoreManagerAuthoring>
     {
         public override void Bake(HerbivoreManagerAuthoring authoring)
@@ -36,5 +38,6 @@ public struct HerbivoreManager : IComponentData
     public int InitialCount;
 
     /// Bandera para no inicializar dos veces.
+
     public byte Initialized;
 }

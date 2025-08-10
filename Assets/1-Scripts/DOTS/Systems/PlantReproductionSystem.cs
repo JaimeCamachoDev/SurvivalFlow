@@ -63,6 +63,7 @@ public partial struct PlantReproductionSystem : ISystem
             bool reproduced = false;
 
             // Intentamos crear hasta reproductionCount brotes.
+
             for (int i = 0; i < spawnAttempts && plant.ValueRW.Growth >= cost; i++)
             {
                 int index = rand.NextInt(available.Length);
