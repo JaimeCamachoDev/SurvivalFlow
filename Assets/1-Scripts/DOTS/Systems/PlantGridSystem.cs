@@ -25,9 +25,8 @@ public partial struct PlantGridSystem : ISystem
         {
             occupancy.Add(gp.ValueRO.Cell);
         }
-
+        
         // limit computed earlier
-
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
         int births = 0;
