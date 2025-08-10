@@ -6,8 +6,9 @@ using UnityEngine;
 public class PlantManagerAuthoring : MonoBehaviour
 {
     public GameObject plantPrefab;
-    [Range(0, 1f)] public float reproductionCost = 0.3f;
-    public int overcrowdLimit = 5;
+    [Range(0f, 1f)] public float density = 0.5f;
+    public bool enforceDensity = true;
+    public int maxPlants = 1000;
 
     class Baker : Baker<PlantManagerAuthoring>
     {
@@ -17,8 +18,9 @@ public class PlantManagerAuthoring : MonoBehaviour
             AddComponent(entity, new PlantManager
             {
                 Prefab = GetEntity(authoring.plantPrefab, TransformUsageFlags.Dynamic),
-                ReproductionCost = authoring.reproductionCost,
-                OvercrowdLimit = authoring.overcrowdLimit
+                Density = authoring.density,
+                EnforceDensity = authoring.enforceDensity,
+                MaxPlants = authoring.maxPlants
             });
         }
     }
@@ -27,6 +29,7 @@ public class PlantManagerAuthoring : MonoBehaviour
 public struct PlantManager : IComponentData
 {
     public Entity Prefab;
-    public float ReproductionCost;
-    public int OvercrowdLimit;
+    public float Density;
+    public bool EnforceDensity;
+    public int MaxPlants;
 }

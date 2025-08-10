@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-/// Gestiona la reproducción y muerte por sobrepoblación en la cuadricula.
+/// Gestiona la proliferación de plantas controlando la densidad global.
 [BurstCompile]
 public partial struct PlantGridSystem : ISystem
 {
@@ -14,79 +14,75 @@ public partial struct PlantGridSystem : ISystem
             return;
 
         var query = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
-        int count = query.CalculateEntityCount();
-        var occupancy = new NativeParallelHashMap<int2, byte>(count, Allocator.Temp);
+        int current = query.CalculateEntityCount();
+        var occupancy = new NativeParallelHashSet<int2>(current, Allocator.Temp);
 
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
         {
-            occupancy.TryAdd(gp.ValueRO.Cell, 0);
+            occupancy.Add(gp.ValueRO.Cell);
         }
 
+        int target = manager.EnforceDensity ? (int)math.round(manager.Density * manager.MaxPlants) : int.MaxValue;
+        int neededBirths = math.max(0, target - current);
+        int neededDeaths = math.max(0, current - target);
+
         var ecb = new EntityCommandBuffer(Allocator.Temp);
+        var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
 
-        foreach (var (plant, gp) in SystemAPI.Query<RefRW<Plant>, RefRO<GridPosition>>())
+        if (neededBirths > 0)
         {
-            int neighbours = 0;
-            for (int dx = -1; dx <= 1; dx++)
+            foreach (var (plant, gp) in SystemAPI.Query<RefRO<Plant>, RefRO<GridPosition>>())
             {
-                for (int dz = -1; dz <= 1; dz++)
-                {
-                    if (dx == 0 && dz == 0) continue;
-                    int2 check = gp.ValueRO.Cell + new int2(dx, dz);
-                    if (occupancy.ContainsKey(check))
-                        neighbours++;
-                }
-            }
+                if (plant.ValueRO.Stage != PlantStage.Mature)
+                    continue;
 
-            if (neighbours > manager.OvercrowdLimit)
-            {
-                plant.ValueRW.Stage = PlantStage.Withering;
-            }
-
-            if (plant.ValueRO.Stage == PlantStage.Mature)
-            {
-                bool reproduced = false;
-                for (int dx = -1; dx <= 1; dx++)
+                var rnd = Unity.Mathematics.Random.CreateFromIndex((uint)math.hash(gp.ValueRO.Cell));
+                for (int i = 0; i < 8 && neededBirths > 0; i++)
                 {
-                    for (int dz = -1; dz <= 1; dz++)
+                    int2 offset;
+                    do
                     {
-                        if (dx == 0 && dz == 0) continue;
-                        int2 target = gp.ValueRO.Cell + new int2(dx, dz);
-                        if (occupancy.ContainsKey(target))
-                            continue;
+                        offset = new int2(rnd.NextInt(-1, 2), rnd.NextInt(-1, 2));
+                    }
+                    while (offset.x == 0 && offset.y == 0);
 
+                    int2 cell = gp.ValueRO.Cell + offset;
+                    if (occupancy.Add(cell))
+                    {
                         var child = ecb.Instantiate(manager.Prefab);
                         ecb.SetComponent(child, new LocalTransform
                         {
-                            Position = new float3(target.x, 0f, target.y),
+                            Position = new float3(cell.x, 0f, cell.y),
                             Rotation = quaternion.identity,
                             Scale = 0.2f
                         });
-                        ecb.SetComponent(child, new GridPosition { Cell = target });
+                        ecb.SetComponent(child, new GridPosition { Cell = cell });
                         ecb.SetComponent(child, new Plant
                         {
-                            Growth = plant.ValueRO.MaxGrowth * 0.2f,
-                            MaxGrowth = plant.ValueRO.MaxGrowth,
-                            GrowthRate = plant.ValueRO.GrowthRate,
+                            Growth = prefabPlant.MaxGrowth * 0.2f,
+                            MaxGrowth = prefabPlant.MaxGrowth,
+                            GrowthRate = prefabPlant.GrowthRate,
                             ScaleStep = 1,
                             Stage = PlantStage.Growing
                         });
-                        occupancy.TryAdd(target, 0);
-                        reproduced = true;
+                        neededBirths--;
+                        break;
                     }
                 }
 
-                if (reproduced)
-                {
-                    plant.ValueRW.Growth -= plant.ValueRO.MaxGrowth * manager.ReproductionCost;
-                    if (plant.ValueRW.Growth < 0f) plant.ValueRW.Growth = 0f;
-                    plant.ValueRW.Stage = PlantStage.Growing;
-                }
+                if (neededBirths == 0)
+                    break;
             }
-            else if (plant.ValueRO.Stage == PlantStage.Withering && neighbours <= manager.OvercrowdLimit)
+        }
+
+        if (neededDeaths > 0)
+        {
+            var entities = query.ToEntityArray(Allocator.Temp);
+            for (int i = 0; i < neededDeaths && i < entities.Length; i++)
             {
-                plant.ValueRW.Stage = PlantStage.Growing;
+                ecb.DestroyEntity(entities[i]);
             }
+            entities.Dispose();
         }
 
         ecb.Playback(state.EntityManager);
