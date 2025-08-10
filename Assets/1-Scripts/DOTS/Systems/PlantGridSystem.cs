@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-/// Gestiona la reproducción y muerte por sobrepoblación en la cuadricula.
+/// Gestiona la proliferación de plantas controlando la densidad global.
 [BurstCompile]
 public partial struct PlantGridSystem : ISystem
 {
@@ -14,62 +14,75 @@ public partial struct PlantGridSystem : ISystem
             return;
 
         var query = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
-        int count = query.CalculateEntityCount();
-        var occupancy = new NativeParallelHashMap<int2, byte>(count, Allocator.Temp);
-        var births = new NativeParallelHashMap<int2, int>(count * 8, Allocator.Temp);
-        var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
+        int current = query.CalculateEntityCount();
+        var occupancy = new NativeParallelHashSet<int2>(current, Allocator.Temp);
 
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
         {
-            occupancy.TryAdd(gp.ValueRO.Cell, 0);
+            occupancy.Add(gp.ValueRO.Cell);
         }
 
-        var ecb = new EntityCommandBuffer(Allocator.Temp);
+        int target = manager.EnforceDensity ? (int)math.round(manager.Density * manager.MaxPlants) : int.MaxValue;
+        int neededBirths = math.max(0, target - current);
+        int neededDeaths = math.max(0, current - target);
 
-        foreach (var (plant, gp) in SystemAPI.Query<RefRW<Plant>, RefRO<GridPosition>>())
+        var ecb = new EntityCommandBuffer(Allocator.Temp);
+        var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
+
+        if (neededBirths > 0)
         {
-            int neighbours = 0;
-            int children = 0;
-            for (int dx = -1; dx <= 1; dx++)
+            foreach (var (plant, gp) in SystemAPI.Query<RefRO<Plant>, RefRO<GridPosition>>())
             {
-                for (int dz = -1; dz <= 1; dz++)
+                if (plant.ValueRO.Stage != PlantStage.Mature)
+                    continue;
+
+                var rnd = Unity.Mathematics.Random.CreateFromIndex((uint)math.hash(gp.ValueRO.Cell));
+                for (int i = 0; i < 8 && neededBirths > 0; i++)
                 {
-                    if (dx == 0 && dz == 0) continue;
-                    int2 check = gp.ValueRO.Cell + new int2(dx, dz);
-                    if (occupancy.ContainsKey(check))
+                    int2 offset;
+                    do
                     {
-                        neighbours++;
+                        offset = new int2(rnd.NextInt(-1, 2), rnd.NextInt(-1, 2));
                     }
-                    else if (plant.ValueRO.Stage == PlantStage.Mature)
+                    while (offset.x == 0 && offset.y == 0);
+
+                    int2 cell = gp.ValueRO.Cell + offset;
+                    if (occupancy.Add(cell))
                     {
-                        if (births.TryGetValue(check, out var existing))
+                        var child = ecb.Instantiate(manager.Prefab);
+                        ecb.SetComponent(child, new LocalTransform
                         {
-                            births[check] = existing + 1;
-                        }
-                        else
+                            Position = new float3(cell.x, 0f, cell.y),
+                            Rotation = quaternion.identity,
+                            Scale = 0.2f
+                        });
+                        ecb.SetComponent(child, new GridPosition { Cell = cell });
+                        ecb.SetComponent(child, new Plant
                         {
-                            births.TryAdd(check, 1);
-                        }
-                        children++;
+                            Growth = prefabPlant.MaxGrowth * 0.2f,
+                            MaxGrowth = prefabPlant.MaxGrowth,
+                            GrowthRate = prefabPlant.GrowthRate,
+                            ScaleStep = 1,
+                            Stage = PlantStage.Growing
+                        });
+                        neededBirths--;
+                        break;
                     }
                 }
-            }
 
-            if (neighbours < manager.UnderpopulationLimit || neighbours > manager.OvercrowdLimit)
-            {
-                plant.ValueRW.Stage = PlantStage.Withering;
+                if (neededBirths == 0)
+                    break;
             }
-            else if (plant.ValueRO.Stage == PlantStage.Withering)
-            {
-                plant.ValueRW.Stage = PlantStage.Growing;
-            }
+        }
 
-            if (children > 0)
+        if (neededDeaths > 0)
+        {
+            var entities = query.ToEntityArray(Allocator.Temp);
+            for (int i = 0; i < neededDeaths && i < entities.Length; i++)
             {
-                plant.ValueRW.Growth -= plant.ValueRO.MaxGrowth * manager.ReproductionCost * children;
-                if (plant.ValueRW.Growth < 0f) plant.ValueRW.Growth = 0f;
-                plant.ValueRW.Stage = PlantStage.Growing;
+                ecb.DestroyEntity(entities[i]);
             }
+            entities.Dispose();
         }
 
         foreach (var kvp in births)
