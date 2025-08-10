@@ -29,12 +29,10 @@ public partial struct PlantGridSystem : ISystem
         var occupancy = new NativeParallelHashSet<int2>(limit, Allocator.Temp);
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
             occupancy.Add(gp.ValueRO.Cell);
-
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
         int2 half = (int2)(manager.AreaSize / 2f);
         int minDist = (int)math.ceil(manager.MinDistance);
-
         var rng = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 1));
 
         foreach (var (plant, gp) in SystemAPI.Query<RefRW<Plant>, RefRO<GridPosition>>())
@@ -127,6 +125,7 @@ public partial struct PlantGridSystem : ISystem
 
         cells.Dispose();
         return spawned;
+
     }
 
     static void Spawn(int2 cell, ref EntityCommandBuffer ecb, Entity prefab, in Plant template)

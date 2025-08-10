@@ -36,11 +36,11 @@ public partial struct PlantGrowthSystem : ISystem
             }
 
             float percent = math.clamp(plant.ValueRO.Growth / plant.ValueRO.MaxGrowth, 0f, 1f);
-            int step = (int)math.floor(percent * 5f);
+            int step = (int)math.floor(percent * 10f);
             if (step < 1) step = 1;
             if (plant.ValueRO.ScaleStep != step)
             {
-                transform.ValueRW.Scale = step / 5f;
+                transform.ValueRW.Scale = step / 10f;
                 plant.ValueRW.ScaleStep = (byte)step;
             }
         }

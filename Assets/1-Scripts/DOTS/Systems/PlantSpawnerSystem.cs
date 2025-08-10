@@ -22,7 +22,6 @@ public partial struct PlantSpawnerSystem : ISystem
             var patchRadius = spawner.ValueRO.PatchRadius;
             var rand = Unity.Mathematics.Random.CreateFromIndex(1);
             var prefabPlant = state.EntityManager.GetComponentData<Plant>(prefab);
-
             float minDist = 0f;
             if (SystemAPI.TryGetSingleton<PlantManager>(out var manager))
                 minDist = manager.MinDistance;
