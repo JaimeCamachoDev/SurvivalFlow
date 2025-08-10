@@ -50,32 +50,39 @@ public partial struct PlantReproductionSystem : ISystem
                     available.Add(cell);
             }
 
-            if (available.Length == 0)
+            int spawnAttempts = math.min(manager.ReproductionCount, available.Length);
+            bool reproduced = false;
+
+            for (int i = 0; i < spawnAttempts && plant.ValueRW.Growth >= cost; i++)
             {
-                available.Dispose();
-                continue;
+                int index = rand.NextInt(available.Length);
+                int2 target = available[index];
+                available.RemoveAtSwapBack(index);
+
+                occupancy.Add(target);
+
+                var child = ecb.Instantiate(manager.Prefab);
+                ecb.SetComponent(child, new LocalTransform
+                {
+                    Position = new float3(target.x, 0f, target.y),
+                    Rotation = quaternion.identity,
+                    Scale = 0.2f
+                });
+
+                var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
+                template.ScaleStep = 1;
+                template.Stage = PlantStage.Growing;
+                ecb.SetComponent(child, template);
+                ecb.AddComponent(child, new GridPosition { Cell = target });
+
+                plant.ValueRW.Growth -= cost;
+                reproduced = true;
             }
 
-            int2 target = available[rand.NextInt(available.Length)];
             available.Dispose();
 
-            occupancy.Add(target);
-
-            var child = ecb.Instantiate(manager.Prefab);
-            ecb.SetComponent(child, new LocalTransform
-            {
-                Position = new float3(target.x, 0f, target.y),
-                Rotation = quaternion.identity,
-                Scale = 0.2f
-            });
-
-            var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
-            template.ScaleStep = 1;
-            template.Stage = PlantStage.Growing;
-            ecb.SetComponent(child, template);
-            ecb.AddComponent(child, new GridPosition { Cell = target });
-
-            plant.ValueRW.Growth -= cost;
+            if (reproduced)
+                plant.ValueRW.Stage = PlantStage.Growing;
         }
 
         ecb.Playback(state.EntityManager);
