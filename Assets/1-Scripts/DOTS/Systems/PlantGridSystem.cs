@@ -85,32 +85,7 @@ public partial struct PlantGridSystem : ISystem
             entities.Dispose();
         }
 
-        foreach (var kvp in births)
-        {
-            if (kvp.Value >= manager.ReproductionThreshold && !occupancy.ContainsKey(kvp.Key))
-            {
-                var child = ecb.Instantiate(manager.Prefab);
-                ecb.SetComponent(child, new LocalTransform
-                {
-                    Position = new float3(kvp.Key.x, 0f, kvp.Key.y),
-                    Rotation = quaternion.identity,
-                    Scale = 0.2f
-                });
-                ecb.SetComponent(child, new GridPosition { Cell = kvp.Key });
-                ecb.SetComponent(child, new Plant
-                {
-                    Growth = prefabPlant.MaxGrowth * 0.2f,
-                    MaxGrowth = prefabPlant.MaxGrowth,
-                    GrowthRate = prefabPlant.GrowthRate,
-                    ScaleStep = 1,
-                    Stage = PlantStage.Growing
-                });
-                occupancy.TryAdd(kvp.Key, 0);
-            }
-        }
-
         ecb.Playback(state.EntityManager);
         occupancy.Dispose();
-        births.Dispose();
     }
 }
