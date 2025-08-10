@@ -15,6 +15,8 @@ public class PlantManagerAuthoring : MonoBehaviour
     [Header("Reproduction")]
     [Range(0f,1f)]
     public float reproductionCost = 0.2f;
+    [Range(1,8)]
+    public int reproductionCount = 1;
 
     class Baker : Baker<PlantManagerAuthoring>
     {
@@ -28,6 +30,7 @@ public class PlantManagerAuthoring : MonoBehaviour
                 PatchCount = authoring.patchCount,
                 PatchRadius = authoring.patchRadius,
                 ReproductionCost = authoring.reproductionCost,
+                ReproductionCount = (byte)math.clamp(authoring.reproductionCount, 1, 8),
                 Initialized = 0
             });
         }
@@ -41,5 +44,6 @@ public struct PlantManager : IComponentData
     public int PatchCount;
     public float PatchRadius;
     public float ReproductionCost;
+    public byte ReproductionCount;
     public byte Initialized;
 }
