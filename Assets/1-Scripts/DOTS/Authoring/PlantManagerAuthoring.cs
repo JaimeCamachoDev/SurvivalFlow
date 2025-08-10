@@ -14,6 +14,12 @@ public class PlantManagerAuthoring : MonoBehaviour
     public float reproductionCost = 0.1f;
     [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
 
+    public Vector2 areaSize = new Vector2(50, 50);
+    public float minDistanceBetweenPlants = 1f;
+    public float reproductionCost = 0.1f;
+    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
+    public float reproductionInterval = 5f;
+
     class Baker : Baker<PlantManagerAuthoring>
     {
         public override void Bake(PlantManagerAuthoring authoring)
@@ -26,7 +32,10 @@ public class PlantManagerAuthoring : MonoBehaviour
                 AreaSize = new float2(authoring.areaSize.x, authoring.areaSize.y),
                 MinDistance = authoring.minDistanceBetweenPlants,
                 ReproductionCost = authoring.reproductionCost,
-                RandomSpawnChance = authoring.randomSpawnChance
+                RandomSpawnChance = authoring.randomSpawnChance,
+                ReproductionInterval = authoring.reproductionInterval,
+                Timer = 0f
+
             });
         }
     }
@@ -40,4 +49,6 @@ public struct PlantManager : IComponentData
     public float MinDistance;
     public float ReproductionCost;
     public float RandomSpawnChance;
+    public float ReproductionInterval;
+    public float Timer;
 }

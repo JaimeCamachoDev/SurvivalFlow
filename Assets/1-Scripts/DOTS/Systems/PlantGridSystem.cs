@@ -65,7 +65,6 @@ public partial struct PlantGridSystem : ISystem
 
         ecb.Playback(state.EntityManager);
         occupancy.Dispose();
-
     }
 
     static bool IsFree(int2 cell, ref NativeParallelHashSet<int2> occ, int minDist)
