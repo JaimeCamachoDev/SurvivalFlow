@@ -10,107 +10,121 @@ public partial struct PlantGridSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<PlantManager>(out var manager))
+        if (!SystemAPI.TryGetSingletonRW<PlantManager>(out var managerRw))
             return;
+
+        var manager = managerRw.ValueRO;
+        manager.Timer += SystemAPI.Time.DeltaTime;
+        if (manager.Timer < manager.ReproductionInterval)
+        {
+            managerRw.ValueRW = manager;
+            return;
+        }
+        manager.Timer = 0f;
 
         var query = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
         int current = query.CalculateEntityCount();
-        var occupancy = new NativeParallelHashSet<int2>(current, Allocator.Temp);
+        int limit = manager.EnforceDensity
+            ? (int)math.round(manager.Density * manager.MaxPlants)
+            : manager.MaxPlants;
 
+        var occupancy = new NativeParallelHashSet<int2>(limit, Allocator.Temp);
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
-        {
             occupancy.Add(gp.ValueRO.Cell);
-        }
-
-        int target = manager.EnforceDensity ? (int)math.round(manager.Density * manager.MaxPlants) : int.MaxValue;
-        int neededBirths = math.max(0, target - current);
-        int neededDeaths = math.max(0, current - target);
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
+        int2 half = (int2)(manager.AreaSize / 2f);
+        int minDist = (int)math.ceil(manager.MinDistance);
 
-        if (neededBirths > 0)
+        // gather mature plants
+        var mature = new NativeList<int2>(Allocator.Temp);
+        foreach (var (plant, gp) in SystemAPI.Query<RefRO<Plant>, RefRO<GridPosition>>())
         {
-            foreach (var (plant, gp) in SystemAPI.Query<RefRO<Plant>, RefRO<GridPosition>>())
+            if (plant.ValueRO.Stage == PlantStage.Mature)
+                mature.Add(gp.ValueRO.Cell);
+        }
+
+        var rng = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 1));
+
+        if (current < limit && mature.Length > 0)
+        {
+            for (int attempt = 0; attempt < 10 && current < limit; attempt++)
             {
-                if (plant.ValueRO.Stage != PlantStage.Mature)
-                    continue;
+                var parentCell = mature[rng.NextInt(mature.Length)];
+                float angle = rng.NextFloat(0f, 2f * math.PI);
+                float dist = rng.NextFloat(manager.MinDistance, manager.ReproductionRadius);
+                int2 offset = new int2(
+                    (int)math.round(math.cos(angle) * dist),
+                    (int)math.round(math.sin(angle) * dist));
+                int2 cell = parentCell + offset;
+                cell = math.clamp(cell, -half, half);
 
-                var rnd = Unity.Mathematics.Random.CreateFromIndex((uint)math.hash(gp.ValueRO.Cell));
-                for (int i = 0; i < 8 && neededBirths > 0; i++)
+                if (IsFree(cell, ref occupancy, minDist))
                 {
-                    int2 offset;
-                    do
-                    {
-                        offset = new int2(rnd.NextInt(-1, 2), rnd.NextInt(-1, 2));
-                    }
-                    while (offset.x == 0 && offset.y == 0);
-
-                    int2 cell = gp.ValueRO.Cell + offset;
-                    if (occupancy.Add(cell))
-                    {
-                        var child = ecb.Instantiate(manager.Prefab);
-                        ecb.SetComponent(child, new LocalTransform
-                        {
-                            Position = new float3(cell.x, 0f, cell.y),
-                            Rotation = quaternion.identity,
-                            Scale = 0.2f
-                        });
-                        ecb.SetComponent(child, new GridPosition { Cell = cell });
-                        ecb.SetComponent(child, new Plant
-                        {
-                            Growth = prefabPlant.MaxGrowth * 0.2f,
-                            MaxGrowth = prefabPlant.MaxGrowth,
-                            GrowthRate = prefabPlant.GrowthRate,
-                            ScaleStep = 1,
-                            Stage = PlantStage.Growing
-                        });
-                        neededBirths--;
-                        break;
-                    }
+                    Spawn(cell, ref ecb, manager.Prefab, prefabPlant);
+                    occupancy.Add(cell);
+                    current++;
                 }
-
-                if (neededBirths == 0)
-                    break;
             }
         }
 
-        if (neededDeaths > 0)
+        if (current < limit && (current == 0 || rng.NextFloat() < manager.RandomSpawnChance))
+        {
+            for (int attempt = 0; attempt < 10 && current < limit; attempt++)
+            {
+                int2 cell = new int2(
+                    rng.NextInt(-half.x, half.x),
+                    rng.NextInt(-half.y, half.y));
+
+                if (IsFree(cell, ref occupancy, minDist))
+                {
+                    Spawn(cell, ref ecb, manager.Prefab, prefabPlant);
+                    occupancy.Add(cell);
+                    current++;
+                    break;
+                }
+            }
+        }
+
+        if (current > limit)
         {
             var entities = query.ToEntityArray(Allocator.Temp);
-            for (int i = 0; i < neededDeaths && i < entities.Length; i++)
-            {
+            int remove = math.min(current - limit, entities.Length);
+            for (int i = 0; i < remove; i++)
                 ecb.DestroyEntity(entities[i]);
-            }
             entities.Dispose();
-        }
-
-        foreach (var kvp in births)
-        {
-            if (kvp.Value >= manager.ReproductionThreshold && !occupancy.ContainsKey(kvp.Key))
-            {
-                var child = ecb.Instantiate(manager.Prefab);
-                ecb.SetComponent(child, new LocalTransform
-                {
-                    Position = new float3(kvp.Key.x, 0f, kvp.Key.y),
-                    Rotation = quaternion.identity,
-                    Scale = 0.2f
-                });
-                ecb.SetComponent(child, new GridPosition { Cell = kvp.Key });
-                ecb.SetComponent(child, new Plant
-                {
-                    Growth = prefabPlant.MaxGrowth * 0.2f,
-                    MaxGrowth = prefabPlant.MaxGrowth,
-                    GrowthRate = prefabPlant.GrowthRate,
-                    ScaleStep = 1,
-                    Stage = PlantStage.Growing
-                });
-                occupancy.TryAdd(kvp.Key, 0);
-            }
         }
 
         ecb.Playback(state.EntityManager);
         occupancy.Dispose();
-        births.Dispose();
+        mature.Dispose();
+        managerRw.ValueRW = manager;
+    }
+
+    static bool IsFree(int2 cell, ref NativeParallelHashSet<int2> occ, int minDist)
+    {
+        for (int x = -minDist; x <= minDist; x++)
+            for (int y = -minDist; y <= minDist; y++)
+                if (occ.Contains(cell + new int2(x, y)))
+                    return false;
+        return true;
+    }
+
+    static void Spawn(int2 cell, ref EntityCommandBuffer ecb, Entity prefab, in Plant template)
+    {
+        var e = ecb.Instantiate(prefab);
+        ecb.SetComponent(e, new LocalTransform
+        {
+            Position = new float3(cell.x, 0f, cell.y),
+            Rotation = quaternion.identity,
+            Scale = 0.2f
+        });
+        var plant = template;
+        plant.Growth = template.MaxGrowth * 0.2f;
+        plant.ScaleStep = 1;
+        plant.Stage = PlantStage.Growing;
+        ecb.SetComponent(e, plant);
+        ecb.AddComponent(e, new GridPosition { Cell = cell });
     }
 }
