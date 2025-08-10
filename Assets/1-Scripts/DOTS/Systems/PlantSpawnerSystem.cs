@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+
 /// Sistema que instancia plantas dentro de una cuadrícula evitando celdas ocupadas.
 [BurstCompile]
 public partial struct PlantSpawnerSystem : ISystem
@@ -47,6 +48,7 @@ public partial struct PlantSpawnerSystem : ISystem
             }
 
             used.Dispose();
+
             ecb.RemoveComponent<PlantSpawner>(entity);
         }
 
