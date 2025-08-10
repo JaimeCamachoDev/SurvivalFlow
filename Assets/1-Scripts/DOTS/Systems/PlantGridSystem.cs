@@ -24,7 +24,7 @@ public partial struct PlantGridSystem : ISystem
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        foreach (var (plant, gp) in SystemAPI.Query<RefRW<Plant>, RefRO<GridPosition>>().WithEntityAccess())
+        foreach (var (plant, gp) in SystemAPI.Query<RefRW<Plant>, RefRO<GridPosition>>())
         {
             int neighbours = 0;
             for (int dx = -1; dx <= 1; dx++)
