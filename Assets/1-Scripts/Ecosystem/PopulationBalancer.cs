@@ -54,7 +54,7 @@ public class PopulationBalancer : MonoBehaviour
         // Sample populations (similar to PopulationGraph.Update)
         currentPlants = VegetationManager.Instance != null ?
             VegetationManager.Instance.activeVegetation.Count : 0;
-        List<Herbivore> herbArray = Herbivore.All;
+        List<Herbivores> herbArray = Herbivores.All;
         List<Carnivore> carnArray = Carnivore.All;
         currentHerbivores = herbArray.Count;
         currentCarnivores = carnArray.Count;
@@ -90,7 +90,7 @@ public class PopulationBalancer : MonoBehaviour
         }
     }
 
-    void AdjustHerbivoreReproduction(List<Herbivore> herd, float threshold)
+    void AdjustHerbivoreReproduction(List<Herbivores> herd, float threshold)
     {
         foreach (var h in herd)
             h.reproductionThreshold = threshold;
@@ -125,7 +125,7 @@ public class PopulationBalancer : MonoBehaviour
 
     void ResetThresholds()
     {
-        foreach (var h in Herbivore.All)
+        foreach (var h in Herbivores.All)
             h.reproductionThreshold = herbivoreNormalThreshold;
         foreach (var c in Carnivore.All)
             c.reproductionThreshold = carnivoreNormalThreshold;

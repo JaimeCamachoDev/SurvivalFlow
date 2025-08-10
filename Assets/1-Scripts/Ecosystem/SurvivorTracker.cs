@@ -17,7 +17,7 @@ public static class SurvivorTracker
     public static Record bestHerbivore;
     public static Record bestCarnivore;
 
-    public static void ReportDeath(Herbivore h)
+    public static void ReportDeath(Herbivores h)
     {
         if (h.lifetime > bestHerbivore.lifespan)
         {
@@ -49,11 +49,11 @@ public static class SurvivorTracker
 
     public static Transform GetOldestHerbivoreTransform()
     {
-        Herbivore oldest = null;
+        Herbivores oldest = null;
         float max = 0f;
-        for (int i = 0; i < Herbivore.All.Count; i++)
+        for (int i = 0; i < Herbivores.All.Count; i++)
         {
-            var h = Herbivore.All[i];
+            var h = Herbivores.All[i];
             if (h.lifetime > max)
             {
                 max = h.lifetime;

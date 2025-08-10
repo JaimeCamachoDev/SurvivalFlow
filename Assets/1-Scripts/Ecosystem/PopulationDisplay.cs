@@ -16,7 +16,7 @@ public class PopulationDisplay : MonoBehaviour
     {
         int plantCount = VegetationManager.Instance != null ?
             VegetationManager.Instance.activeVegetation.Count : 0;
-        int herbCount = Herbivore.All.Count;
+        int herbCount = Herbivores.All.Count;
         int carnCount = Carnivore.All.Count;
 
         if (plantsText != null)

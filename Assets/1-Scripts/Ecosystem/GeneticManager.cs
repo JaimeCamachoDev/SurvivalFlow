@@ -35,7 +35,7 @@ public class GeneticManager : MonoBehaviour
 
     public void ApplyToAll()
     {
-        foreach (var h in Herbivore.All)
+        foreach (var h in Herbivores.All)
             h.ApplyGenetics();
         foreach (var c in Carnivore.All)
             c.ApplyGenetics();

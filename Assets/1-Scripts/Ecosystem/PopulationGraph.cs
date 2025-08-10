@@ -26,7 +26,7 @@ public class PopulationGraph : MonoBehaviour
         timer = 0f;
 
         int plantCount = VegetationManager.Instance != null ? VegetationManager.Instance.activeVegetation.Count : 0;
-        int herbCount = Herbivore.All.Count;
+        int herbCount = Herbivores.All.Count;
         int carnCount = Carnivore.All.Count;
 
         AddPoint(plantsLine, plantPoints, plantCount);

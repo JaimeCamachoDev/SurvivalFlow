@@ -32,7 +32,7 @@ public class Carnivore : MonoBehaviour
     public int maxOffspring = 1;
 
 
-    Herbivore targetPrey;                  // Herbívoro seleccionado como presa
+    Herbivores targetPrey;                  // Herbívoro seleccionado como presa
     MeatTile targetMeat;                    // Carne en el suelo
     Vector3 wanderDir;                      // Dirección al deambular
     float wanderTimer;                      // Temporizador de cambio de dirección
@@ -282,9 +282,9 @@ public class Carnivore : MonoBehaviour
     // Busca el herbívoro vivo más cercano dentro del radio de detección
     void FindPrey()
     {
-        Herbivore best = null;
+        Herbivores best = null;
         float bestDist = float.MaxValue;
-        foreach (var h in Herbivore.All)
+        foreach (var h in Herbivores.All)
         {
             float dist = Vector3.Distance(transform.position, h.transform.position);
             if (dist <= detectionRadius && dist < bestDist)

@@ -6,9 +6,9 @@ using System.Collections.Generic;
 /// alimentación hasta saciarse, deambular y reproducción simple.
 /// Cada bloque de código está comentado en español para facilitar su comprensión.
 /// </summary>
-public class Herbivore : MonoBehaviour
+public class Herbivores : MonoBehaviour
 {
-    public static readonly List<Herbivore> All = new List<Herbivore>();
+    public static readonly List<Herbivores> All = new List<Herbivores>();
     static readonly Collider[] predatorBuffer = new Collider[32];
     static readonly Collider[] neighborBuffer = new Collider[32];
     static readonly Collider[] plantCheckBuffer = new Collider[32];
@@ -48,7 +48,7 @@ public class Herbivore : MonoBehaviour
     float reproductionTimer;                     // Controla el enfriamiento de reproducción
     float fleeTimer;                             // Tiempo restante de huida
     Vector3 fleeDir;                             // Dirección actual de huida
-    Herbivore partnerTarget;                     // Pareja con la que intenta reproducirse
+    Herbivores partnerTarget;                     // Pareja con la que intenta reproducirse
     Renderer cachedRenderer;                     // Renderer cacheado para cambiar color
     Color baseColor;                             // Color original
     Vector3 baseScale;                          // Escala base para crecimiento
@@ -227,7 +227,7 @@ public class Herbivore : MonoBehaviour
             {
                 var n = neighborBuffer[i];
                 if (n == null || n.gameObject == gameObject) continue;
-                if (n.GetComponent<Herbivore>() == null) continue;
+                if (n.GetComponent<Herbivores>() == null) continue;
 
                 Vector3 away = transform.position - n.transform.position;
                 away.y = 0f;
@@ -293,9 +293,9 @@ public class Herbivore : MonoBehaviour
     }
 
     // Busca un compañero disponible dentro del radio de búsqueda
-    Herbivore FindPartner()
+    Herbivores FindPartner()
     {
-        Herbivore best = null;
+        Herbivores best = null;
         float bestDist = float.MaxValue;
         foreach (var h in All)
         {
@@ -312,7 +312,7 @@ public class Herbivore : MonoBehaviour
     }
 
     // Instancia una nueva cría y reduce el hambre de los padres
-    void ReproduceWith(Herbivore partner)
+    void ReproduceWith(Herbivores partner)
     {
         if (herbivorePrefab == null) return;
 
@@ -323,7 +323,7 @@ public class Herbivore : MonoBehaviour
             spawnPos += Random.insideUnitSphere * 0.5f;
             spawnPos.y = 0f;
             GameObject child = Instantiate(herbivorePrefab, spawnPos, Quaternion.identity);
-            Herbivore baby = child.GetComponent<Herbivore>();
+            Herbivores baby = child.GetComponent<Herbivores>();
             if (baby != null)
             {
                 baby.herbivorePrefab = herbivorePrefab;
@@ -364,7 +364,7 @@ public class Herbivore : MonoBehaviour
         }
     }
 
-    public void InheritFromParents(Herbivore a, Herbivore b)
+    public void InheritFromParents(Herbivores a, Herbivores b)
     {
         baseMaxHunger = (a.maxHunger + b.maxHunger) * 0.5f;
         baseHungerRate = (a.hungerRate + b.hungerRate) * 0.5f;

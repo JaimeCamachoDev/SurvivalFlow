@@ -131,17 +131,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlantSpawner
       objectReference: {fileID: 0}
-    - target: {fileID: 5598882078243196512, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
-      propertyPath: Count
-      value: 500
-      objectReference: {fileID: 0}
-    - target: {fileID: 5598882078243196512, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
+    - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
       propertyPath: patchCount
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
-    - target: {fileID: 5598882078243196512, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
+    - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
       propertyPath: patchRadius
-      value: 1
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
+      propertyPath: reproductionCost
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
+      propertyPath: reproductionCount
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5809920506453307135, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -188,7 +192,7 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
---- !u!1001 &6004515151440675316
+--- !u!1001 &7817250889409069849
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -196,94 +200,58 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: density
-      value: 1
+    - target: {fileID: 3070345986350346606, guid: ed169a643fdf93340bac8a483925a627, type: 3}
+      propertyPath: m_Name
+      value: Herbivore Manager
       objectReference: {fileID: 0}
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: enforceDensity
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: randomSpawnChance
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: reproductionRadius
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: reproductionInterval
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: reproductionThreshold
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4970933325721209830, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: minDistanceBetweenPlants
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.7527094
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -11.487961
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.4923009
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5757377234728215870, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+    - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6789570790319094912, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: m_Name
-      value: PlantManager
-      objectReference: {fileID: 0}
-    - target: {fileID: 6789570790319094912, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
-      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: b96714910c2ff8248a995fe863fd2ca5, type: 3}
+  m_SourcePrefab: {fileID: 100100000, guid: ed169a643fdf93340bac8a483925a627, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 7817250889409069849}
   - {fileID: 1730093544}
-  - {fileID: 6004515151440675316}

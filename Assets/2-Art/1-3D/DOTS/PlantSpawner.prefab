@@ -9,7 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5809920506453307135}
-  - component: {fileID: 5598882078243196512}
+  - component: {fileID: 5037013917334665024}
+  - component: {fileID: 186317480650798803}
   m_Layer: 0
   m_Name: PlantSpawner
   m_TagString: Untagged
@@ -32,7 +33,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5598882078243196512
+--- !u!114 &5037013917334665024
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,9 +42,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 4205775457725278312}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bd039205ed9492ea5b7af8c3cf4a1f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 611c33ded68b41b0851fe6a802981209, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlantPrefab: {fileID: 8311962731384735518, guid: 7bdfa0a76e3956b4eafd27fcefa04ecc, type: 3}
-  Count: 100
+  plantPrefab: {fileID: 8311962731384735518, guid: 7bdfa0a76e3956b4eafd27fcefa04ecc, type: 3}
+  initialCount: 100
+  patchCount: 5
+  patchRadius: 5
+  reproductionCost: 0.2
+--- !u!114 &186317480650798803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4205775457725278312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f3da3c5e9f846b589393839836e582a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   areaSize: {x: 50, y: 50}
+  cellSize: 1
