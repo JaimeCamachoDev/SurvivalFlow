@@ -9,6 +9,7 @@ public class PlantManagerAuthoring : MonoBehaviour
     [Range(0f, 1f)] public float density = 0.5f;
     public bool enforceDensity = true;
     public int maxPlants = 1000;
+    public int reproductionThreshold = 4;
 
     class Baker : Baker<PlantManagerAuthoring>
     {
@@ -20,7 +21,8 @@ public class PlantManagerAuthoring : MonoBehaviour
                 Prefab = GetEntity(authoring.plantPrefab, TransformUsageFlags.Dynamic),
                 Density = authoring.density,
                 EnforceDensity = authoring.enforceDensity,
-                MaxPlants = authoring.maxPlants
+                MaxPlants = authoring.maxPlants,
+                ReproductionThreshold = authoring.reproductionThreshold
             });
         }
     }
@@ -32,4 +34,5 @@ public struct PlantManager : IComponentData
     public float Density;
     public bool EnforceDensity;
     public int MaxPlants;
+    public int ReproductionThreshold;
 }

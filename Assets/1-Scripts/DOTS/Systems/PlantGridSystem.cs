@@ -22,22 +22,22 @@ public partial struct PlantGridSystem : ISystem
             occupancy.Add(gp.ValueRO.Cell);
         }
 
-        int target = manager.EnforceDensity ? (int)math.round(manager.Density * manager.MaxPlants) : int.MaxValue;
-        int neededBirths = math.max(0, target - current);
-        int neededDeaths = math.max(0, current - target);
+        int limit = manager.EnforceDensity
+            ? (int)math.round(manager.Density * manager.MaxPlants)
+            : manager.MaxPlants;
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
-
-        if (neededBirths > 0)
+        int births = 0;
+        if (current < limit)
         {
             foreach (var (plant, gp) in SystemAPI.Query<RefRO<Plant>, RefRO<GridPosition>>())
             {
-                if (plant.ValueRO.Stage != PlantStage.Mature)
+                if (plant.ValueRO.Stage != PlantStage.Mature || current >= limit || births >= manager.ReproductionThreshold)
                     continue;
 
                 var rnd = Unity.Mathematics.Random.CreateFromIndex((uint)math.hash(gp.ValueRO.Cell));
-                for (int i = 0; i < 8 && neededBirths > 0; i++)
+                for (int i = 0; i < 8; i++)
                 {
                     int2 offset;
                     do
@@ -65,52 +65,25 @@ public partial struct PlantGridSystem : ISystem
                             ScaleStep = 1,
                             Stage = PlantStage.Growing
                         });
-                        neededBirths--;
+                        current++;
+                        births++;
                         break;
                     }
                 }
-
-                if (neededBirths == 0)
-                    break;
             }
         }
 
-        if (neededDeaths > 0)
+        if (current > limit)
         {
             var entities = query.ToEntityArray(Allocator.Temp);
-            for (int i = 0; i < neededDeaths && i < entities.Length; i++)
+            for (int i = 0; i < current - limit && i < entities.Length; i++)
             {
                 ecb.DestroyEntity(entities[i]);
             }
             entities.Dispose();
         }
 
-        foreach (var kvp in births)
-        {
-            if (kvp.Value >= manager.ReproductionThreshold && !occupancy.ContainsKey(kvp.Key))
-            {
-                var child = ecb.Instantiate(manager.Prefab);
-                ecb.SetComponent(child, new LocalTransform
-                {
-                    Position = new float3(kvp.Key.x, 0f, kvp.Key.y),
-                    Rotation = quaternion.identity,
-                    Scale = 0.2f
-                });
-                ecb.SetComponent(child, new GridPosition { Cell = kvp.Key });
-                ecb.SetComponent(child, new Plant
-                {
-                    Growth = prefabPlant.MaxGrowth * 0.2f,
-                    MaxGrowth = prefabPlant.MaxGrowth,
-                    GrowthRate = prefabPlant.GrowthRate,
-                    ScaleStep = 1,
-                    Stage = PlantStage.Growing
-                });
-                occupancy.TryAdd(kvp.Key, 0);
-            }
-        }
-
         ecb.Playback(state.EntityManager);
         occupancy.Dispose();
-        births.Dispose();
     }
 }
