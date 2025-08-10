@@ -31,7 +31,7 @@ public partial struct PlantGridSystem : ISystem
         var occupancy = new NativeParallelHashSet<int2>(limit, Allocator.Temp);
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
             occupancy.Add(gp.ValueRO.Cell);
-
+            
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
         int2 half = (int2)(manager.AreaSize / 2f);
@@ -72,6 +72,7 @@ public partial struct PlantGridSystem : ISystem
         if (current < limit && (current == 0 || rng.NextFloat() < manager.RandomSpawnChance))
         {
             for (int attempt = 0; attempt < 10 && current < limit; attempt++)
+
             {
                 int2 cell = new int2(
                     rng.NextInt(-half.x, half.x),

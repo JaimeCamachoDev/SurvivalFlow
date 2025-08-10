@@ -9,6 +9,7 @@ public class PlantManagerAuthoring : MonoBehaviour
     [Range(0f, 1f)] public float density = 0.5f;
     public bool enforceDensity = true;
     public int maxPlants = 1000;
+    public int reproductionThreshold = 4;
 
     public Vector2 areaSize = new Vector2(50, 50);
     public float reproductionInterval = 10f;
