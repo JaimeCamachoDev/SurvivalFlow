@@ -7,6 +7,12 @@ public class PlantManagerAuthoring : MonoBehaviour
 {
     public GameObject plantPrefab;
     public int maxPlants = 1000;
+    public int reproductionThreshold = 4;
+
+    public Vector2 areaSize = new Vector2(50, 50);
+    public float minDistanceBetweenPlants = 1f;
+    public float reproductionCost = 0.1f;
+    [Range(0f, 1f)] public float randomSpawnChance = 0.1f;
 
     public Vector2 areaSize = new Vector2(50, 50);
     public float minDistanceBetweenPlants = 1f;
@@ -29,6 +35,7 @@ public class PlantManagerAuthoring : MonoBehaviour
                 RandomSpawnChance = authoring.randomSpawnChance,
                 ReproductionInterval = authoring.reproductionInterval,
                 Timer = 0f
+
             });
         }
     }
