@@ -31,7 +31,8 @@ public class PlantAuthoring : MonoBehaviour
                 MaxGrowth = authoring.maxGrowth,
                 GrowthRate = authoring.growthRate,
                 ScaleStep = 1,
-                Stage = PlantStage.Growing
+                Stage = PlantStage.Growing,
+                BeingEaten = 0
             });
 
             // Transform inicial según el porcentaje de crecimiento.
