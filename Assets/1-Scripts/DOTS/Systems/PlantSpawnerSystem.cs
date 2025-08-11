@@ -66,11 +66,16 @@ public partial struct PlantSpawnerSystem : ISystem
                 continue; // Ya hay una planta en esa celda
 
             var e = ecb.Instantiate(prefab);
+            var spawnPos = new float3(cell.x, 0f, cell.y);
             ecb.SetComponent(e, new LocalTransform
             {
-                Position = new float3(cell.x, 0f, cell.y),
+                Position = spawnPos,
                 Rotation = quaternion.identity,
                 Scale = initialScale
+            });
+            ecb.SetComponent(e, new LocalToWorld
+            {
+                Value = float4x4.TRS(spawnPos, quaternion.identity, new float3(initialScale))
             });
 
             ecb.SetComponent(e, prefabPlant);

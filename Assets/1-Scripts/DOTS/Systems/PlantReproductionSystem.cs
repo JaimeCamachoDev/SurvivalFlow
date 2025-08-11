@@ -89,6 +89,11 @@ public partial struct PlantReproductionSystem : ISystem
                         float scale = math.max(manager.InitialGrowthPercent, 0.2f);
                         ecb.SetComponent(child, template);
                         ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
+                        ecb.SetComponent(child, new LocalToWorld
+                        {
+                            Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
+                        });
+
                         positions.Add(pos);
                         parentPlant.Growth -= cost;
                         spawned = true;
@@ -140,6 +145,11 @@ public partial struct PlantReproductionSystem : ISystem
                     float scale = math.max(manager.InitialGrowthPercent, 0.2f);
                     ecb.SetComponent(child, template);
                     ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
+                    ecb.SetComponent(child, new LocalToWorld
+                    {
+                        Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
+                    });
+
                     positions.Add(pos);
                     totalPlants++;
                     break;
