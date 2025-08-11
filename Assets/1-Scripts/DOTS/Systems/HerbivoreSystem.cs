@@ -100,9 +100,33 @@ public partial struct HerbivoreSystem : ISystem
             }
             // Movimiento con acumulación subcelda para permanecer en la cuadrícula.
             float3 move = herb.ValueRO.MoveDirection * speed * dt + herb.ValueRO.MoveRemainder;
-            int2 delta = new int2((int)math.round(move.x), (int)math.round(move.z));
-            herb.ValueRW.MoveRemainder = move - new float3(delta.x, 0f, delta.y);
+            int2 delta = int2.zero;
 
+            // Evitamos "saltos" al movernos en diagonal acumulando pasos en ambos ejes
+            // y aplicando el mínimo de ellos como desplazamiento simultáneo.
+            if (math.abs(herb.ValueRO.MoveDirection.x) > 0f && math.abs(herb.ValueRO.MoveDirection.z) > 0f)
+            {
+                int stepX = (int)math.floor(math.abs(move.x));
+                int stepZ = (int)math.floor(math.abs(move.z));
+                int steps = math.min(stepX, stepZ);
+                if (steps > 0)
+                {
+                    delta = new int2((int)math.sign(move.x) * steps, (int)math.sign(move.z) * steps);
+                    move -= new float3(delta.x, 0f, delta.y);
+                }
+            }
+            else
+            {
+                int stepX = (int)math.floor(math.abs(move.x));
+                int stepZ = (int)math.floor(math.abs(move.z));
+                if (stepX != 0 || stepZ != 0)
+                {
+                    delta = new int2((int)math.sign(move.x) * stepX, (int)math.sign(move.z) * stepZ);
+                    move -= new float3(delta.x, 0f, delta.y);
+                }
+            }
+
+            herb.ValueRW.MoveRemainder = move;
             int2 targetCell = currentCell + delta;
             targetCell.x = math.clamp(targetCell.x, -bounds.x, bounds.x);
             targetCell.y = math.clamp(targetCell.y, -bounds.y, bounds.y);
@@ -161,7 +185,6 @@ public partial struct HerbivoreSystem : ISystem
                 var plant = state.EntityManager.GetComponentData<Plant>(plantEntity);
                 plant.Stage = PlantStage.Withering;
                 plant.BeingEaten = 1;
-
                 plant.Growth -= eat;
                 if (plant.Growth <= 0f)
                     ecb.DestroyEntity(plantEntity);
