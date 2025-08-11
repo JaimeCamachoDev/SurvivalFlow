@@ -4,102 +4,163 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-/// Sistema que permite a las plantas maduras reproducirse en celdas adyacentes.
+/// Sistema que controla la reproducción global de las plantas.
+/// Solo se intenta un nacimiento por intervalo definido en PlantManager.
 [BurstCompile]
 public partial struct PlantReproductionSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
-        // Obtenemos configuración de plantas y datos de la cuadrícula.
-        if (!SystemAPI.TryGetSingleton<PlantManager>(out var manager) ||
+        // Obtenemos la configuración global y los datos de la cuadrícula.
+        if (!SystemAPI.TryGetSingletonRW<PlantManager>(out var managerRw) ||
             !SystemAPI.TryGetSingleton<GridManager>(out var grid))
             return;
 
-        // Buffer para crear entidades al final del frame.
+        var manager = managerRw.ValueRO;
+        manager.ReproductionTimer += SystemAPI.Time.DeltaTime;
+        if (manager.ReproductionTimer < manager.ReproductionInterval)
+        {
+            managerRw.ValueRW = manager;
+            return;
+        }
+        manager.ReproductionTimer = 0f;
+
         var ecb = new EntityCommandBuffer(Allocator.Temp);
+        var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 1));
 
-        // Conjunto de celdas ocupadas para no solapar plantas.
-        var occupancy = new NativeParallelHashSet<int2>(128, Allocator.Temp);
-        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>())
-            occupancy.Add(gp.ValueRO.Cell);
+        // Recolectamos posiciones de todas las plantas y las maduras.
+        var positions = new NativeList<float3>(Allocator.Temp);
+        var matureEntities = new NativeList<Entity>(Allocator.Temp);
+        var maturePositions = new NativeList<float3>(Allocator.Temp);
 
-        // Generador aleatorio basado en el tiempo.
-        var rand = Unity.Mathematics.Random.CreateFromIndex(
-            (uint)(SystemAPI.Time.ElapsedTime * 1000 + 1));
-
-        // Direcciones a las 8 celdas adyacentes.
-        int2[] dirs = new int2[8]
+        foreach (var (plant, transform, entity) in SystemAPI.Query<RefRO<Plant>, RefRO<LocalTransform>>().WithEntityAccess())
         {
-            new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1),
-            new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
-        };
-
-        // Límite de la cuadrícula.
-        float2 half = grid.AreaSize * 0.5f;
-
-        // Recorremos todas las plantas para evaluar su reproducción.
-        foreach (var (plant, gp, entity) in SystemAPI.Query<RefRW<Plant>, RefRO<GridPosition>>().WithEntityAccess())
-        {
-            if (plant.ValueRO.Stage != PlantStage.Mature)
-                continue; // Solo plantas maduras
-
-            // Coste de reproducirse en términos de crecimiento.
-            float cost = manager.ReproductionCost * plant.ValueRO.MaxGrowth;
-            if (plant.ValueRO.Growth < cost)
-                continue; // No tiene recursos suficientes
-
-            // Lista de celdas libres adyacentes.
-            var available = new NativeList<int2>(Allocator.Temp);
-            foreach (var dir in dirs)
+            positions.Add(transform.ValueRO.Position);
+            if (plant.ValueRO.Stage == PlantStage.Mature)
             {
-                int2 cell = gp.ValueRO.Cell + dir;
-                if (cell.x < -half.x || cell.x > half.x || cell.y < -half.y || cell.y > half.y)
-                    continue; // Fuera de la cuadrícula
-                if (!occupancy.Contains(cell))
-                    available.Add(cell);
+                matureEntities.Add(entity);
+                maturePositions.Add(transform.ValueRO.Position);
             }
-
-            int spawnAttempts = math.min(manager.ReproductionCount, available.Length);
-            bool reproduced = false;
-
-            // Intentamos crear hasta reproductionCount brotes.
-
-            for (int i = 0; i < spawnAttempts && plant.ValueRW.Growth >= cost; i++)
-            {
-                int index = rand.NextInt(available.Length);
-                int2 target = available[index];
-                available.RemoveAtSwapBack(index);
-
-                occupancy.Add(target); // Marcamos la celda como ocupada
-
-                // Instanciamos la nueva planta en la celda elegida.
-                var child = ecb.Instantiate(manager.Prefab);
-                ecb.SetComponent(child, new LocalTransform
-                {
-                    Position = new float3(target.x, 0f, target.y),
-                    Rotation = quaternion.identity,
-                    Scale = 0.2f
-                });
-
-                // Inicializamos datos de la planta hija.
-                var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
-                template.ScaleStep = 1;
-                template.Stage = PlantStage.Growing;
-                ecb.SetComponent(child, template);
-                ecb.AddComponent(child, new GridPosition { Cell = target });
-
-                plant.ValueRW.Growth -= cost;
-                reproduced = true;
-            }
-
-            available.Dispose();
-
-            if (reproduced)
-                plant.ValueRW.Stage = PlantStage.Growing; // Vuelve a crecer tras reproducirse
         }
 
-        // Aplicamos los cambios y liberamos memoria.
+        int totalPlants = positions.Length;
+
+        // Intento de reproducción alrededor de una planta madura.
+        if (totalPlants < manager.MaxPlants && matureEntities.Length > 0)
+        {
+            int parentIndex = rand.NextInt(matureEntities.Length);
+            var parentEntity = matureEntities[parentIndex];
+            var parentPos = maturePositions[parentIndex];
+            var parentPlant = state.EntityManager.GetComponentData<Plant>(parentEntity);
+            float cost = manager.ReproductionCost * parentPlant.MaxGrowth;
+
+            int children = math.min(manager.ReproductionCount, manager.MaxPlants - totalPlants);
+            for (int c = 0; c < children && parentPlant.Growth >= cost; c++)
+            {
+                bool spawned = false;
+                for (int attempt = 0; attempt < 10; attempt++)
+                {
+                    float2 offset2 = rand.NextFloat2Direction() *
+                        rand.NextFloat(manager.MinDistanceBetweenPlants, manager.ReproductionRadius);
+                    float3 pos = parentPos + new float3(offset2.x, 0f, offset2.y);
+                    pos.x = math.clamp(pos.x, -grid.AreaSize.x * 0.5f, grid.AreaSize.x * 0.5f);
+                    pos.z = math.clamp(pos.z, -grid.AreaSize.y * 0.5f, grid.AreaSize.y * 0.5f);
+
+                    bool occupied = false;
+                    for (int i = 0; i < positions.Length; i++)
+                    {
+                        if (math.distance(new float2(pos.x, pos.z), new float2(positions[i].x, positions[i].z)) <
+                            manager.MinDistanceBetweenPlants)
+                        {
+                            occupied = true;
+                            break;
+                        }
+                    }
+
+                    if (!occupied)
+                    {
+                        var child = ecb.Instantiate(manager.Prefab);
+                        var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
+                        template.MaxGrowth = manager.PlantMaxGrowth;
+                        template.GrowthRate = manager.PlantGrowthRate;
+                        template.Growth = manager.PlantMaxGrowth * manager.InitialGrowthPercent;
+                        template.ScaleStep = 1;
+                        template.Stage = PlantStage.Growing;
+                        float scale = math.max(manager.InitialGrowthPercent, 0.2f);
+                        ecb.SetComponent(child, template);
+                        ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
+                        ecb.SetComponent(child, new LocalToWorld
+                        {
+                            Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
+                        });
+                        positions.Add(pos);
+                        parentPlant.Growth -= cost;
+                        spawned = true;
+                        totalPlants++;
+                        break;
+                    }
+                }
+
+                if (!spawned)
+                    break;
+            }
+
+            if (parentPlant.Growth < parentPlant.MaxGrowth)
+                parentPlant.Stage = PlantStage.Growing;
+            state.EntityManager.SetComponentData(parentEntity, parentPlant);
+        }
+
+        // Siembra aleatoria para repoblar huecos.
+        if (totalPlants < manager.MaxPlants &&
+            (totalPlants == 0 || rand.NextFloat() < manager.RandomSpawnChance))
+        {
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                float3 pos = new float3(
+                    rand.NextFloat(-grid.AreaSize.x * 0.5f, grid.AreaSize.x * 0.5f),
+                    0f,
+                    rand.NextFloat(-grid.AreaSize.y * 0.5f, grid.AreaSize.y * 0.5f));
+
+                bool occupied = false;
+                for (int i = 0; i < positions.Length; i++)
+                {
+                    if (math.distance(new float2(pos.x, pos.z), new float2(positions[i].x, positions[i].z)) <
+                        manager.MinDistanceBetweenPlants)
+                    {
+                        occupied = true;
+                        break;
+                    }
+                }
+
+                if (!occupied)
+                {
+                    var child = ecb.Instantiate(manager.Prefab);
+                    var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
+                    template.MaxGrowth = manager.PlantMaxGrowth;
+                    template.GrowthRate = manager.PlantGrowthRate;
+                    template.Growth = manager.PlantMaxGrowth * manager.InitialGrowthPercent;
+                    template.ScaleStep = 1;
+                    template.Stage = PlantStage.Growing;
+                    float scale = math.max(manager.InitialGrowthPercent, 0.2f);
+                    ecb.SetComponent(child, template);
+                    ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
+                    ecb.SetComponent(child, new LocalToWorld
+                    {
+                        Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
+                    });
+                    positions.Add(pos);
+                    totalPlants++;
+                    break;
+                }
+            }
+        }
+
+        managerRw.ValueRW = manager;
         ecb.Playback(state.EntityManager);
-        occupancy.Dispose();
+
+        positions.Dispose();
+        matureEntities.Dispose();
+        maturePositions.Dispose();
     }
 }
+

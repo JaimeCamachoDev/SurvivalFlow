@@ -30,6 +30,12 @@ public partial struct PlantSpawnerSystem : ISystem
 
         var rand = Unity.Mathematics.Random.CreateFromIndex(1);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(prefab);
+        prefabPlant.MaxGrowth = manager.PlantMaxGrowth;
+        prefabPlant.GrowthRate = manager.PlantGrowthRate;
+        prefabPlant.Growth = manager.PlantMaxGrowth * manager.InitialGrowthPercent;
+        prefabPlant.ScaleStep = 1;
+        prefabPlant.Stage = PlantStage.Growing;
+        float initialScale = math.max(manager.InitialGrowthPercent, 0.2f);
 
         // Conjunto de celdas ocupadas y centros de cada parche.
         int2 half = (int2)(area / 2f);
@@ -60,15 +66,18 @@ public partial struct PlantSpawnerSystem : ISystem
                 continue; // Ya hay una planta en esa celda
 
             var e = ecb.Instantiate(prefab);
+            var spawnPos = new float3(cell.x, 0f, cell.y);
             ecb.SetComponent(e, new LocalTransform
             {
-                Position = new float3(cell.x, 0f, cell.y),
+                Position = spawnPos,
                 Rotation = quaternion.identity,
-                Scale = 0.2f
+                Scale = initialScale
+            });
+            ecb.SetComponent(e, new LocalToWorld
+            {
+                Value = float4x4.TRS(spawnPos, quaternion.identity, new float3(initialScale))
             });
 
-            prefabPlant.ScaleStep = 1;
-            prefabPlant.Stage = PlantStage.Growing;
             ecb.SetComponent(e, prefabPlant);
             ecb.AddComponent(e, new GridPosition { Cell = cell });
             spawned++;

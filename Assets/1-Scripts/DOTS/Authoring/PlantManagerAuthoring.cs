@@ -18,16 +18,31 @@ public class PlantManagerAuthoring : MonoBehaviour
     // Radio de cada parche de plantas.
     public float patchRadius = 5f;
 
-    [Header("Reproduction")]
-    // Porcentaje de crecimiento que se consume al reproducirse.
-    [Range(0f,1f)]
-    public float reproductionCost = 0.2f;
-    [Range(1,8)]
-    public int reproductionCount = 1;
+    [Header("Plant Settings")]
+    // Parámetros básicos de crecimiento de todas las plantas.
+    public float maxGrowth = 100f;
+    public float growthRate = 2f;
+    [Range(0f,1f)] public float initialGrowthPercent = 0.05f;
 
-    // Número de brotes que puede generar cada planta (1-8).
-    [Range(1,8)]
-    public int reproductionCount = 1;
+    [Header("Reproduction")]
+    // Intervalo entre intentos de reproducción globales.
+    public float reproductionInterval = 10f;
+
+    // Límite máximo de plantas en el mundo.
+    public int maxPlants = 200;
+
+    // Distancia mínima y radio de reproducción alrededor del padre.
+    public float minDistanceBetweenPlants = 1f;
+    public float reproductionRadius = 3f;
+
+    // Probabilidad de que aparezca una planta aleatoria cuando hay huecos.
+    [Range(0f,1f)] public float randomSpawnChance = 0.1f;
+
+    // Coste relativo de crecimiento gastado al reproducirse.
+    [Range(0f,1f)] public float reproductionCost = 0.2f;
+
+    // Número de brotes que puede generar cada intento de reproducción.
+    [Range(1,8)] public int reproductionCount = 1;
 
     // Convierte los datos de authoring a componentes DOTS.
     class Baker : Baker<PlantManagerAuthoring>
@@ -42,8 +57,17 @@ public class PlantManagerAuthoring : MonoBehaviour
                 InitialCount = authoring.initialCount,
                 PatchCount = authoring.patchCount,
                 PatchRadius = authoring.patchRadius,
+                PlantMaxGrowth = authoring.maxGrowth,
+                PlantGrowthRate = authoring.growthRate,
+                InitialGrowthPercent = authoring.initialGrowthPercent,
+                ReproductionInterval = authoring.reproductionInterval,
+                MaxPlants = authoring.maxPlants,
+                MinDistanceBetweenPlants = authoring.minDistanceBetweenPlants,
+                ReproductionRadius = authoring.reproductionRadius,
+                RandomSpawnChance = authoring.randomSpawnChance,
                 ReproductionCost = authoring.reproductionCost,
                 ReproductionCount = (byte)math.clamp(authoring.reproductionCount, 1, 8),
+                ReproductionTimer = 0f,
                 Initialized = 0
             });
         }
@@ -65,11 +89,22 @@ public struct PlantManager : IComponentData
     /// Radio de cada parche.
     public float PatchRadius;
 
-    /// Coste relativo de crecimiento gastado en reproducción.
-    public float ReproductionCost;
+    /// Parámetros básicos de todas las plantas.
+    public float PlantMaxGrowth;
+    public float PlantGrowthRate;
+    public float InitialGrowthPercent;
 
-    /// Número de brotes por ciclo.
+    /// Configuración de reproducción global.
+    public float ReproductionInterval;
+    public int MaxPlants;
+    public float MinDistanceBetweenPlants;
+    public float ReproductionRadius;
+    public float RandomSpawnChance;
+    public float ReproductionCost;
     public byte ReproductionCount;
+
+    /// Temporizador interno para controlar el intervalo de reproducción.
+    public float ReproductionTimer;
 
     /// Bandera interna para evitar inicializar dos veces.
     public byte Initialized;
