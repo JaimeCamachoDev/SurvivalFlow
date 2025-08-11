@@ -33,25 +33,30 @@ public partial struct HerbivoreSystem : ISystem
             plantCells.Add(pgp.ValueRO.Cell);
         }
 
-        // Direcciones posibles (4 vecinos cardinales).
-        int2[] dirs = new int2[4]
+        // Direcciones posibles (8 vecinos alrededor de la celda).
+        int2[] dirs = new int2[8]
         {
-            new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
+            new int2(1,0),  new int2(-1,0),  new int2(0,1),  new int2(0,-1),
+            new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
         };
 
         // Recorremos cada herbívoro.
         foreach (var (transform, hunger, health, herb, entity) in
                  SystemAPI.Query<RefRW<LocalTransform>, RefRW<Hunger>, RefRW<Health>, RefRW<Herbivore>>().WithEntityAccess())
         {
+            // Celda en la que se encuentra actualmente.
+            int2 currentCell = new int2(
+                (int)math.floor(transform.ValueRO.Position.x / grid.CellSize),
+                (int)math.floor(transform.ValueRO.Position.z / grid.CellSize));
+
             // Determinar si tiene hambre para correr hacia plantas.
             bool isHungry = hunger.ValueRO.Value <= hunger.ValueRO.SeekThreshold;
+            float speed = isHungry ? herb.ValueRO.MoveSpeed * 2f : herb.ValueRO.MoveSpeed;
+            float3 pos = transform.ValueRO.Position;
 
             // Selección de dirección: si tiene hambre busca la planta más cercana.
             if (isHungry && plantCells.Length > 0)
             {
-                int2 currentCell = new int2(
-                    (int)math.floor(transform.ValueRO.Position.x / grid.CellSize),
-                    (int)math.floor(transform.ValueRO.Position.z / grid.CellSize));
                 float bestDist = float.MaxValue;
                 int2 target = currentCell;
                 for (int i = 0; i < plantCells.Length; i++)
@@ -63,8 +68,22 @@ public partial struct HerbivoreSystem : ISystem
                         target = plantCells[i];
                     }
                 }
-                float3 targetPos = new float3(target.x * grid.CellSize, 0f, target.y * grid.CellSize);
-                herb.ValueRW.MoveDirection = math.normalize(targetPos - transform.ValueRO.Position);
+
+                int2 diff = target - currentCell;
+                int2 step = new int2(math.clamp(diff.x, -1, 1), math.clamp(diff.y, -1, 1));
+                float3 dir = float3.zero;
+                if (step.x != 0 || step.y != 0)
+                    dir = math.normalize(new float3(step.x, 0f, step.y));
+                herb.ValueRW.MoveDirection = dir;
+
+                if (math.abs(diff.x) > 1 || math.abs(diff.y) > 1)
+                {
+                    float3 targetPos = new float3((currentCell.x + step.x) * grid.CellSize, 0f,
+                                                  (currentCell.y + step.y) * grid.CellSize);
+                    float dist = math.distance(pos, targetPos);
+                    float moveDist = math.min(dist, speed * dt);
+                    pos += dir * moveDist;
+                }
             }
             else
             {
@@ -72,7 +91,7 @@ public partial struct HerbivoreSystem : ISystem
                 herb.ValueRW.DirectionTimer -= dt;
                 if (herb.ValueRO.DirectionTimer <= 0f)
                 {
-                    int choice = rand.NextInt(5); // 0 = quieto
+                    int choice = rand.NextInt(9); // 0 = quieto
                     if (choice == 0)
                         herb.ValueRW.MoveDirection = float3.zero;
                     else
@@ -82,12 +101,11 @@ public partial struct HerbivoreSystem : ISystem
                     }
                     herb.ValueRW.DirectionTimer = herb.ValueRO.ChangeDirectionInterval;
                 }
+
+                pos += herb.ValueRO.MoveDirection * speed * dt;
             }
 
-            // Calculamos el desplazamiento y lo limitamos dentro del área y celdas.
-            float speed = isHungry ? herb.ValueRO.MoveSpeed * 2f : herb.ValueRO.MoveSpeed;
-            float3 move = herb.ValueRO.MoveDirection * speed * dt;
-            float3 pos = transform.ValueRO.Position + move;
+            // Limitamos la posición dentro del área permitida.
             pos.x = math.clamp(pos.x, -half.x, half.x);
             pos.z = math.clamp(pos.z, -half.y, half.y);
             transform.ValueRW.Position = pos;
@@ -96,7 +114,7 @@ public partial struct HerbivoreSystem : ISystem
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
                 transform.ValueRW.Rotation = quaternion.LookRotationSafe(herb.ValueRO.MoveDirection, math.up());
 
-            // Celda en la que se encuentra actualmente.
+            // Celda en la que se encuentra tras el movimiento.
             int2 cell = new int2(
                 (int)math.floor(transform.ValueRO.Position.x / grid.CellSize),
                 (int)math.floor(transform.ValueRO.Position.z / grid.CellSize));
