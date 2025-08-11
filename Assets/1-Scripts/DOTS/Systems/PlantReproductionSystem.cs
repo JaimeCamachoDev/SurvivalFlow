@@ -93,6 +93,7 @@ public partial struct PlantReproductionSystem : ISystem
                         {
                             Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
                         });
+
                         positions.Add(pos);
                         parentPlant.Growth -= cost;
                         spawned = true;
@@ -148,6 +149,7 @@ public partial struct PlantReproductionSystem : ISystem
                     {
                         Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
                     });
+
                     positions.Add(pos);
                     totalPlants++;
                     break;
