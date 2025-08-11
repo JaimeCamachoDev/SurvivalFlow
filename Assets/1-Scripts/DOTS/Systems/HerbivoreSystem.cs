@@ -6,6 +6,9 @@ using Unity.Transforms;
 
 
 /// Gestiona el movimiento, hambre y alimentación de los herbívoros DOTS.
+/// TODO: Implementar reproducción agregando un componente de reproducción con umbrales
+/// y cooldown, buscando parejas cercanas, acercando a ambos hasta una distancia de
+/// apareamiento y generando nuevas entidades de cría al cumplirse las condiciones.
 [BurstCompile]
 public partial struct HerbivoreSystem : ISystem
 {
