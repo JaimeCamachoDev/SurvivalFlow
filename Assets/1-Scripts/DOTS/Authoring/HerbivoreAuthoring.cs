@@ -51,7 +51,8 @@ public class HerbivoreAuthoring : MonoBehaviour
                 HealthRestorePercent = authoring.healthRestorePercent,
                 ChangeDirectionInterval = authoring.changeDirectionInterval,
                 DirectionTimer = 0f,
-                MoveDirection = float3.zero
+                MoveDirection = float3.zero,
+                MoveRemainder = float3.zero
             });
 
             // Componentes de salud y hambre iniciales.
