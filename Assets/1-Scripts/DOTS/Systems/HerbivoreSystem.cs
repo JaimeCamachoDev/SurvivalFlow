@@ -95,6 +95,8 @@ public partial struct HerbivoreSystem : ISystem
                     }
                     herb.ValueRW.DirectionTimer = herb.ValueRO.ChangeDirectionInterval;
                 }
+
+                pos += herb.ValueRO.MoveDirection * speed * dt;
             }
             // Movimiento con acumulación subcelda para permanecer en la cuadrícula.
             float3 move = herb.ValueRO.MoveDirection * speed * dt + herb.ValueRO.MoveRemainder;
@@ -125,7 +127,6 @@ public partial struct HerbivoreSystem : ISystem
             }
 
             herb.ValueRW.MoveRemainder = move;
-
             int2 targetCell = currentCell + delta;
             targetCell.x = math.clamp(targetCell.x, -bounds.x, bounds.x);
             targetCell.y = math.clamp(targetCell.y, -bounds.y, bounds.y);
@@ -143,7 +144,6 @@ public partial struct HerbivoreSystem : ISystem
                 transform.ValueRW.Position = new float3(currentCell.x * grid.CellSize, 0f, currentCell.y * grid.CellSize);
                 herb.ValueRW.MoveRemainder = float3.zero;
             }
-
             // Orientamos al herbívoro hacia su dirección de movimiento para dar sensación de giro.
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
                 transform.ValueRW.Rotation = quaternion.LookRotationSafe(herb.ValueRO.MoveDirection, math.up());
