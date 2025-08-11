@@ -31,7 +31,7 @@ public class PlantManagerAuthoring : MonoBehaviour
     // Límite máximo de plantas en el mundo.
     public int maxPlants = 200;
 
-    // Distancia mínima y radio de reproducción alrededor del padre.
+    // Distancia mínima y radio de reproducción alrededor del padre (en celdas).
     public float minDistanceBetweenPlants = 1f;
     public float reproductionRadius = 3f;
 
