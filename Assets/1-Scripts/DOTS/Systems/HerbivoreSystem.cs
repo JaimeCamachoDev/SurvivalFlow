@@ -90,9 +90,11 @@ public partial struct HerbivoreSystem : ISystem
             float3 pos = transform.ValueRO.Position + move;
             pos.x = math.clamp(pos.x, -half.x, half.x);
             pos.z = math.clamp(pos.z, -half.y, half.y);
-            pos.x = math.round(pos.x / grid.CellSize) * grid.CellSize;
-            pos.z = math.round(pos.z / grid.CellSize) * grid.CellSize;
             transform.ValueRW.Position = pos;
+
+            // Orientamos al herbívoro hacia su dirección de movimiento para dar sensación de giro.
+            if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
+                transform.ValueRW.Rotation = quaternion.LookRotationSafe(herb.ValueRO.MoveDirection, math.up());
 
             // Celda en la que se encuentra actualmente.
             int2 cell = new int2(
@@ -116,13 +118,28 @@ public partial struct HerbivoreSystem : ISystem
                 }
             }
 
-            // Comprobamos si hay una planta en la celda actual.
-            if (plants.TryGetFirstValue(cell, out var plantEntity, out _))
+            // Celda frente a la dirección de movimiento, para comer sin superponerse visualmente.
+            int2 forwardCell = cell + new int2(
+                (int)math.round(herb.ValueRO.MoveDirection.x),
+                (int)math.round(herb.ValueRO.MoveDirection.z));
+
+            // Comprobamos si hay una planta en la celda frontal.
+            if (plants.TryGetFirstValue(forwardCell, out var plantEntity, out _))
             {
-                hunger.ValueRW.Value = math.min(hunger.ValueRO.Max, hunger.ValueRO.Value + herb.ValueRO.HungerGain);
-                health.ValueRW.Value = math.min(health.ValueRO.Max,
-                    health.ValueRO.Value + health.ValueRO.Max * herb.ValueRO.HealthRestorePercent);
-                ecb.DestroyEntity(plantEntity); // La planta es consumida
+                // Restablecemos hambre y vida de forma gradual.
+                float eat = herb.ValueRO.HungerGain * dt;
+                hunger.ValueRW.Value = math.min(hunger.ValueRO.Max, hunger.ValueRO.Value + eat);
+                float healthGain = health.ValueRO.Max * herb.ValueRO.HealthRestorePercent * dt;
+                health.ValueRW.Value = math.min(health.ValueRO.Max, health.ValueRO.Value + healthGain);
+
+                // Dañamos a la planta y la marcamos como marchitándose.
+                var plant = state.EntityManager.GetComponentData<Plant>(plantEntity);
+                plant.Stage = PlantStage.Withering;
+                plant.Growth -= eat;
+                if (plant.Growth <= 0f)
+                    ecb.DestroyEntity(plantEntity);
+                else
+                    state.EntityManager.SetComponentData(plantEntity, plant);
             }
         }
         // Ejecutamos los cambios y liberamos la memoria usada.
