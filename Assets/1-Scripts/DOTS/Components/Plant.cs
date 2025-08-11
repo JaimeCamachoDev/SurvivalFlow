@@ -20,4 +20,7 @@ public struct Plant : IComponentData
 
     /// Estado visual/biológico actual.
     public PlantStage Stage;
+
+    /// Marcador temporal cuando un herbívoro la está consumiendo en este frame.
+    public byte BeingEaten;
 }

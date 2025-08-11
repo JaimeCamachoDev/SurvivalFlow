@@ -27,4 +27,7 @@ public struct Herbivore : IComponentData
 
     /// Dirección de movimiento normalizada actual.
     public float3 MoveDirection;
+
+    /// Desplazamiento subcelda acumulado para mantener el movimiento alineado a la cuadrícula.
+    public float3 MoveRemainder;
 }

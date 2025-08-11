@@ -27,19 +27,27 @@ public partial struct PlantReproductionSystem : ISystem
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 1));
+        int2 half = (int2)(grid.AreaSize / 2f);
 
-        // Recolectamos posiciones de todas las plantas y las maduras.
+        // Recolectamos las celdas ocupadas y las posiciones de las plantas maduras.
         var positions = new NativeList<float3>(Allocator.Temp);
         var matureEntities = new NativeList<Entity>(Allocator.Temp);
         var maturePositions = new NativeList<float3>(Allocator.Temp);
+        var occupied = new NativeParallelHashSet<int2>(manager.MaxPlants, Allocator.Temp);
 
-        foreach (var (plant, transform, entity) in SystemAPI.Query<RefRO<Plant>, RefRO<LocalTransform>>().WithEntityAccess())
+        foreach (var (plant, transform, gridPos, entity) in SystemAPI
+                     .Query<RefRO<Plant>, RefRO<LocalTransform>, RefRO<GridPosition>>()
+                     .WithEntityAccess())
         {
-            positions.Add(transform.ValueRO.Position);
+            int2 cell = gridPos.ValueRO.Cell;
+            float3 snapPos = new float3(cell.x, 0f, cell.y);
+            positions.Add(snapPos);
+            occupied.Add(cell);
+
             if (plant.ValueRO.Stage == PlantStage.Mature)
             {
                 matureEntities.Add(entity);
-                maturePositions.Add(transform.ValueRO.Position);
+                maturePositions.Add(snapPos);
             }
         }
 
@@ -63,21 +71,25 @@ public partial struct PlantReproductionSystem : ISystem
                     float2 offset2 = rand.NextFloat2Direction() *
                         rand.NextFloat(manager.MinDistanceBetweenPlants, manager.ReproductionRadius);
                     float3 pos = parentPos + new float3(offset2.x, 0f, offset2.y);
-                    pos.x = math.clamp(pos.x, -grid.AreaSize.x * 0.5f, grid.AreaSize.x * 0.5f);
-                    pos.z = math.clamp(pos.z, -grid.AreaSize.y * 0.5f, grid.AreaSize.y * 0.5f);
+                    int2 cell = new int2((int)math.round(pos.x), (int)math.round(pos.z));
+                    cell = math.clamp(cell, -half, half);
+                    pos = new float3(cell.x, 0f, cell.y);
 
-                    bool occupied = false;
+                    if (occupied.Contains(cell))
+                        continue;
+
+                    bool tooClose = false;
                     for (int i = 0; i < positions.Length; i++)
                     {
                         if (math.distance(new float2(pos.x, pos.z), new float2(positions[i].x, positions[i].z)) <
                             manager.MinDistanceBetweenPlants)
                         {
-                            occupied = true;
+                            tooClose = true;
                             break;
                         }
                     }
 
-                    if (!occupied)
+                    if (!tooClose)
                     {
                         var child = ecb.Instantiate(manager.Prefab);
                         var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
@@ -93,8 +105,10 @@ public partial struct PlantReproductionSystem : ISystem
                         {
                             Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
                         });
+                        ecb.AddComponent(child, new GridPosition { Cell = cell });
 
                         positions.Add(pos);
+                        occupied.Add(cell);
                         parentPlant.Growth -= cost;
                         spawned = true;
                         totalPlants++;
@@ -121,19 +135,25 @@ public partial struct PlantReproductionSystem : ISystem
                     rand.NextFloat(-grid.AreaSize.x * 0.5f, grid.AreaSize.x * 0.5f),
                     0f,
                     rand.NextFloat(-grid.AreaSize.y * 0.5f, grid.AreaSize.y * 0.5f));
+                int2 cell = new int2((int)math.round(pos.x), (int)math.round(pos.z));
+                cell = math.clamp(cell, -half, half);
+                pos = new float3(cell.x, 0f, cell.y);
 
-                bool occupied = false;
+                if (occupied.Contains(cell))
+                    continue;
+
+                bool tooClose = false;
                 for (int i = 0; i < positions.Length; i++)
                 {
                     if (math.distance(new float2(pos.x, pos.z), new float2(positions[i].x, positions[i].z)) <
                         manager.MinDistanceBetweenPlants)
                     {
-                        occupied = true;
+                        tooClose = true;
                         break;
                     }
                 }
 
-                if (!occupied)
+                if (!tooClose)
                 {
                     var child = ecb.Instantiate(manager.Prefab);
                     var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
@@ -149,8 +169,10 @@ public partial struct PlantReproductionSystem : ISystem
                     {
                         Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
                     });
+                    ecb.AddComponent(child, new GridPosition { Cell = cell });
 
                     positions.Add(pos);
+                    occupied.Add(cell);
                     totalPlants++;
                     break;
                 }
@@ -163,6 +185,7 @@ public partial struct PlantReproductionSystem : ISystem
         positions.Dispose();
         matureEntities.Dispose();
         maturePositions.Dispose();
+        occupied.Dispose();
     }
 }
 
