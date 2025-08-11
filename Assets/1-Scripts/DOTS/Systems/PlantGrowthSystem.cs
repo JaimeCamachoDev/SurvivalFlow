@@ -16,20 +16,27 @@ public partial struct PlantGrowthSystem : ISystem
         // Recorremos todas las plantas para actualizar su crecimiento.
         foreach (var (plant, transform, entity) in SystemAPI.Query<RefRW<Plant>, RefRW<LocalTransform>>().WithEntityAccess())
         {
-            switch (plant.ValueRO.Stage)
+            bool eaten = plant.ValueRO.BeingEaten != 0;
+            var stage = plant.ValueRO.Stage;
+            if (stage == PlantStage.Withering && !eaten && plant.ValueRO.Growth > 0f)
+            {
+                stage = PlantStage.Growing;
+                plant.ValueRW.Stage = PlantStage.Growing;
+            }
+
+            switch (stage)
             {
                 case PlantStage.Growing:
                     // Aumenta el tamaño hasta alcanzar el máximo.
                     plant.ValueRW.Growth += plant.ValueRO.GrowthRate * dt;
                     if (plant.ValueRW.Growth >= plant.ValueRO.MaxGrowth)
                     {
-                        plant.ValueRW.Growth = plant.ValueRO.MaxGrowth;
+                        plant.ValueRW.Growth = plant.ValueRW.MaxGrowth;
                         plant.ValueRW.Stage = PlantStage.Mature;
                     }
                     break;
                 case PlantStage.Withering:
-                    // Reduce el tamaño hasta desaparecer.
-                    plant.ValueRW.Growth -= plant.ValueRO.GrowthRate * dt;
+                    // La reducción de tamaño ocurre al ser consumida por herbívoros.
                     if (plant.ValueRO.Growth <= 0f)
                     {
                         ecb.DestroyEntity(entity);
@@ -37,6 +44,8 @@ public partial struct PlantGrowthSystem : ISystem
                     }
                     break;
             }
+
+            plant.ValueRW.BeingEaten = 0;
 
             // Ajusta la escala visual solo cuando cambia lo suficiente.
             float percent = math.clamp(plant.ValueRO.Growth / plant.ValueRO.MaxGrowth, 0f, 1f);

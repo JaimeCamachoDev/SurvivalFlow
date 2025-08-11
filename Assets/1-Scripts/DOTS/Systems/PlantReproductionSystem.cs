@@ -93,6 +93,8 @@ public partial struct PlantReproductionSystem : ISystem
                         {
                             Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
                         });
+                        int2 cell = new int2((int)math.round(pos.x), (int)math.round(pos.z));
+                        ecb.AddComponent(child, new GridPosition { Cell = cell });
 
                         positions.Add(pos);
                         parentPlant.Growth -= cost;
@@ -149,6 +151,8 @@ public partial struct PlantReproductionSystem : ISystem
                     {
                         Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
                     });
+                    int2 cell = new int2((int)math.round(pos.x), (int)math.round(pos.z));
+                    ecb.AddComponent(child, new GridPosition { Cell = cell });
 
                     positions.Add(pos);
                     totalPlants++;
