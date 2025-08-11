@@ -9,19 +9,22 @@ public partial struct PlantColorSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
+        if (!SystemAPI.TryGetSingleton<VisualCueManager>(out var cues))
+            return;
+
         foreach (var (plant, color) in SystemAPI.Query<RefRO<Plant>, RefRW<URPMaterialPropertyBaseColor>>())
         {
             float4 c = color.ValueRO.Value;
             switch (plant.ValueRO.Stage)
             {
                 case PlantStage.Growing:
-                    c = new float4(1f, 1f, 0f, 1f); // Amarillo
+                    c = cues.PlantGrowingColor;
                     break;
                 case PlantStage.Mature:
-                    c = new float4(0f, 1f, 0f, 1f); // Verde
+                    c = cues.PlantMatureColor;
                     break;
                 case PlantStage.Withering:
-                    c = new float4(1f, 0f, 0f, 1f); // Rojo
+                    c = cues.PlantWitheringColor;
                     break;
             }
 

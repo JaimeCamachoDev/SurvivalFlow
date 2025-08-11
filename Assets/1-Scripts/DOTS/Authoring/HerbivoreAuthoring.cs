@@ -66,13 +66,14 @@ public class HerbivoreAuthoring : MonoBehaviour
             {
                 Value = authoring.maxHunger,
                 Max = authoring.maxHunger,
-                DecreaseRate = 0f,
-                SeekThreshold = 0f,
+                DecreaseRate = authoring.idleHungerRate,
+                SeekThreshold = authoring.maxHunger * 0.5f,
                 DeathThreshold = 0f
             });
 
-            // Transform inicial del herbívoro.
+            // Transform y posición inicial del herbívoro.
             AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, 1f));
+            AddComponent(entity, new GridPosition { Cell = int2.zero });
 
             // Etiqueta y color inicial.
 
