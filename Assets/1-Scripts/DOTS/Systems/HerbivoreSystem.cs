@@ -96,7 +96,6 @@ public partial struct HerbivoreSystem : ISystem
                     herb.ValueRW.DirectionTimer = herb.ValueRO.ChangeDirectionInterval;
                 }
 
-                pos += herb.ValueRO.MoveDirection * speed * dt;
             }
             // Movimiento con acumulación subcelda para permanecer en la cuadrícula.
             float3 move = herb.ValueRO.MoveDirection * speed * dt + herb.ValueRO.MoveRemainder;
