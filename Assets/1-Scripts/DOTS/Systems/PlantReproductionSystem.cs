@@ -25,9 +25,10 @@ public partial struct PlantReproductionSystem : ISystem
         }
         manager.ReproductionTimer = 0f;
 
+        float cellSize = grid.CellSize;
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 1));
-        int2 half = (int2)(grid.AreaSize / 2f);
+        int2 half = (int2)(grid.AreaSize / (2f * cellSize));
 
         // Recolectamos las celdas ocupadas y las posiciones de las plantas maduras.
         var positions = new NativeList<float3>(Allocator.Temp);
@@ -40,7 +41,7 @@ public partial struct PlantReproductionSystem : ISystem
                      .WithEntityAccess())
         {
             int2 cell = gridPos.ValueRO.Cell;
-            float3 snapPos = new float3(cell.x, 0f, cell.y);
+            float3 snapPos = new float3(cell.x * cellSize, 0f, cell.y * cellSize);
             positions.Add(snapPos);
             occupied.Add(cell);
 
@@ -68,12 +69,14 @@ public partial struct PlantReproductionSystem : ISystem
                 bool spawned = false;
                 for (int attempt = 0; attempt < 10; attempt++)
                 {
+                    float minDist = manager.MinDistanceBetweenPlants * cellSize;
+                    float radius = manager.ReproductionRadius * cellSize;
                     float2 offset2 = rand.NextFloat2Direction() *
-                        rand.NextFloat(manager.MinDistanceBetweenPlants, manager.ReproductionRadius);
+                        rand.NextFloat(minDist, radius);
                     float3 pos = parentPos + new float3(offset2.x, 0f, offset2.y);
-                    int2 cell = new int2((int)math.round(pos.x), (int)math.round(pos.z));
+                    int2 cell = new int2((int)math.round(pos.x / cellSize), (int)math.round(pos.z / cellSize));
                     cell = math.clamp(cell, -half, half);
-                    pos = new float3(cell.x, 0f, cell.y);
+                    pos = new float3(cell.x * cellSize, 0f, cell.y * cellSize);
 
                     if (occupied.Contains(cell))
                         continue;
@@ -82,11 +85,11 @@ public partial struct PlantReproductionSystem : ISystem
                     for (int i = 0; i < positions.Length; i++)
                     {
                         if (math.distance(new float2(pos.x, pos.z), new float2(positions[i].x, positions[i].z)) <
-                            manager.MinDistanceBetweenPlants)
-                        {
-                            tooClose = true;
-                            break;
-                        }
+                            minDist)
+                            {
+                                tooClose = true;
+                                break;
+                            }
                     }
 
                     if (!tooClose)
@@ -135,18 +138,19 @@ public partial struct PlantReproductionSystem : ISystem
                     rand.NextFloat(-grid.AreaSize.x * 0.5f, grid.AreaSize.x * 0.5f),
                     0f,
                     rand.NextFloat(-grid.AreaSize.y * 0.5f, grid.AreaSize.y * 0.5f));
-                int2 cell = new int2((int)math.round(pos.x), (int)math.round(pos.z));
+                int2 cell = new int2((int)math.round(pos.x / cellSize), (int)math.round(pos.z / cellSize));
                 cell = math.clamp(cell, -half, half);
-                pos = new float3(cell.x, 0f, cell.y);
+                pos = new float3(cell.x * cellSize, 0f, cell.y * cellSize);
 
                 if (occupied.Contains(cell))
                     continue;
 
                 bool tooClose = false;
+                float minDist = manager.MinDistanceBetweenPlants * cellSize;
                 for (int i = 0; i < positions.Length; i++)
                 {
                     if (math.distance(new float2(pos.x, pos.z), new float2(positions[i].x, positions[i].z)) <
-                        manager.MinDistanceBetweenPlants)
+                        minDist)
                     {
                         tooClose = true;
                         break;
