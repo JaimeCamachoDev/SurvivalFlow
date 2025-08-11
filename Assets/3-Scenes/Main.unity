@@ -1944,9 +1944,9 @@ MonoBehaviour:
   areaSize: {x: 200, y: 200}
   reproductionInterval: 1
   maxVegetation: 300
-  minDistanceBetweenPlants: 3
-  reproductionRadius: 3
-  randomSpawnChance: 0.8
+  minDistanceBetweenPlants: 1
+  reproductionRadius: 2
+  randomSpawnChance: 1
 --- !u!1001 &610738357
 PrefabInstance:
   m_ObjectHideFlags: 0

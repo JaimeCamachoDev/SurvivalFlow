@@ -133,18 +133,30 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
       propertyPath: patchCount
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
       propertyPath: patchRadius
-      value: 10
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
+      propertyPath: initialCount
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
       propertyPath: reproductionCost
-      value: 0.5
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
       propertyPath: reproductionCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
+      propertyPath: reproductionInterval
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5037013917334665024, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
+      propertyPath: minDistanceBetweenPlants
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5809920506453307135, guid: 2bd1afd9aff768b4395a1a282bceb0a3, type: 3}
@@ -204,6 +216,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herbivore Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 3070345986350346606, guid: ed169a643fdf93340bac8a483925a627, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3649319500469955782, guid: ed169a643fdf93340bac8a483925a627, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -244,14 +260,76 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8919171034950611675, guid: ed169a643fdf93340bac8a483925a627, type: 3}
+      propertyPath: initialCount
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ed169a643fdf93340bac8a483925a627, type: 3}
+--- !u!1001 &8942612505037988092
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.90771735
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -83.59546
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 57.875927
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 63179314489930528, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2491330703103835619, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
+      propertyPath: m_Name
+      value: ' ColorManager'
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 410a2e2f33073ee4f8797bbf4a28ade1, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 7817250889409069849}
   - {fileID: 1730093544}
+  - {fileID: 8942612505037988092}
