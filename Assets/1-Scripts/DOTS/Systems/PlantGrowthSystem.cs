@@ -28,8 +28,7 @@ public partial struct PlantGrowthSystem : ISystem
                     }
                     break;
                 case PlantStage.Withering:
-                    // Reduce el tamaño hasta desaparecer.
-                    plant.ValueRW.Growth -= plant.ValueRO.GrowthRate * dt;
+                    // La reducción de tamaño ocurre al ser consumida por herbívoros.
                     if (plant.ValueRO.Growth <= 0f)
                     {
                         ecb.DestroyEntity(entity);
