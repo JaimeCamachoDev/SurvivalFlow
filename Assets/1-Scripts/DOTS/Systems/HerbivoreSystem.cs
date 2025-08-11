@@ -53,12 +53,14 @@ public partial struct HerbivoreSystem : ISystem
             // Celda actual del herbívoro.
             int2 currentCell = gp.ValueRO.Cell;
 
-            // Determinar si tiene hambre para correr hacia plantas.
-            bool isHungry = hunger.ValueRO.Value <= hunger.ValueRO.SeekThreshold;
-            float speed = isHungry ? herb.ValueRO.MoveSpeed * 2f : herb.ValueRO.MoveSpeed;
+            // Hambre actual: cuando caen por debajo del umbral buscan comida
+            // pero continúan comiendo hasta llenarse por completo.
+            bool shouldSeekPlant = hunger.ValueRO.Value <= hunger.ValueRO.SeekThreshold;
+            bool isHungry = hunger.ValueRO.Value < hunger.ValueRO.Max;
+            float speed = shouldSeekPlant ? herb.ValueRO.MoveSpeed * 2f : herb.ValueRO.MoveSpeed;
 
-            // Selección de dirección: si tiene hambre busca la planta más cercana.
-            if (isHungry && plantCells.Length > 0)
+            // Selección de dirección: si necesita buscar, lo hace hacia la planta más cercana.
+            if (shouldSeekPlant && plantCells.Length > 0)
             {
                 float bestDist = float.MaxValue;
                 int2 target = currentCell;
@@ -171,7 +173,7 @@ public partial struct HerbivoreSystem : ISystem
                 (int)math.round(herb.ValueRO.MoveDirection.x),
                 (int)math.round(herb.ValueRO.MoveDirection.z));
 
-            // Comprobamos si hay una planta en la celda frontal y solo la comemos si hay hambre.
+            // Comprobamos si hay una planta en la celda frontal y comemos hasta llenarnos.
             if (isHungry && plants.TryGetFirstValue(forwardCell, out var plantEntity, out _))
             {
                 // Restablecemos hambre y vida de forma gradual.
@@ -179,6 +181,9 @@ public partial struct HerbivoreSystem : ISystem
                 hunger.ValueRW.Value = math.min(hunger.ValueRO.Max, hunger.ValueRO.Value + eat);
                 float healthGain = health.ValueRO.Max * herb.ValueRO.HealthRestorePercent * dt;
                 health.ValueRW.Value = math.min(health.ValueRO.Max, health.ValueRO.Value + healthGain);
+
+                // Permanecemos en el lugar mientras comemos.
+                herb.ValueRW.MoveDirection = float3.zero;
 
                 // Dañamos a la planta y la marcamos como marchitándose.
                 var plant = state.EntityManager.GetComponentData<Plant>(plantEntity);
