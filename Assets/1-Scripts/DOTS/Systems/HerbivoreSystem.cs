@@ -171,8 +171,8 @@ public partial struct HerbivoreSystem : ISystem
                 (int)math.round(herb.ValueRO.MoveDirection.x),
                 (int)math.round(herb.ValueRO.MoveDirection.z));
 
-            // Comprobamos si hay una planta en la celda frontal.
-            if (plants.TryGetFirstValue(forwardCell, out var plantEntity, out _))
+            // Comprobamos si hay una planta en la celda frontal y solo la comemos si hay hambre.
+            if (isHungry && plants.TryGetFirstValue(forwardCell, out var plantEntity, out _))
             {
                 // Restablecemos hambre y vida de forma gradual.
                 float eat = herb.ValueRO.HungerGain * dt;
