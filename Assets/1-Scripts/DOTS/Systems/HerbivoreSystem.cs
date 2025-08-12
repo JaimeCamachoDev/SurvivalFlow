@@ -148,15 +148,15 @@ public partial struct HerbivoreSystem : ISystem
                         int gen = math.max(info.ValueRO.Generation, mateInfo.Generation) + 1;
                         for (int i = 0; i < offspringCount; i++)
                         {
-                            int2 cell = currentCell;
+                            int2 spawnCell = currentCell;
                             var child = ecb.Instantiate(hManager.Prefab);
                             ecb.SetComponent(child, new LocalTransform
                             {
-                                Position = new float3(cell.x, 0f, cell.y),
+                                Position = new float3(spawnCell.x, 0f, spawnCell.y),
                                 Rotation = quaternion.identity,
                                 Scale = 1f
                             });
-                            ecb.AddComponent(child, new GridPosition { Cell = cell });
+                            ecb.AddComponent(child, new GridPosition { Cell = spawnCell });
                             ecb.SetComponent(child, new HerbivoreInfo
                             {
                                 Name = HerbivoreNameGenerator.NextName(),
