@@ -5,7 +5,7 @@ using Unity.Entities;
 /// </summary>
 public struct Reproduction : IComponentData
 {
-    /// Nivel de hambre necesario para poder reproducirse.
+    /// Nivel de energía necesario para poder reproducirse.
     public float Threshold;
     /// Radio de búsqueda activa de pareja.
     public float SeekRadius;
@@ -19,4 +19,7 @@ public struct Reproduction : IComponentData
     public int MinOffspring;
     /// Número máximo de crías por reproducción.
     public int MaxOffspring;
+
+    /// Porcentaje de energía consumida al reproducirse (0-1).
+    public float EnergyCostPercent;
 }

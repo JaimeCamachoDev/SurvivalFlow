@@ -11,8 +11,8 @@ public partial struct HerbivoreDecisionSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         float dt = SystemAPI.Time.DeltaTime;
-        foreach (var (hState, timer, hunger, repro, entity) in
-                 SystemAPI.Query<RefRW<HerbivoreState>, RefRW<HerbivoreDecisionTimer>, RefRO<Hunger>, RefRO<Reproduction>>().WithEntityAccess())
+        foreach (var (hState, timer, energy, repro, entity) in
+                 SystemAPI.Query<RefRW<HerbivoreState>, RefRW<HerbivoreDecisionTimer>, RefRO<Energy>, RefRO<Reproduction>>().WithEntityAccess())
         {
             timer.ValueRW.TimeLeft -= dt;
             if (timer.ValueRO.TimeLeft > 0f)
@@ -26,12 +26,12 @@ public partial struct HerbivoreDecisionSystem : ISystem
                 continue;
             }
 
-            bool readyToMate = hunger.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f;
+            bool readyToMate = energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f;
             if (readyToMate)
             {
                 hState.ValueRW.Current = HerbivoreBehaviour.Mate;
             }
-            else if (hunger.ValueRO.Value < hunger.ValueRO.SeekThreshold)
+            else if (energy.ValueRO.Value < energy.ValueRO.SeekThreshold)
             {
                 hState.ValueRW.Current = HerbivoreBehaviour.Eat;
             }

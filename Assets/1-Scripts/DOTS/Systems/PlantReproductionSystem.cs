@@ -64,10 +64,10 @@ public partial struct PlantReproductionSystem : ISystem
             var parentEntity = matureEntities[parentIndex];
             var parentPos = maturePositions[parentIndex];
             var parentPlant = state.EntityManager.GetComponentData<Plant>(parentEntity);
-            float cost = manager.ReproductionCost * parentPlant.MaxGrowth;
+            float cost = manager.ReproductionCost * parentPlant.MaxEnergy;
 
             int children = math.min(manager.ReproductionCount, manager.MaxPlants - totalPlants);
-            for (int c = 0; c < children && parentPlant.Growth >= cost; c++)
+            for (int c = 0; c < children && parentPlant.Energy >= cost; c++)
             {
                 bool spawned = false;
                 for (int attempt = 0; attempt < 10; attempt++)
@@ -99,12 +99,12 @@ public partial struct PlantReproductionSystem : ISystem
                     {
                         var child = ecb.Instantiate(manager.Prefab);
                         var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
-                        template.MaxGrowth = manager.PlantMaxGrowth;
-                        template.GrowthRate = manager.PlantGrowthRate;
-                        template.Growth = manager.PlantMaxGrowth * manager.InitialGrowthPercent;
+                        template.MaxEnergy = manager.PlantMaxEnergy;
+                        template.EnergyGainRate = manager.PlantEnergyGainRate;
+                        template.Energy = manager.PlantMaxEnergy * manager.InitialEnergyPercent;
                         template.ScaleStep = 1;
                         template.Stage = PlantStage.Growing;
-                        float scale = math.max(manager.InitialGrowthPercent, 0.2f);
+                        float scale = math.max(manager.InitialEnergyPercent, 0.2f);
                         ecb.SetComponent(child, template);
                         ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
                         ecb.SetComponent(child, new LocalToWorld
@@ -115,7 +115,7 @@ public partial struct PlantReproductionSystem : ISystem
 
                         positions.Add(pos);
                         occupied.Add(cell);
-                        parentPlant.Growth -= cost;
+                        parentPlant.Energy -= cost;
                         spawned = true;
                         totalPlants++;
                         break;
@@ -126,7 +126,7 @@ public partial struct PlantReproductionSystem : ISystem
                     break;
             }
 
-            if (parentPlant.Growth < parentPlant.MaxGrowth)
+            if (parentPlant.Energy < parentPlant.MaxEnergy)
                 parentPlant.Stage = PlantStage.Growing;
             state.EntityManager.SetComponentData(parentEntity, parentPlant);
         }
@@ -164,12 +164,12 @@ public partial struct PlantReproductionSystem : ISystem
                 {
                     var child = ecb.Instantiate(manager.Prefab);
                     var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
-                    template.MaxGrowth = manager.PlantMaxGrowth;
-                    template.GrowthRate = manager.PlantGrowthRate;
-                    template.Growth = manager.PlantMaxGrowth * manager.InitialGrowthPercent;
+                    template.MaxEnergy = manager.PlantMaxEnergy;
+                    template.EnergyGainRate = manager.PlantEnergyGainRate;
+                    template.Energy = manager.PlantMaxEnergy * manager.InitialEnergyPercent;
                     template.ScaleStep = 1;
                     template.Stage = PlantStage.Growing;
-                    float scale = math.max(manager.InitialGrowthPercent, 0.2f);
+                    float scale = math.max(manager.InitialEnergyPercent, 0.2f);
                     ecb.SetComponent(child, template);
                     ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
                     ecb.SetComponent(child, new LocalToWorld

@@ -107,8 +107,8 @@ public partial struct HerbivoreSystem : ISystem
         }
 
         // Recorremos cada herbívoro.
-        foreach (var (transform, hunger, health, herb, gp, repro, info, entity) in
-                 SystemAPI.Query<RefRW<LocalTransform>, RefRW<Hunger>, RefRW<Health>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Reproduction>, RefRW<HerbivoreInfo>>().WithEntityAccess())
+        foreach (var (transform, energy, health, herb, gp, repro, info, entity) in
+                 SystemAPI.Query<RefRW<LocalTransform>, RefRW<Energy>, RefRW<Health>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Reproduction>, RefRW<HerbivoreInfo>>().WithEntityAccess())
         {
             int2 currentCell = gp.ValueRO.Cell;
             repro.ValueRW.Timer = math.max(0f, repro.ValueRO.Timer - dt);
@@ -130,7 +130,7 @@ public partial struct HerbivoreSystem : ISystem
                 }
             }
 
-            bool needsFood = hunger.ValueRO.Value < hunger.ValueRO.SeekThreshold;
+            bool needsFood = energy.ValueRO.Value < energy.ValueRO.SeekThreshold;
             bool hasKnownPlant = herb.ValueRO.HasKnownPlant != 0;
 
             if (hasKnownPlant && !plants.TryGetFirstValue(herb.ValueRO.KnownPlantCell, out _, out _))
@@ -145,7 +145,7 @@ public partial struct HerbivoreSystem : ISystem
             bool isEating = herb.ValueRO.IsEating != 0;
             if (isEating)
             {
-                if (!plantHere || hunger.ValueRO.Value >= hunger.ValueRO.Max)
+                if (!plantHere || energy.ValueRO.Value >= energy.ValueRO.Max)
                 {
                     isEating = false;
                     herb.ValueRW.IsEating = 0;
@@ -158,6 +158,11 @@ public partial struct HerbivoreSystem : ISystem
             }
 
             float speed = herb.ValueRO.MoveSpeed * (isFleeing ? 2f : 1f);
+            if (energy.ValueRO.Value <= 0f)
+            {
+                isFleeing = false;
+                speed = herb.ValueRO.MoveSpeed * 0.25f;
+            }
             bool hasDirection = isFleeing;
 
             if (!isEating && !isFleeing)
@@ -255,7 +260,7 @@ public partial struct HerbivoreSystem : ISystem
                         }
                     }
 
-                    bool readyToReproduce = hunger.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f;
+                    bool readyToReproduce = energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f;
                     if (readyToReproduce)
                     {
                         float bestDist = float.MaxValue;
@@ -270,8 +275,8 @@ public partial struct HerbivoreSystem : ISystem
                                 if (herbMap.TryGetValue(c, out var cand) && cand != entity)
                                 {
                                     var candRepro = state.EntityManager.GetComponentData<Reproduction>(cand);
-                                    var candHunger = state.EntityManager.GetComponentData<Hunger>(cand);
-                                    if (candRepro.Timer <= 0f && candHunger.Value >= candRepro.Threshold)
+                                    var candEnergy = state.EntityManager.GetComponentData<Energy>(cand);
+                                    if (candRepro.Timer <= 0f && candEnergy.Value >= candRepro.Threshold)
                                     {
                                         float dist = math.lengthsq(new float2(x, y));
                                         if (dist < bestDist)
@@ -315,20 +320,20 @@ public partial struct HerbivoreSystem : ISystem
                                         var mateHerb = state.EntityManager.GetComponentData<Herbivore>(mate);
                                         var childHerb = herb.ValueRO;
                                         childHerb.MoveSpeed = (herb.ValueRO.MoveSpeed + mateHerb.MoveSpeed) * 0.5f;
-                                        childHerb.IdleHungerRate = (herb.ValueRO.IdleHungerRate + mateHerb.IdleHungerRate) * 0.5f;
-                                        childHerb.MoveHungerRate = (herb.ValueRO.MoveHungerRate + mateHerb.MoveHungerRate) * 0.5f;
-                                        childHerb.EatRate = (herb.ValueRO.EatRate + mateHerb.EatRate) * 0.5f;
+                                        childHerb.IdleEnergyCost = (herb.ValueRO.IdleEnergyCost + mateHerb.IdleEnergyCost) * 0.5f;
+                                        childHerb.MoveEnergyCost = (herb.ValueRO.MoveEnergyCost + mateHerb.MoveEnergyCost) * 0.5f;
+                                        childHerb.EatEnergyRate = (herb.ValueRO.EatEnergyRate + mateHerb.EatEnergyRate) * 0.5f;
                                         childHerb.PlantSeekRadius = (herb.ValueRO.PlantSeekRadius + mateHerb.PlantSeekRadius) * 0.5f;
                                         childHerb.ChangeDirectionInterval = (herb.ValueRO.ChangeDirectionInterval + mateHerb.ChangeDirectionInterval) * 0.5f;
 
                                         if (rand.NextFloat() < hManager.MutationChance)
                                             childHerb.MoveSpeed += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
                                         if (rand.NextFloat() < hManager.MutationChance)
-                                            childHerb.IdleHungerRate += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                            childHerb.IdleEnergyCost += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
                                         if (rand.NextFloat() < hManager.MutationChance)
-                                            childHerb.MoveHungerRate += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                            childHerb.MoveEnergyCost += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
                                         if (rand.NextFloat() < hManager.MutationChance)
-                                            childHerb.EatRate += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                            childHerb.EatEnergyRate += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
                                         if (rand.NextFloat() < hManager.MutationChance)
                                             childHerb.PlantSeekRadius += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
                                         if (rand.NextFloat() < hManager.MutationChance)
@@ -341,6 +346,10 @@ public partial struct HerbivoreSystem : ISystem
                                 var mateRepro = state.EntityManager.GetComponentData<Reproduction>(mate);
                                 mateRepro.Timer = mateRepro.Cooldown;
                                 state.EntityManager.SetComponentData(mate, mateRepro);
+                                energy.ValueRW.Value *= (1f - repro.ValueRO.EnergyCostPercent);
+                                var mateEnergy = state.EntityManager.GetComponentData<Energy>(mate);
+                                mateEnergy.Value *= (1f - repro.ValueRO.EnergyCostPercent);
+                                state.EntityManager.SetComponentData(mate, mateEnergy);
                             }
                             else
                             {
@@ -442,7 +451,7 @@ public partial struct HerbivoreSystem : ISystem
             targetCell.x = math.clamp(targetCell.x, -bounds.x, bounds.x);
             targetCell.y = math.clamp(targetCell.y, -bounds.y, bounds.y);
 
-            if (!herbCells.Contains(targetCell) || math.all(targetCell == currentCell))
+            if ((!herbCells.Contains(targetCell) && !obstacles.Contains(targetCell)) || math.all(targetCell == currentCell))
             {
                 float3 targetPos = new float3(targetCell.x * grid.CellSize, 0f, targetCell.y * grid.CellSize);
                 transform.ValueRW.Position = targetPos;
@@ -459,23 +468,23 @@ public partial struct HerbivoreSystem : ISystem
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
                 transform.ValueRW.Rotation = quaternion.LookRotationSafe(herb.ValueRO.MoveDirection, math.up());
 
-            float hungerRate = herb.ValueRO.MoveDirection.x == 0f && herb.ValueRO.MoveDirection.z == 0f
-                ? herb.ValueRO.IdleHungerRate
-                : herb.ValueRO.IdleHungerRate + herb.ValueRO.MoveHungerRate * speed;
-            hunger.ValueRW.Value = math.max(0f, hunger.ValueRO.Value - hungerRate * dt);
+            float energyRate = herb.ValueRO.MoveDirection.x == 0f && herb.ValueRO.MoveDirection.z == 0f
+                ? herb.ValueRO.IdleEnergyCost
+                : herb.ValueRO.IdleEnergyCost + herb.ValueRO.MoveEnergyCost * speed;
+            energy.ValueRW.Value = math.max(0f, energy.ValueRO.Value - energyRate * dt);
 
             if (isEating)
             {
-                float eat = herb.ValueRO.EatRate * dt;
-                hunger.ValueRW.Value = math.min(hunger.ValueRO.Max, hunger.ValueRO.Value + eat);
+                float eat = herb.ValueRO.EatEnergyRate * dt;
+                energy.ValueRW.Value = math.min(energy.ValueRO.Max, energy.ValueRO.Value + eat);
                 float healthGain = health.ValueRO.Max * herb.ValueRO.HealthRestorePercent * dt;
                 health.ValueRW.Value = math.min(health.ValueRO.Max, health.ValueRO.Value + healthGain);
 
                 var plant = state.EntityManager.GetComponentData<Plant>(eatingPlant);
                 plant.Stage = PlantStage.Withering;
                 plant.BeingEaten = 1;
-                plant.Growth -= eat;
-                if (plant.Growth <= 0f)
+                plant.Energy -= eat;
+                if (plant.Energy <= 0f)
                 {
                     ecb.DestroyEntity(eatingPlant);
                     herb.ValueRW.HasKnownPlant = 0;
@@ -490,7 +499,7 @@ public partial struct HerbivoreSystem : ISystem
 
             herb.ValueRW.IsEating = (byte)(isEating ? 1 : 0);
 
-            if (hunger.ValueRO.Value <= hunger.ValueRO.DeathThreshold)
+            if (energy.ValueRO.Value <= energy.ValueRO.DeathThreshold)
             {
                 health.ValueRW.Value -= dt;
                 if (health.ValueRO.Value <= 0f)

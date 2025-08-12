@@ -30,12 +30,12 @@ public partial struct PlantSpawnerSystem : ISystem
 
         var rand = Unity.Mathematics.Random.CreateFromIndex(1);
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(prefab);
-        prefabPlant.MaxGrowth = manager.PlantMaxGrowth;
-        prefabPlant.GrowthRate = manager.PlantGrowthRate;
-        prefabPlant.Growth = manager.PlantMaxGrowth * manager.InitialGrowthPercent;
+        prefabPlant.MaxEnergy = manager.PlantMaxEnergy;
+        prefabPlant.EnergyGainRate = manager.PlantEnergyGainRate;
+        prefabPlant.Energy = manager.PlantMaxEnergy * manager.InitialEnergyPercent;
         prefabPlant.ScaleStep = 1;
         prefabPlant.Stage = PlantStage.Growing;
-        float initialScale = math.max(manager.InitialGrowthPercent, 0.2f);
+        float initialScale = math.max(manager.InitialEnergyPercent, 0.2f);
 
         // Conjunto de celdas ocupadas y centros de cada parche.
         int2 half = (int2)(area / 2f);
