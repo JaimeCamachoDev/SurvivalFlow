@@ -10,6 +10,7 @@ public partial struct HerbivoreSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
+        // Comprobamos que exista una cuadrícula para delimitar el movimiento.
         if (!SystemAPI.TryGetSingleton<GridManager>(out var grid) ||
             !SystemAPI.TryGetSingleton<HerbivoreManager>(out var hManager))
             return;
@@ -29,6 +30,7 @@ public partial struct HerbivoreSystem : ISystem
             plantCells.Add(pgp.ValueRO.Cell);
         }
 
+        // Celdas ocupadas por herbívoros para evitar superposiciones y mapa para búsquedas.
         var herbCells = new NativeParallelHashSet<int2>(1024, Allocator.Temp);
         var herbMap = new NativeParallelHashMap<int2, Entity>(1024, Allocator.Temp);
         foreach (var (gp, e) in SystemAPI.Query<RefRO<GridPosition>>().WithAll<Herbivore>().WithEntityAccess())
@@ -43,6 +45,7 @@ public partial struct HerbivoreSystem : ISystem
             new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
         };
 
+        // Recorremos cada herbívoro.
         foreach (var (transform, hunger, health, herb, gp, repro, info, entity) in
                  SystemAPI.Query<RefRW<LocalTransform>, RefRW<Hunger>, RefRW<Health>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Reproduction>, RefRW<HerbivoreInfo>>().WithEntityAccess())
         {
@@ -358,7 +361,7 @@ public partial struct HerbivoreSystem : ISystem
                     continue;
                 }
             }
-
+            // Tiempo de vida del herbívoro.
             info.ValueRW.Lifetime += dt;
         }
 
