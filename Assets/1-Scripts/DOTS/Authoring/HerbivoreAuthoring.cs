@@ -30,6 +30,22 @@ public class HerbivoreAuthoring : MonoBehaviour
     // Radio en el que pueden detectar plantas.
     public float plantSeekRadius = 5f;
 
+    [Header("Percepción")]
+    public float predatorSenseRadius = 6f;
+
+    [Header("Separación")]
+    public float separationRadius = 1.5f;
+    public float separationForce = 1f;
+
+    [Header("Decisiones")]
+    public float decisionCooldown = 0.2f;
+
+    [Header("Colores de estado")]
+    public Color wanderColor = Color.green;
+    public Color eatColor = Color.yellow;
+    public Color mateColor = Color.cyan;
+    public Color fleeColor = Color.red;
+
     [Header("Reproducción")]
     public float reproductionThreshold = 80f;
     public float reproductionSeekRadius = 6f;
@@ -69,6 +85,30 @@ public class HerbivoreAuthoring : MonoBehaviour
                 KnownPlantCell = int2.zero,
                 HasKnownPlant = 0,
                 IsEating = 0
+            });
+
+            AddComponent(entity, new HerbivoreState
+            {
+                Current = HerbivoreBehaviour.Wander,
+                DecisionCooldown = authoring.decisionCooldown
+            });
+
+            AddComponent(entity, new HerbivoreDecisionTimer { TimeLeft = 0f });
+
+            AddComponent(entity, new PredatorSense { Radius = authoring.predatorSenseRadius });
+
+            AddComponent(entity, new SeparationRadius
+            {
+                Value = authoring.separationRadius,
+                Force = authoring.separationForce
+            });
+
+            AddComponent(entity, new StateColor
+            {
+                Wander = new float4(authoring.wanderColor.r, authoring.wanderColor.g, authoring.wanderColor.b, authoring.wanderColor.a),
+                Eat = new float4(authoring.eatColor.r, authoring.eatColor.g, authoring.eatColor.b, authoring.eatColor.a),
+                Mate = new float4(authoring.mateColor.r, authoring.mateColor.g, authoring.mateColor.b, authoring.mateColor.a),
+                Flee = new float4(authoring.fleeColor.r, authoring.fleeColor.g, authoring.fleeColor.b, authoring.fleeColor.a)
             });
 
             // Componentes de salud y hambre iniciales.
