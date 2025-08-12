@@ -1,5 +1,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 
 /// Authoring para crear entidades de obstáculo en la cuadrícula.
@@ -9,9 +10,15 @@ public class ObstacleAuthoring : MonoBehaviour
     {
         public override void Bake(ObstacleAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Static);
+            // Obstáculos estáticos; se usa TransformUsageFlags.None (no existe "Static").
+            var entity = GetEntity(TransformUsageFlags.None);
+
+            float3 pos = authoring.transform.position;
+            int2 cell = new int2((int)math.round(pos.x), (int)math.round(pos.z));
+
             AddComponent<ObstacleTag>(entity);
-            AddComponent(entity, new GridPosition { Cell = int2.zero });
+            AddComponent(entity, new GridPosition { Cell = cell });
+            AddComponent(entity, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, 1f));
         }
     }
 }
