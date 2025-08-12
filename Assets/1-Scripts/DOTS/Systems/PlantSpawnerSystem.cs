@@ -40,6 +40,10 @@ public partial struct PlantSpawnerSystem : ISystem
         // Conjunto de celdas ocupadas y centros de cada parche.
         int2 half = (int2)(area / 2f);
         var used = new NativeParallelHashSet<int2>(count, Allocator.Temp);
+        // Evitamos colocar plantas donde ya existen obstáculos.
+        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
+            used.Add(gp.ValueRO.Cell);
+
         var centers = new NativeArray<float2>(patchCount, Allocator.Temp);
         for (int p = 0; p < patchCount; p++)
         {
