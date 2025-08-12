@@ -133,10 +133,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   plantGrowingColor: {r: 0.10781531, g: 0.754717, b: 0, a: 1}
   plantMatureColor: {r: 0, g: 0.5377358, b: 0.06260835, a: 1}
-  plantWitheringColor: {r: 1, g: 0, b: 0, a: 1}
-  herbivoreNormalColor: {r: 0, g: 1, b: 0.8556876, a: 1}
-  herbivoreHungryColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  herbivoreStarvingColor: {r: 1, g: 0, b: 0, a: 1}
+  plantWitheringColor: {r: 0.026689121, g: 0.21698111, b: 0, a: 1}
+  herbivoreNormalColor: {r: 0, g: 0.3654208, b: 0.43529412, a: 1}
+  herbivoreHungryColor: {r: 0, g: 0.8962264, b: 0.7608539, a: 1}
+  herbivoreStarvingColor: {r: 0, g: 0.037499666, b: 1, a: 1}
 --- !u!1 &6811824876002106655
 GameObject:
   m_ObjectHideFlags: 0
@@ -199,16 +199,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   plantPrefab: {fileID: 8311962731384735518, guid: 7bdfa0a76e3956b4eafd27fcefa04ecc, type: 3}
-  initialCount: 1
-  patchCount: 1
-  patchRadius: 1
+  initialCount: 100
+  patchCount: 10
+  patchRadius: 10
   maxGrowth: 100
-  growthRate: 2
-  initialGrowthPercent: 0.05
+  growthRate: 5
+  initialGrowthPercent: 0.2
   reproductionInterval: 1
-  maxPlants: 200
+  maxPlants: 10000
   minDistanceBetweenPlants: 2
-  reproductionRadius: 3
+  reproductionRadius: 4
   randomSpawnChance: 0.1
   reproductionCost: 0.1
   reproductionCount: 1
@@ -224,7 +224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f3da3c5e9f846b589393839836e582a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  areaSize: {x: 50, y: 50}
+  areaSize: {x: 100, y: 100}
   cellSize: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

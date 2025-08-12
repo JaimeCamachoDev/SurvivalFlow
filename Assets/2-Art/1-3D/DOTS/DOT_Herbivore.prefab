@@ -386,10 +386,17 @@ MonoBehaviour:
   maxHealth: 50
   maxHunger: 100
   moveSpeed: 2
-  idleHungerRate: 0
-  moveHungerRate: 1
-  hungerGainOnEat: 40
-  healthRestorePercent: 0.25
+  idleHungerRate: 1
+  moveHungerRate: 2
+  eatRate: 40
+  plantSeekRadius: 50
+  reproductionThreshold: 80
+  reproductionSeekRadius: 5
+  reproductionMatingDistance: 1
+  reproductionCooldown: 100
+  minOffspring: 0
+  maxOffspring: 2
+  healthRestorePercent: 0.1
   changeDirectionInterval: 2
 --- !u!1 &7833623928901765993
 GameObject:
