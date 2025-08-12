@@ -12,20 +12,20 @@ public class HerbivoreAuthoring : MonoBehaviour
     // Vida máxima del herbívoro.
     public float maxHealth = 50f;
 
-    // Hambre máxima que puede almacenar.
-    public float maxHunger = 100f;
+    // Energía máxima que puede almacenar.
+    public float maxEnergy = 100f;
 
     // Velocidad de movimiento.
     public float moveSpeed = 2f;
 
-    // Consumo de hambre por segundo cuando está quieto.
-    public float idleHungerRate = 1f;
+    // Consumo de energía por segundo cuando está quieto.
+    public float idleEnergyCost = 1f;
 
-    // Consumo adicional de hambre al moverse.
-    public float moveHungerRate = 2f;
+    // Consumo adicional de energía al moverse.
+    public float moveEnergyCost = 2f;
 
-    // Tasa de alimentación (hambre recuperada por segundo).
-    public float eatRate = 40f;
+    // Tasa de alimentación (energía recuperada por segundo).
+    public float eatEnergyRate = 40f;
 
     // Radio en el que pueden detectar plantas.
     public float plantSeekRadius = 5f;
@@ -53,6 +53,7 @@ public class HerbivoreAuthoring : MonoBehaviour
     public float reproductionCooldown = 10f;
     public int minOffspring = 1;
     public int maxOffspring = 2;
+    [Range(0f,1f)] public float reproductionEnergyCostPercent = 0.25f;
 
     // Porcentaje de vida restaurada al comer.
     [Range(0f,1f)] public float healthRestorePercent = 0.25f;
@@ -73,9 +74,9 @@ public class HerbivoreAuthoring : MonoBehaviour
             AddComponent(entity, new Herbivore
             {
                 MoveSpeed = authoring.moveSpeed,
-                IdleHungerRate = authoring.idleHungerRate,
-                MoveHungerRate = authoring.moveHungerRate,
-                EatRate = authoring.eatRate,
+                IdleEnergyCost = authoring.idleEnergyCost,
+                MoveEnergyCost = authoring.moveEnergyCost,
+                EatEnergyRate = authoring.eatEnergyRate,
                 PlantSeekRadius = authoring.plantSeekRadius,
                 HealthRestorePercent = authoring.healthRestorePercent,
                 ChangeDirectionInterval = authoring.changeDirectionInterval,
@@ -119,12 +120,11 @@ public class HerbivoreAuthoring : MonoBehaviour
                 Max = authoring.maxHealth
             });
 
-            AddComponent(entity, new Hunger
+            AddComponent(entity, new Energy
             {
-                Value = authoring.maxHunger,
-                Max = authoring.maxHunger,
-                DecreaseRate = authoring.idleHungerRate,
-                SeekThreshold = authoring.maxHunger * 0.5f,
+                Value = authoring.maxEnergy,
+                Max = authoring.maxEnergy,
+                SeekThreshold = authoring.maxEnergy * 0.5f,
                 DeathThreshold = 0f
             });
 
@@ -137,7 +137,8 @@ public class HerbivoreAuthoring : MonoBehaviour
                 Cooldown = authoring.reproductionCooldown,
                 Timer = 0f,
                 MinOffspring = authoring.minOffspring,
-                MaxOffspring = authoring.maxOffspring
+                MaxOffspring = authoring.maxOffspring,
+                EnergyCostPercent = authoring.reproductionEnergyCostPercent
             });
 
             AddComponent(entity, new HerbivoreInfo

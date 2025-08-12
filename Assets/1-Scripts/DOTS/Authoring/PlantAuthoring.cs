@@ -8,14 +8,14 @@ using UnityEngine;
 /// Authoring de un prefab de planta que se convierte a entidad DOTS.
 public class PlantAuthoring : MonoBehaviour
 {
-    // Tamaño máximo que alcanzará la planta.
-    public float maxGrowth = 100f;
+    // Energía máxima que puede almacenar la planta.
+    public float maxEnergy = 100f;
 
-    // Velocidad de crecimiento por segundo.
-    public float growthRate = 2f;
+    // Velocidad a la que gana energía por segundo.
+    public float energyGainRate = 2f;
 
-    // Porcentaje del tamaño máximo con el que aparece.
-    [Range(0f, 1f)] public float initialGrowthPercent = 0.05f;
+    // Porcentaje de energía inicial al nacer.
+    [Range(0f, 1f)] public float initialEnergyPercent = 0.05f;
 
     // Convierte el prefab en entidad DOTS con los componentes necesarios.
     class Baker : Baker<PlantAuthoring>
@@ -24,19 +24,19 @@ public class PlantAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            // Componentes de crecimiento de la planta.
+            // Componentes de energía de la planta.
             AddComponent(entity, new Plant
             {
-                Growth = authoring.maxGrowth * authoring.initialGrowthPercent,
-                MaxGrowth = authoring.maxGrowth,
-                GrowthRate = authoring.growthRate,
+                Energy = authoring.maxEnergy * authoring.initialEnergyPercent,
+                MaxEnergy = authoring.maxEnergy,
+                EnergyGainRate = authoring.energyGainRate,
                 ScaleStep = 1,
                 Stage = PlantStage.Growing,
                 BeingEaten = 0
             });
 
-            // Transform inicial según el porcentaje de crecimiento.
-            float initialScale = math.max(authoring.initialGrowthPercent, 0.2f);
+            // Transform inicial según el porcentaje de energía.
+            float initialScale = math.max(authoring.initialEnergyPercent, 0.2f);
             AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, initialScale));
 
             // Color inicial para indicar estado de crecimiento.

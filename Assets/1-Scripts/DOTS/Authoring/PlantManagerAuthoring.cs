@@ -19,10 +19,10 @@ public class PlantManagerAuthoring : MonoBehaviour
     public float patchRadius = 5f;
 
     [Header("Plant Settings")]
-    // Parámetros básicos de crecimiento de todas las plantas.
-    public float maxGrowth = 100f;
-    public float growthRate = 2f;
-    [Range(0f,1f)] public float initialGrowthPercent = 0.05f;
+    // Parámetros básicos de energía de todas las plantas.
+    public float maxEnergy = 100f;
+    public float energyGainRate = 2f;
+    [Range(0f,1f)] public float initialEnergyPercent = 0.05f;
 
     [Header("Reproduction")]
     // Intervalo entre intentos de reproducción globales.
@@ -38,7 +38,7 @@ public class PlantManagerAuthoring : MonoBehaviour
     // Probabilidad de que aparezca una planta aleatoria cuando hay huecos.
     [Range(0f,1f)] public float randomSpawnChance = 0.1f;
 
-    // Coste relativo de crecimiento gastado al reproducirse.
+    // Coste relativo de energía gastado al reproducirse.
     [Range(0f,1f)] public float reproductionCost = 0.2f;
 
     // Número de brotes que puede generar cada intento de reproducción.
@@ -57,9 +57,9 @@ public class PlantManagerAuthoring : MonoBehaviour
                 InitialCount = authoring.initialCount,
                 PatchCount = authoring.patchCount,
                 PatchRadius = authoring.patchRadius,
-                PlantMaxGrowth = authoring.maxGrowth,
-                PlantGrowthRate = authoring.growthRate,
-                InitialGrowthPercent = authoring.initialGrowthPercent,
+                PlantMaxEnergy = authoring.maxEnergy,
+                PlantEnergyGainRate = authoring.energyGainRate,
+                InitialEnergyPercent = authoring.initialEnergyPercent,
                 ReproductionInterval = authoring.reproductionInterval,
                 MaxPlants = authoring.maxPlants,
                 MinDistanceBetweenPlants = authoring.minDistanceBetweenPlants,
@@ -90,9 +90,9 @@ public struct PlantManager : IComponentData
     public float PatchRadius;
 
     /// Parámetros básicos de todas las plantas.
-    public float PlantMaxGrowth;
-    public float PlantGrowthRate;
-    public float InitialGrowthPercent;
+    public float PlantMaxEnergy;
+    public float PlantEnergyGainRate;
+    public float InitialEnergyPercent;
 
     /// Configuración de reproducción global.
     public float ReproductionInterval;

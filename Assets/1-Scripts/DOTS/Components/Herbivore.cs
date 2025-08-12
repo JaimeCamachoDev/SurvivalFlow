@@ -7,14 +7,14 @@ public struct Herbivore : IComponentData
     /// Velocidad de movimiento por segundo.
     public float MoveSpeed;
 
-    /// Consumo de hambre por segundo cuando está quieto.
-    public float IdleHungerRate;
+    /// Consumo de energía por segundo cuando está quieto.
+    public float IdleEnergyCost;
 
-    /// Consumo adicional de hambre por unidad de velocidad.
-    public float MoveHungerRate;
+    /// Consumo adicional de energía por unidad de velocidad.
+    public float MoveEnergyCost;
 
-    /// Tasa a la que recupera hambre al comer (por segundo).
-    public float EatRate;
+    /// Tasa a la que recupera energía al comer (por segundo).
+    public float EatEnergyRate;
 
     /// Radio en celdas en el que puede detectar plantas.
     public float PlantSeekRadius;
