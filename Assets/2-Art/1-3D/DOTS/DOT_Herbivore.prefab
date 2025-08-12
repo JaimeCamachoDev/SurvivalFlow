@@ -390,10 +390,18 @@ MonoBehaviour:
   moveHungerRate: 2
   eatRate: 40
   plantSeekRadius: 50
-  reproductionThreshold: 80
+  predatorSenseRadius: 6
+  separationRadius: 1
+  separationForce: 1
+  decisionCooldown: 0.2
+  wanderColor: {r: 0, g: 1, b: 0, a: 1}
+  eatColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  mateColor: {r: 0, g: 1, b: 1, a: 1}
+  fleeColor: {r: 1, g: 0, b: 0, a: 1}
+  reproductionThreshold: 50
   reproductionSeekRadius: 5
   reproductionMatingDistance: 1
-  reproductionCooldown: 100
+  reproductionCooldown: 50
   minOffspring: 0
   maxOffspring: 2
   healthRestorePercent: 0.1
