@@ -33,4 +33,10 @@ public struct Herbivore : IComponentData
 
     /// Desplazamiento subcelda acumulado para mantener el movimiento alineado a la cuadrícula.
     public float3 MoveRemainder;
+
+    /// Celda recordada de la última planta vista.
+    public int2 KnownPlantCell;
+
+    /// Indicador de si posee una planta recordada.
+    public byte HasKnownPlant;
 }
