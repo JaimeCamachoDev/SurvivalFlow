@@ -451,9 +451,10 @@ public partial struct HerbivoreSystem : ISystem
             targetCell.x = math.clamp(targetCell.x, -bounds.x, bounds.x);
             targetCell.y = math.clamp(targetCell.y, -bounds.y, bounds.y);
 
+            float3 worldOffset = new float3(move.x, 0f, move.z) * grid.CellSize;
             if ((!herbCells.Contains(targetCell) && !obstacles.Contains(targetCell)) || math.all(targetCell == currentCell))
             {
-                float3 targetPos = new float3(targetCell.x * grid.CellSize, 0f, targetCell.y * grid.CellSize);
+                float3 targetPos = new float3(targetCell.x * grid.CellSize, 0f, targetCell.y * grid.CellSize) + worldOffset;
                 transform.ValueRW.Position = targetPos;
                 gp.ValueRW.Cell = targetCell;
                 herbCells.Remove(currentCell);
