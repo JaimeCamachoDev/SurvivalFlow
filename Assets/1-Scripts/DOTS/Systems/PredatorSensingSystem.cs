@@ -13,9 +13,9 @@ public partial struct PredatorSensingSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var predators = new NativeList<float3>(Allocator.Temp);
-        foreach (var (t, _) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<CarnivoreTag>())
+        foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<CarnivoreTag>())
         {
-            predators.Add(t.ValueRO.Position);
+            predators.Add(transform.ValueRO.Position);
         }
 
         foreach (var (t, sense, entity) in SystemAPI.Query<RefRO<LocalTransform>, RefRO<PredatorSense>>().WithEntityAccess())
