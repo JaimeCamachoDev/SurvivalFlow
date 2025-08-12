@@ -13,8 +13,11 @@ public struct Herbivore : IComponentData
     /// Consumo adicional de hambre por unidad de velocidad.
     public float MoveHungerRate;
 
-    /// Hambre recuperada al comer una planta.
-    public float HungerGain;
+    /// Tasa a la que recupera hambre al comer (por segundo).
+    public float EatRate;
+
+    /// Radio en celdas en el que puede detectar plantas.
+    public float PlantSeekRadius;
 
     /// Porcentaje de vida máxima que se restaura al comer (0-1).
     public float HealthRestorePercent;

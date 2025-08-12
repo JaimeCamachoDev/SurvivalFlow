@@ -44,6 +44,12 @@ public partial struct HerbivoreSpawnerSystem : ISystem
                 Scale = 1f
             });
             ecb.AddComponent(e, new GridPosition { Cell = cell });
+            ecb.SetComponent(e, new HerbivoreInfo
+            {
+                Name = HerbivoreNameGenerator.NextName(),
+                Lifetime = 0f,
+                Generation = 1
+            });
         }
 
         // Marcamos que ya se generaron para no repetir.
