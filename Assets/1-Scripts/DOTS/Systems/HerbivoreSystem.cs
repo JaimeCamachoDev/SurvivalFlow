@@ -113,6 +113,23 @@ public partial struct HerbivoreSystem : ISystem
             int2 currentCell = gp.ValueRO.Cell;
             repro.ValueRW.Timer = math.max(0f, repro.ValueRO.Timer - dt);
 
+            bool isFleeing = false;
+            if (SystemAPI.HasComponent<Fleeing>(entity))
+            {
+                var flee = SystemAPI.GetComponent<Fleeing>(entity);
+                flee.TimeLeft -= dt;
+                if (flee.TimeLeft <= 0f)
+                {
+                    ecb.RemoveComponent<Fleeing>(entity);
+                }
+                else
+                {
+                    isFleeing = true;
+                    herb.ValueRW.MoveDirection = math.normalize(flee.Direction);
+                    SystemAPI.SetComponent(entity, flee);
+                }
+            }
+
             bool needsFood = hunger.ValueRO.Value < hunger.ValueRO.SeekThreshold;
             bool hasKnownPlant = herb.ValueRO.HasKnownPlant != 0;
 
@@ -140,10 +157,10 @@ public partial struct HerbivoreSystem : ISystem
                 herb.ValueRW.IsEating = 1;
             }
 
-            float speed = herb.ValueRO.MoveSpeed;
-            bool hasDirection = false;
+            float speed = herb.ValueRO.MoveSpeed * (isFleeing ? 2f : 1f);
+            bool hasDirection = isFleeing;
 
-            if (!isEating)
+            if (!isEating && !isFleeing)
             {
                 if (needsFood)
                 {
@@ -292,6 +309,33 @@ public partial struct HerbivoreSystem : ISystem
                                         Lifetime = 0f,
                                         Generation = gen
                                     });
+
+                                    if (hManager.GeneticsEnabled != 0)
+                                    {
+                                        var mateHerb = state.EntityManager.GetComponentData<Herbivore>(mate);
+                                        var childHerb = herb.ValueRO;
+                                        childHerb.MoveSpeed = (herb.ValueRO.MoveSpeed + mateHerb.MoveSpeed) * 0.5f;
+                                        childHerb.IdleHungerRate = (herb.ValueRO.IdleHungerRate + mateHerb.IdleHungerRate) * 0.5f;
+                                        childHerb.MoveHungerRate = (herb.ValueRO.MoveHungerRate + mateHerb.MoveHungerRate) * 0.5f;
+                                        childHerb.EatRate = (herb.ValueRO.EatRate + mateHerb.EatRate) * 0.5f;
+                                        childHerb.PlantSeekRadius = (herb.ValueRO.PlantSeekRadius + mateHerb.PlantSeekRadius) * 0.5f;
+                                        childHerb.ChangeDirectionInterval = (herb.ValueRO.ChangeDirectionInterval + mateHerb.ChangeDirectionInterval) * 0.5f;
+
+                                        if (rand.NextFloat() < hManager.MutationChance)
+                                            childHerb.MoveSpeed += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                        if (rand.NextFloat() < hManager.MutationChance)
+                                            childHerb.IdleHungerRate += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                        if (rand.NextFloat() < hManager.MutationChance)
+                                            childHerb.MoveHungerRate += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                        if (rand.NextFloat() < hManager.MutationChance)
+                                            childHerb.EatRate += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                        if (rand.NextFloat() < hManager.MutationChance)
+                                            childHerb.PlantSeekRadius += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+                                        if (rand.NextFloat() < hManager.MutationChance)
+                                            childHerb.ChangeDirectionInterval += rand.NextFloat(-hManager.MutationScale, hManager.MutationScale);
+
+                                        ecb.SetComponent(child, childHerb);
+                                    }
                                 }
                                 repro.ValueRW.Timer = repro.ValueRO.Cooldown;
                                 var mateRepro = state.EntityManager.GetComponentData<Reproduction>(mate);
@@ -338,6 +382,33 @@ public partial struct HerbivoreSystem : ISystem
                         }
                         speed *= 0.5f;
                     }
+                }
+            }
+
+            if (SystemAPI.HasComponent<SeparationRadius>(entity))
+            {
+                var sep = SystemAPI.GetComponent<SeparationRadius>(entity);
+                float3 repulse = float3.zero;
+                int radius = (int)math.ceil(sep.Value);
+                for (int x = -radius; x <= radius; x++)
+                {
+                    for (int y = -radius; y <= radius; y++)
+                    {
+                        if (x == 0 && y == 0) continue;
+                        int2 c = currentCell + new int2(x, y);
+                        if (herbMap.TryGetValue(c, out var other) && other != entity)
+                        {
+                            float2 diff = new float2(currentCell.x - c.x, currentCell.y - c.y);
+                            float distSq = math.lengthsq(diff);
+                            if (distSq < sep.Value * sep.Value)
+                                repulse += new float3(diff.x, 0f, diff.y) / math.max(distSq, 0.01f);
+                        }
+                    }
+                }
+                if (!repulse.Equals(float3.zero))
+                {
+                    herb.ValueRW.MoveDirection = math.normalize(herb.ValueRO.MoveDirection + repulse * sep.Force);
+                    hasDirection = true;
                 }
             }
 
