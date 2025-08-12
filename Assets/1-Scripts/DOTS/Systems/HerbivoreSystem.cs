@@ -39,11 +39,72 @@ public partial struct HerbivoreSystem : ISystem
             herbMap.TryAdd(gp.ValueRO.Cell, e);
         }
 
+        // Celdas con obstáculos estáticos del escenario.
+        var obstacles = new NativeParallelHashSet<int2>(1024, Allocator.Temp);
+        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
+        {
+            obstacles.Add(gp.ValueRO.Cell);
+        }
+
         int2[] dirs = new int2[8]
         {
             new int2(1,0),  new int2(-1,0),  new int2(0,1),  new int2(0,-1),
             new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
         };
+
+        // Búsqueda simple por anchura para encontrar la siguiente celda hacia un objetivo.
+        bool TryFindNextStep(int2 start, int2 target, out int2 next)
+        {
+            var queue = new NativeQueue<int2>(Allocator.Temp);
+            var cameFrom = new NativeParallelHashMap<int2, int2>(1024, Allocator.Temp);
+            queue.Enqueue(start);
+            cameFrom.TryAdd(start, start);
+            int2[] dirs4 = new int2[4]
+            {
+                new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
+            };
+
+            bool found = false;
+            while (queue.TryDequeue(out var cell))
+            {
+                if (math.all(cell == target))
+                {
+                    found = true;
+                    break;
+                }
+
+                for (int i = 0; i < dirs4.Length; i++)
+                {
+                    int2 nc = cell + dirs4[i];
+                    if (math.abs(nc.x) > bounds.x || math.abs(nc.y) > bounds.y)
+                        continue;
+                    if (obstacles.Contains(nc))
+                        continue;
+                    if (herbCells.Contains(nc) && !math.all(nc == target))
+                        continue;
+                    if (!cameFrom.TryAdd(nc, cell))
+                        continue;
+                    queue.Enqueue(nc);
+                }
+            }
+
+            next = start;
+            if (found)
+            {
+                var cur = target;
+                var prev = cameFrom[cur];
+                while (!math.all(prev == start))
+                {
+                    cur = prev;
+                    prev = cameFrom[cur];
+                }
+                next = cur;
+            }
+
+            queue.Dispose();
+            cameFrom.Dispose();
+            return found;
+        }
 
         // Recorremos cada herbívoro.
         foreach (var (transform, hunger, health, herb, gp, repro, info, entity) in
@@ -91,12 +152,14 @@ public partial struct HerbivoreSystem : ISystem
                         if (plants.TryGetFirstValue(herb.ValueRO.KnownPlantCell, out var targetPlant, out _))
                         {
                             eatingPlant = targetPlant;
-                            int2 diff = herb.ValueRO.KnownPlantCell - currentCell;
-                            if (!math.all(diff == int2.zero))
+                            if (!math.all(herb.ValueRO.KnownPlantCell == currentCell))
                             {
-                                int2 step = new int2(math.clamp(diff.x, -1, 1), math.clamp(diff.y, -1, 1));
-                                herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
-                                hasDirection = true;
+                                if (TryFindNextStep(currentCell, herb.ValueRO.KnownPlantCell, out var nextCell))
+                                {
+                                    int2 step = nextCell - currentCell;
+                                    herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
+                                    hasDirection = true;
+                                }
                             }
                             else
                             {
@@ -130,10 +193,12 @@ public partial struct HerbivoreSystem : ISystem
                         {
                             herb.ValueRW.KnownPlantCell = target;
                             herb.ValueRW.HasKnownPlant = 1;
-                            int2 diff = target - currentCell;
-                            int2 step = new int2(math.clamp(diff.x, -1, 1), math.clamp(diff.y, -1, 1));
-                            herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
-                            hasDirection = true;
+                            if (TryFindNextStep(currentCell, target, out var nextCell))
+                            {
+                                int2 step = nextCell - currentCell;
+                                herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
+                                hasDirection = true;
+                            }
                         }
                         else
                         {
@@ -235,12 +300,14 @@ public partial struct HerbivoreSystem : ISystem
                             }
                             else
                             {
-                                int2 diff = mateCell - currentCell;
-                                int2 step = new int2(math.clamp(diff.x, -1, 1), math.clamp(diff.y, -1, 1));
-                                if (step.x != 0 || step.y != 0)
+                                if (TryFindNextStep(currentCell, mateCell, out var nextCell))
                                 {
-                                    herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
-                                    hasDirection = true;
+                                    int2 step = nextCell - currentCell;
+                                    if (step.x != 0 || step.y != 0)
+                                    {
+                                        herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
+                                        hasDirection = true;
+                                    }
                                 }
                             }
                         }
@@ -370,5 +437,6 @@ public partial struct HerbivoreSystem : ISystem
         plantCells.Dispose();
         herbCells.Dispose();
         herbMap.Dispose();
+        obstacles.Dispose();
     }
 }
