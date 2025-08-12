@@ -29,12 +29,24 @@ public partial struct HerbivoreSpawnerSystem : ISystem
         float2 area = grid.AreaSize;
         int2 half = (int2)(area / 2f);
 
+        // Evitamos colocar herbívoros sobre obstáculos existentes.
+        var occupied = new NativeParallelHashSet<int2>(manager.InitialCount, Allocator.Temp);
+        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
+            occupied.Add(gp.ValueRO.Cell);
+
         // Instanciamos el número solicitado de herbívoros en posiciones aleatorias.
-        for (int i = 0; i < manager.InitialCount; i++)
+        int spawned = 0;
+        int attempts = 0;
+        int maxAttempts = manager.InitialCount * 20;
+        while (spawned < manager.InitialCount && attempts < maxAttempts)
         {
+            attempts++;
             int2 cell = new int2(
                 rand.NextInt(-half.x, half.x + 1),
                 rand.NextInt(-half.y, half.y + 1));
+
+            if (!occupied.Add(cell))
+                continue;
 
             var e = ecb.Instantiate(manager.Prefab);
             ecb.SetComponent(e, new LocalTransform
@@ -50,7 +62,10 @@ public partial struct HerbivoreSpawnerSystem : ISystem
                 Lifetime = 0f,
                 Generation = 1
             });
+            spawned++;
         }
+
+        occupied.Dispose();
 
         // Marcamos que ya se generaron para no repetir.
         manager.Initialized = 1;

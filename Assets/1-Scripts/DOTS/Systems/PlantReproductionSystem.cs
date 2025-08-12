@@ -35,6 +35,9 @@ public partial struct PlantReproductionSystem : ISystem
         var matureEntities = new NativeList<Entity>(Allocator.Temp);
         var maturePositions = new NativeList<float3>(Allocator.Temp);
         var occupied = new NativeParallelHashSet<int2>(manager.MaxPlants, Allocator.Temp);
+        // Reservamos las celdas que contienen obstáculos para impedir nacimientos allí.
+        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
+            occupied.Add(gp.ValueRO.Cell);
 
         foreach (var (plant, transform, gridPos, entity) in SystemAPI
                      .Query<RefRO<Plant>, RefRO<LocalTransform>, RefRO<GridPosition>>()

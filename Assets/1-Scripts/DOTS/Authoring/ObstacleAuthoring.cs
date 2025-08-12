@@ -9,7 +9,8 @@ public class ObstacleAuthoring : MonoBehaviour
     {
         public override void Bake(ObstacleAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Static);
+            // Obstáculos estáticos que no requieren transformación dinámica.
+            var entity = GetEntity(TransformUsageFlags.None);
             AddComponent<ObstacleTag>(entity);
             AddComponent(entity, new GridPosition { Cell = int2.zero });
         }
