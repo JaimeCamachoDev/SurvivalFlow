@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
@@ -23,8 +24,19 @@ public class HerbivoreAuthoring : MonoBehaviour
     // Consumo adicional de hambre al moverse.
     public float moveHungerRate = 2f;
 
-    // Hambre recuperada al comer una planta.
-    public float hungerGainOnEat = 40f;
+    // Tasa de alimentación (hambre recuperada por segundo).
+    public float eatRate = 40f;
+
+    // Radio en el que pueden detectar plantas.
+    public float plantSeekRadius = 5f;
+
+    [Header("Reproducción")]
+    public float reproductionThreshold = 80f;
+    public float reproductionSeekRadius = 6f;
+    public float reproductionMatingDistance = 1f;
+    public float reproductionCooldown = 10f;
+    public int minOffspring = 1;
+    public int maxOffspring = 2;
 
     // Porcentaje de vida restaurada al comer.
     [Range(0f,1f)] public float healthRestorePercent = 0.25f;
@@ -47,12 +59,16 @@ public class HerbivoreAuthoring : MonoBehaviour
                 MoveSpeed = authoring.moveSpeed,
                 IdleHungerRate = authoring.idleHungerRate,
                 MoveHungerRate = authoring.moveHungerRate,
-                HungerGain = authoring.hungerGainOnEat,
+                EatRate = authoring.eatRate,
+                PlantSeekRadius = authoring.plantSeekRadius,
                 HealthRestorePercent = authoring.healthRestorePercent,
                 ChangeDirectionInterval = authoring.changeDirectionInterval,
                 DirectionTimer = 0f,
                 MoveDirection = float3.zero,
-                MoveRemainder = float3.zero
+                MoveRemainder = float3.zero,
+                KnownPlantCell = int2.zero,
+                HasKnownPlant = 0,
+                IsEating = 0
             });
 
             // Componentes de salud y hambre iniciales.
@@ -70,6 +86,25 @@ public class HerbivoreAuthoring : MonoBehaviour
                 DecreaseRate = authoring.idleHungerRate,
                 SeekThreshold = authoring.maxHunger * 0.5f,
                 DeathThreshold = 0f
+            });
+
+            // Reproducción y datos informativos.
+            AddComponent(entity, new Reproduction
+            {
+                Threshold = authoring.reproductionThreshold,
+                SeekRadius = authoring.reproductionSeekRadius,
+                MatingDistance = authoring.reproductionMatingDistance,
+                Cooldown = authoring.reproductionCooldown,
+                Timer = 0f,
+                MinOffspring = authoring.minOffspring,
+                MaxOffspring = authoring.maxOffspring
+            });
+
+            AddComponent(entity, new HerbivoreInfo
+            {
+                Name = new FixedString64Bytes(""),
+                Lifetime = 0f,
+                Generation = 1
             });
 
             // Transform y posición inicial del herbívoro.
