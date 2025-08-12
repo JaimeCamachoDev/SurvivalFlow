@@ -67,7 +67,8 @@ public class HerbivoreAuthoring : MonoBehaviour
                 MoveDirection = float3.zero,
                 MoveRemainder = float3.zero,
                 KnownPlantCell = int2.zero,
-                HasKnownPlant = 0
+                HasKnownPlant = 0,
+                IsEating = 0
             });
 
             // Componentes de salud y hambre iniciales.

@@ -52,7 +52,7 @@ public partial struct HerbivoreSystem : ISystem
             int2 currentCell = gp.ValueRO.Cell;
             repro.ValueRW.Timer = math.max(0f, repro.ValueRO.Timer - dt);
 
-            bool isHungry = hunger.ValueRO.Value < hunger.ValueRO.Max;
+            bool needsFood = hunger.ValueRO.Value < hunger.ValueRO.SeekThreshold;
             bool hasKnownPlant = herb.ValueRO.HasKnownPlant != 0;
 
             if (hasKnownPlant && !plants.TryGetFirstValue(herb.ValueRO.KnownPlantCell, out _, out _))
@@ -61,17 +61,30 @@ public partial struct HerbivoreSystem : ISystem
                 hasKnownPlant = false;
             }
 
-            bool isEating = false;
             Entity eatingPlant = Entity.Null;
-            if (isHungry && plants.TryGetFirstValue(currentCell, out eatingPlant, out _))
+            bool plantHere = plants.TryGetFirstValue(currentCell, out eatingPlant, out _);
+
+            bool isEating = herb.ValueRO.IsEating != 0;
+            if (isEating)
+            {
+                if (!plantHere || hunger.ValueRO.Value >= hunger.ValueRO.Max)
+                {
+                    isEating = false;
+                    herb.ValueRW.IsEating = 0;
+                }
+            }
+            else if (needsFood && plantHere)
+            {
                 isEating = true;
+                herb.ValueRW.IsEating = 1;
+            }
 
             float speed = herb.ValueRO.MoveSpeed;
             bool hasDirection = false;
 
             if (!isEating)
             {
-                if (isHungry)
+                if (needsFood)
                 {
                     if (hasKnownPlant)
                     {
@@ -88,6 +101,7 @@ public partial struct HerbivoreSystem : ISystem
                             else
                             {
                                 isEating = true;
+                                herb.ValueRW.IsEating = 1;
                             }
                         }
                         else
@@ -335,6 +349,8 @@ public partial struct HerbivoreSystem : ISystem
 
                 herb.ValueRW.MoveDirection = float3.zero;
             }
+
+            herb.ValueRW.IsEating = (byte)(isEating ? 1 : 0);
 
             if (hunger.ValueRO.Value <= hunger.ValueRO.DeathThreshold)
             {

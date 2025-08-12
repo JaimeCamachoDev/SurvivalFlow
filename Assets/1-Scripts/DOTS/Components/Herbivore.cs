@@ -39,4 +39,7 @@ public struct Herbivore : IComponentData
 
     /// Indicador de si posee una planta recordada.
     public byte HasKnownPlant;
+
+    /// Indicador de si actualmente está comiendo una planta.
+    public byte IsEating;
 }
