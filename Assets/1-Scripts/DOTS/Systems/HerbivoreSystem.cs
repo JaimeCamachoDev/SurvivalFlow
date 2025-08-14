@@ -51,6 +51,16 @@ public partial struct HerbivoreSystem : ISystem
             new int2(1,0),  new int2(-1,0),  new int2(0,1),  new int2(0,-1),
             new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
         };
+
+
+
+
+
+
+
+
+
+
         int2[] dirs4 = new int2[4]
         {
             new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
@@ -68,7 +78,10 @@ public partial struct HerbivoreSystem : ISystem
             pathQueue.Enqueue(start);
             cameFrom.TryAdd(start, start);
 
+
             bool found = false;
+
+
             while (pathQueue.TryDequeue(out var cell))
             {
                 if (math.all(cell == target))
@@ -104,7 +117,6 @@ public partial struct HerbivoreSystem : ISystem
                 }
                 next = cur;
             }
-
             return found;
         }
 
@@ -157,8 +169,6 @@ public partial struct HerbivoreSystem : ISystem
             {
                 isEating = true;
                 herb.ValueRW.IsEating = 1;
-                herb.ValueRW.MoveDirection = float3.zero;
-                herb.ValueRW.MoveRemainder = float3.zero;
             }
 
             float speed = herb.ValueRO.MoveSpeed * (isFleeing ? 2f : 1f);
@@ -191,8 +201,6 @@ public partial struct HerbivoreSystem : ISystem
                             {
                                 isEating = true;
                                 herb.ValueRW.IsEating = 1;
-                                herb.ValueRW.MoveDirection = float3.zero;
-                                herb.ValueRW.MoveRemainder = float3.zero;
                             }
                         }
                         else
@@ -427,56 +435,48 @@ public partial struct HerbivoreSystem : ISystem
                 }
             }
 
-            if (math.all(herb.ValueRO.MoveDirection == float3.zero))
+            float3 move = herb.ValueRO.MoveDirection * speed * dt + herb.ValueRO.MoveRemainder;
+            int2 delta = int2.zero;
+
+            if (math.abs(herb.ValueRO.MoveDirection.x) > 0f && math.abs(herb.ValueRO.MoveDirection.z) > 0f)
             {
-                transform.ValueRW.Position = new float3(currentCell.x * grid.CellSize, 0f, currentCell.y * grid.CellSize);
-                herb.ValueRW.MoveRemainder = float3.zero;
+                int stepX = (int)math.floor(math.abs(move.x));
+                int stepZ = (int)math.floor(math.abs(move.z));
+                int steps = math.min(stepX, stepZ);
+                if (steps > 0)
+                {
+                    delta = new int2((int)math.sign(move.x) * steps, (int)math.sign(move.z) * steps);
+                    move -= new float3(delta.x, 0f, delta.y);
+                }
             }
             else
             {
-                float3 move = herb.ValueRO.MoveDirection * speed * dt + herb.ValueRO.MoveRemainder;
-                int2 delta = int2.zero;
+                int stepX = (int)math.floor(math.abs(move.x));
+                int stepZ = (int)math.floor(math.abs(move.z));
+                if (stepX != 0 || stepZ != 0)
+                {
+                    delta = new int2((int)math.sign(move.x) * stepX, (int)math.sign(move.z) * stepZ);
+                    move -= new float3(delta.x, 0f, delta.y);
+                }
+            }
 
-                if (math.abs(herb.ValueRO.MoveDirection.x) > 0f && math.abs(herb.ValueRO.MoveDirection.z) > 0f)
-                {
-                    int stepX = (int)math.floor(math.abs(move.x));
-                    int stepZ = (int)math.floor(math.abs(move.z));
-                    int steps = math.min(stepX, stepZ);
-                    if (steps > 0)
-                    {
-                        delta = new int2((int)math.sign(move.x) * steps, (int)math.sign(move.z) * steps);
-                        move -= new float3(delta.x, 0f, delta.y);
-                    }
-                }
-                else
-                {
-                    int stepX = (int)math.floor(math.abs(move.x));
-                    int stepZ = (int)math.floor(math.abs(move.z));
-                    if (stepX != 0 || stepZ != 0)
-                    {
-                        delta = new int2((int)math.sign(move.x) * stepX, (int)math.sign(move.z) * stepZ);
-                        move -= new float3(delta.x, 0f, delta.y);
-                    }
-                }
+            herb.ValueRW.MoveRemainder = move;
+            int2 targetCell = currentCell + delta;
+            targetCell.x = math.clamp(targetCell.x, -bounds.x, bounds.x);
+            targetCell.y = math.clamp(targetCell.y, -bounds.y, bounds.y);
 
-                herb.ValueRW.MoveRemainder = move;
-                int2 targetCell = currentCell + delta;
-                targetCell.x = math.clamp(targetCell.x, -bounds.x, bounds.x);
-                targetCell.y = math.clamp(targetCell.y, -bounds.y, bounds.y);
-                float3 worldOffset = new float3(move.x, 0f, move.z) * grid.CellSize;
-                if ((!herbCells.Contains(targetCell) && !obstacles.Contains(targetCell)) || math.all(targetCell == currentCell))
-                {
-                    float3 targetPos = new float3(targetCell.x * grid.CellSize, 0f, targetCell.y * grid.CellSize) + worldOffset;
-                    transform.ValueRW.Position = targetPos;
-                    gp.ValueRW.Cell = targetCell;
-                    herbCells.Remove(currentCell);
-                    herbCells.Add(targetCell);
-                }
-                else
-                {
-                    transform.ValueRW.Position = new float3(currentCell.x * grid.CellSize, 0f, currentCell.y * grid.CellSize);
-                    herb.ValueRW.MoveRemainder = float3.zero;
-                }
+            if ((!herbCells.Contains(targetCell) && !obstacles.Contains(targetCell)) || math.all(targetCell == currentCell))
+            {
+                float3 targetPos = new float3(targetCell.x * grid.CellSize, 0f, targetCell.y * grid.CellSize);
+                transform.ValueRW.Position = targetPos;
+                gp.ValueRW.Cell = targetCell;
+                herbCells.Remove(currentCell);
+                herbCells.Add(targetCell);
+            }
+            else
+            {
+                transform.ValueRW.Position = new float3(currentCell.x * grid.CellSize, 0f, currentCell.y * grid.CellSize);
+                herb.ValueRW.MoveRemainder = float3.zero;
             }
 
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
