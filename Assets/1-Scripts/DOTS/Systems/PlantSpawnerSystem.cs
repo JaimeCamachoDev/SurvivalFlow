@@ -5,7 +5,9 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 /// Genera el conjunto inicial de plantas definido por PlantManager.
+/// Se ejecuta después de la creación de obstáculos para evitar solapamientos.
 [BurstCompile]
+[UpdateAfter(typeof(ObstacleSpawnerSystem))]
 public partial struct PlantSpawnerSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
@@ -13,6 +15,10 @@ public partial struct PlantSpawnerSystem : ISystem
         // Obtenemos el gestor de plantas y los datos de la cuadrícula.
         if (!SystemAPI.TryGetSingletonRW<PlantManager>(out var managerRw) ||
             !SystemAPI.TryGetSingleton<GridManager>(out var grid))
+            return;
+        // Aseguramos que los obstáculos se hayan generado antes de comenzar.
+        if (!SystemAPI.TryGetSingleton<ObstacleManager>(out var obstacleManager) ||
+            obstacleManager.Initialized == 0)
             return;
 
         // Solo ejecutamos una vez al inicio.
