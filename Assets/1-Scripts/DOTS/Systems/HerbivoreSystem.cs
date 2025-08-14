@@ -51,21 +51,25 @@ public partial struct HerbivoreSystem : ISystem
             new int2(1,0),  new int2(-1,0),  new int2(0,1),  new int2(0,-1),
             new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
         };
+        int2[] dirs4 = new int2[4]
+        {
+            new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
+        };
+
+        var pathQueue = new NativeQueue<int2>(Allocator.Temp);
+        var cameFrom = new NativeParallelHashMap<int2, int2>(1024, Allocator.Temp);
 
         // Búsqueda simple por anchura para encontrar la siguiente celda hacia un objetivo.
         bool TryFindNextStep(int2 start, int2 target, out int2 next)
         {
-            var queue = new NativeQueue<int2>(Allocator.Temp);
-            var cameFrom = new NativeParallelHashMap<int2, int2>(1024, Allocator.Temp);
-            queue.Enqueue(start);
+            pathQueue.Clear();
+            cameFrom.Clear();
+
+            pathQueue.Enqueue(start);
             cameFrom.TryAdd(start, start);
-            int2[] dirs4 = new int2[4]
-            {
-                new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
-            };
 
             bool found = false;
-            while (queue.TryDequeue(out var cell))
+            while (pathQueue.TryDequeue(out var cell))
             {
                 if (math.all(cell == target))
                 {
@@ -84,7 +88,7 @@ public partial struct HerbivoreSystem : ISystem
                         continue;
                     if (!cameFrom.TryAdd(nc, cell))
                         continue;
-                    queue.Enqueue(nc);
+                    pathQueue.Enqueue(nc);
                 }
             }
 
@@ -101,8 +105,6 @@ public partial struct HerbivoreSystem : ISystem
                 next = cur;
             }
 
-            queue.Dispose();
-            cameFrom.Dispose();
             return found;
         }
 
@@ -530,5 +532,7 @@ public partial struct HerbivoreSystem : ISystem
         herbCells.Dispose();
         herbMap.Dispose();
         obstacles.Dispose();
+        pathQueue.Dispose();
+        cameFrom.Dispose();
     }
 }
