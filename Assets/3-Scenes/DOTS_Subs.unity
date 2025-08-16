@@ -126,7 +126,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6811824876002106655}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ed07b5f25a54d368da9db46fa62b29c, type: 3}
   m_Name: 
@@ -180,7 +180,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6811824876002106655}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 924f9cd669f6482abccb28eb19121742, type: 3}
   m_Name: 
@@ -207,9 +207,9 @@ MonoBehaviour:
   initialCount: 300
   patchCount: 20
   patchRadius: 10
-  maxGrowth: 100
-  growthRate: 1
-  initialGrowthPercent: 0.2
+  maxEnergy: 100
+  energyGainRate: 2
+  initialEnergyPercent: 0.05
   reproductionInterval: 1
   maxPlants: 10000
   minDistanceBetweenPlants: 2
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6811824876002106655}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3d8bf663bf3c4197a676f06233a854ce, type: 3}
   m_Name: 
