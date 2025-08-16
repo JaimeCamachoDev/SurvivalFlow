@@ -33,7 +33,16 @@ public partial struct DebugAgentSystem : ISystem
             }
 
             if (!FindPath(current, agent.ValueRO.Target, obstacles, bounds, out var path))
-                continue;
+            {
+                int2 newTarget;
+                do
+                {
+                    newTarget = new int2(rand.NextInt(-bounds.x, bounds.x + 1), rand.NextInt(-bounds.y, bounds.y + 1));
+                } while (obstacles.Contains(newTarget));
+                agent.ValueRW.Target = newTarget;
+                if (!FindPath(current, newTarget, obstacles, bounds, out path))
+                    continue;
+            }
 
             for (int i = 0; i < path.Length - 1; i++)
             {
