@@ -10,9 +10,10 @@ public partial struct HerbivoreSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
-        // Comprobamos que exista una cuadrícula para delimitar el movimiento.
+        // Comprobamos que existan los gestores necesarios para delimitar el movimiento y depurar obstáculos.
         if (!SystemAPI.TryGetSingleton<GridManager>(out var grid) ||
-            !SystemAPI.TryGetSingleton<HerbivoreManager>(out var hManager))
+            !SystemAPI.TryGetSingleton<HerbivoreManager>(out var hManager) ||
+            !SystemAPI.TryGetSingletonRW<ObstacleManager>(out var obstacleManager))
             return;
 
         float dt = SystemAPI.Time.DeltaTime;
@@ -414,23 +415,36 @@ public partial struct HerbivoreSystem : ISystem
             {
                 herb.ValueRW.MoveDirection = float3.zero;
             }
-
+            int2 cell = currentCell;
             if (math.all(herb.ValueRO.MoveDirection == float3.zero))
             {
-                transform.ValueRW.Position = new float3(currentCell.x * grid.CellSize, 0f, currentCell.y * grid.CellSize);
+                transform.ValueRW.Position = new float3(cell.x * grid.CellSize, 0f, cell.y * grid.CellSize);
                 herb.ValueRW.MoveRemainder = float3.zero;
             }
             else
             {
                 float3 move = herb.ValueRO.MoveDirection * speed * dt + herb.ValueRO.MoveRemainder;
-                int2 cell = currentCell;
-
                 while (math.abs(move.x) >= 1f || math.abs(move.z) >= 1f)
                 {
                     int2 step = int2.zero;
                     if (math.abs(move.x) >= 1f) step.x = (int)math.sign(move.x);
                     if (math.abs(move.z) >= 1f) step.y = (int)math.sign(move.z);
                     int2 next = cell + step;
+                    if (step.x != 0 && step.y != 0)
+                    {
+                        int2 cx = cell + new int2(step.x, 0);
+                        int2 cy = cell + new int2(0, step.y);
+                        if (math.abs(cx.x) > bounds.x || math.abs(cx.y) > bounds.y ||
+                            obstacles.Contains(cx) || herbCells.Contains(cx) ||
+                            math.abs(cy.x) > bounds.x || math.abs(cy.y) > bounds.y ||
+                            obstacles.Contains(cy) || herbCells.Contains(cy))
+                        {
+                            move = float3.zero;
+                            herb.ValueRW.MoveRemainder = float3.zero;
+                            herb.ValueRW.MoveDirection = float3.zero;
+                            break;
+                        }
+                    }
 
                     if (math.abs(next.x) > bounds.x || math.abs(next.y) > bounds.y ||
                         obstacles.Contains(next) || herbCells.Contains(next))
@@ -447,12 +461,25 @@ public partial struct HerbivoreSystem : ISystem
                     move -= new float3(step.x, 0f, step.y);
                 }
 
+                if ((cell.x >= bounds.x && move.x > 0f) || (cell.x <= -bounds.x && move.x < 0f))
+                {
+                    move.x = 0f;
+                    herb.ValueRW.MoveDirection.x = 0f;
+                }
+                if ((cell.y >= bounds.y && move.z > 0f) || (cell.y <= -bounds.y && move.z < 0f))
+                {
+                    move.z = 0f;
+                    herb.ValueRW.MoveDirection.z = 0f;
+                }
+
                 gp.ValueRW.Cell = cell;
                 herb.ValueRW.MoveRemainder = move;
                 float3 worldOffset = new float3(move.x, 0f, move.z) * grid.CellSize;
                 transform.ValueRW.Position = new float3(cell.x * grid.CellSize, 0f, cell.y * grid.CellSize) + worldOffset;
-
             }
+
+            if (obstacles.Contains(cell))
+                obstacleManager.ValueRW.DebugCrossings++;
 
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
                 transform.ValueRW.Rotation = quaternion.LookRotationSafe(herb.ValueRO.MoveDirection, math.up());
