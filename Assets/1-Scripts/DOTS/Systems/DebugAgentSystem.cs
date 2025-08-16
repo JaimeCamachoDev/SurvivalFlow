@@ -5,50 +5,29 @@ using Unity.Transforms;
 using UnityEngine;
 
 /// Sistema de movimiento para los agentes de depuración.
+[UpdateAfter(typeof(ObstacleRegistrySystem))]
 public partial struct DebugAgentSystem : ISystem
 {
-    private NativeParallelHashSet<int2> _obstacles;
-
-    public void OnCreate(ref SystemState state)
-    {
-        _obstacles = new NativeParallelHashSet<int2>(1024, Allocator.Persistent);
-    }
-
-    public void OnDestroy(ref SystemState state)
-    {
-        if (_obstacles.IsCreated) _obstacles.Dispose();
-    }
-
-    private partial struct BuildObstacleJob : IJobEntity
-    {
-        public NativeParallelHashSet<int2>.ParallelWriter Obstacles;
-        void Execute(in GridPosition gp, in ObstacleTag tag)
-        {
-            Obstacles.Add(gp.Cell);
-        }
-    }
-
     public void OnUpdate(ref SystemState state)
     {
         if (!SystemAPI.TryGetSingleton<GridManager>(out var grid))
             return;
-
-        _obstacles.Clear();
-        var job = new BuildObstacleJob { Obstacles = _obstacles.AsParallelWriter() }.ScheduleParallel(state.Dependency);
-        state.Dependency = job;
-        state.Dependency.Complete();
+        var obstacles = ObstacleRegistrySystem.Obstacles;
 
         float2 half = grid.AreaSize * 0.5f;
         int2 bounds = (int2)half;
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 13));
 
-        var obstacles = _obstacles;
         bool TryFindNextStep(int2 start, int2 target, out int2 next)
         {
             next = start;
             float best = float.MaxValue;
-            int2[] dirs = new int2[4] { new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1) };
-            for (int i = 0; i < 4; i++)
+            int2[] dirs = new int2[8]
+            {
+                new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1),
+                new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
+            };
+            for (int i = 0; i < 8; i++)
             {
                 int2 cand = start + dirs[i];
                 if (math.abs(cand.x) > bounds.x || math.abs(cand.y) > bounds.y)
@@ -71,7 +50,12 @@ public partial struct DebugAgentSystem : ISystem
 
             if (math.all(current == agent.ValueRO.Target))
             {
-                int2 newTarget = new int2(rand.NextInt(-bounds.x, bounds.x + 1), rand.NextInt(-bounds.y, bounds.y + 1));
+                int2 newTarget;
+                do
+                {
+                    newTarget = new int2(rand.NextInt(-bounds.x, bounds.x + 1), rand.NextInt(-bounds.y, bounds.y + 1));
+                } while (obstacles.Contains(newTarget));
+
                 agent.ValueRW.Target = newTarget;
             }
 
@@ -90,8 +74,19 @@ public partial struct DebugAgentSystem : ISystem
             if (TryFindNextStep(current, agent.ValueRO.Target, out var next))
             {
                 float3 world = new float3(next.x, 0f, next.y);
-                transform.ValueRW.Position = world;
-                gp.ValueRW.Cell = next;
+                float3 pos = transform.ValueRO.Position;
+                float step = agent.ValueRO.MoveSpeed * SystemAPI.Time.DeltaTime;
+                float3 delta = world - pos;
+                float dist = math.length(delta);
+                if (dist <= step)
+                {
+                    transform.ValueRW.Position = world;
+                    gp.ValueRW.Cell = next;
+                }
+                else
+                {
+                    transform.ValueRW.Position = pos + delta / dist * step;
+                }
             }
         }
     }
