@@ -260,7 +260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 7596814737169414124, guid: 396dc4db36fcd1740b1d55c047a26321, type: 3}
   count: 5
-  moveSpeed: 1
+  moveSpeed: 5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
