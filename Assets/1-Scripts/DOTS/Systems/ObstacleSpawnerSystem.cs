@@ -19,6 +19,7 @@ public partial struct ObstacleSpawnerSystem : ISystem
 
         var manager = managerRw.ValueRO;
         var ecb = new EntityCommandBuffer(Allocator.Temp);
+        bool prefabHasGridPos = state.EntityManager.HasComponent<GridPosition>(manager.Prefab);
         var rand = Unity.Mathematics.Random.CreateFromIndex(5);
 
         float2 area = grid.AreaSize;
@@ -46,7 +47,10 @@ public partial struct ObstacleSpawnerSystem : ISystem
             var e = ecb.Instantiate(manager.Prefab);
             var pos = new float3(cell.x, 0f, cell.y);
             ecb.SetComponent(e, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, 1f));
-            ecb.AddComponent(e, new GridPosition { Cell = cell });
+            if (prefabHasGridPos)
+                ecb.SetComponent(e, new GridPosition { Cell = cell });
+            else
+                ecb.AddComponent(e, new GridPosition { Cell = cell });
             spawned++;
         }
 
