@@ -16,7 +16,8 @@ public class ObstacleManagerAuthoring : MonoBehaviour
             {
                 Prefab = GetEntity(authoring.obstaclePrefab, TransformUsageFlags.Dynamic),
                 Count = authoring.count,
-                Initialized = 0
+                Initialized = 0,
+                DebugCrossings = 0
             });
         }
     }
@@ -28,4 +29,5 @@ public struct ObstacleManager : IComponentData
     public Entity Prefab;
     public int Count;
     public byte Initialized;
+    public int DebugCrossings;
 }
