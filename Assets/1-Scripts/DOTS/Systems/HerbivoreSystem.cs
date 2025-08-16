@@ -24,7 +24,6 @@ public partial struct HerbivoreSystem : ISystem
     {
         new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
     };
-
     public void OnCreate(ref SystemState state)
     {
         _plants = new NativeParallelMultiHashMap<int2, Entity>(1024, Allocator.Persistent);
