@@ -42,6 +42,7 @@ public partial struct DebugAgentSystem : ISystem
         int2 bounds = (int2)half;
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 13));
 
+        var obstacles = _obstacles;
         bool TryFindNextStep(int2 start, int2 target, out int2 next)
         {
             next = start;
@@ -52,7 +53,7 @@ public partial struct DebugAgentSystem : ISystem
                 int2 cand = start + dirs[i];
                 if (math.abs(cand.x) > bounds.x || math.abs(cand.y) > bounds.y)
                     continue;
-                if (_obstacles.Contains(cand))
+                if (obstacles.Contains(cand))
                     continue;
                 float dist = math.lengthsq((float2)(target - cand));
                 if (dist < best)
