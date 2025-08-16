@@ -8,6 +8,75 @@ using Unity.Transforms;
 [BurstCompile]
 public partial struct HerbivoreSystem : ISystem
 {
+    private NativeParallelMultiHashMap<int2, Entity> _plants;
+    private NativeList<int2> _plantCells;
+    private NativeParallelHashSet<int2> _herbCells;
+    private NativeParallelHashMap<int2, Entity> _herbMap;
+    private NativeParallelHashSet<int2> _obstacles;
+
+    private static readonly int2[] dirs = new int2[8]
+    {
+        new int2(1,0),  new int2(-1,0),  new int2(0,1),  new int2(0,-1),
+        new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
+    };
+
+    private static readonly int2[] dirs4 = new int2[4]
+    {
+        new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
+    };
+
+    public void OnCreate(ref SystemState state)
+    {
+        _plants = new NativeParallelMultiHashMap<int2, Entity>(1024, Allocator.Persistent);
+        _plantCells = new NativeList<int2>(Allocator.Persistent);
+        _herbCells = new NativeParallelHashSet<int2>(1024, Allocator.Persistent);
+        _herbMap = new NativeParallelHashMap<int2, Entity>(1024, Allocator.Persistent);
+        _obstacles = new NativeParallelHashSet<int2>(1024, Allocator.Persistent);
+    }
+
+    public void OnDestroy(ref SystemState state)
+    {
+        if (_plants.IsCreated) _plants.Dispose();
+        if (_plantCells.IsCreated) _plantCells.Dispose();
+        if (_herbCells.IsCreated) _herbCells.Dispose();
+        if (_herbMap.IsCreated) _herbMap.Dispose();
+        if (_obstacles.IsCreated) _obstacles.Dispose();
+    }
+
+    [BurstCompile]
+    private partial struct BuildPlantJob : IJobEntity
+    {
+        public NativeParallelMultiHashMap<int2, Entity>.ParallelWriter Plants;
+        public NativeList<int2>.ParallelWriter PlantCells;
+        void Execute(Entity entity, in GridPosition gp, in Plant tag)
+        {
+            Plants.Add(gp.Cell, entity);
+            PlantCells.Add(gp.Cell);
+        }
+    }
+
+    [BurstCompile]
+    private partial struct BuildHerbMapJob : IJobEntity
+    {
+        public NativeParallelHashSet<int2>.ParallelWriter Cells;
+        public NativeParallelHashMap<int2, Entity>.ParallelWriter Map;
+        void Execute(Entity entity, in GridPosition gp, in Herbivore tag)
+        {
+            Cells.Add(gp.Cell);
+            Map.TryAdd(gp.Cell, entity);
+        }
+    }
+
+    [BurstCompile]
+    private partial struct BuildObstacleJob : IJobEntity
+    {
+        public NativeParallelHashSet<int2>.ParallelWriter Obstacles;
+        void Execute(in GridPosition gp, in ObstacleTag tag)
+        {
+            Obstacles.Add(gp.Cell);
+        }
+    }
+
     public void OnUpdate(ref SystemState state)
     {
         // Comprobamos que existan los gestores necesarios para delimitar el movimiento y depurar obstáculos.
@@ -22,50 +91,31 @@ public partial struct HerbivoreSystem : ISystem
         int2 bounds = (int2)half;
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
+        _plants.Clear();
+        _plantCells.Clear();
+        _herbCells.Clear();
+        _herbMap.Clear();
+        _obstacles.Clear();
 
-        var plants = new NativeParallelMultiHashMap<int2, Entity>(1024, Allocator.Temp);
-        var plantCells = new NativeList<int2>(Allocator.Temp);
-        foreach (var (pgp, pEntity) in SystemAPI.Query<RefRO<GridPosition>>().WithAll<Plant>().WithEntityAccess())
+        var plantJobHandle = new BuildPlantJob
         {
-            plants.Add(pgp.ValueRO.Cell, pEntity);
-            plantCells.Add(pgp.ValueRO.Cell);
-        }
+            Plants = _plants.AsParallelWriter(),
+            PlantCells = _plantCells.AsParallelWriter()
+        }.ScheduleParallel(state.Dependency);
 
-        // Celdas ocupadas por herbívoros para evitar superposiciones y mapa para búsquedas.
-        var herbCells = new NativeParallelHashSet<int2>(1024, Allocator.Temp);
-        var herbMap = new NativeParallelHashMap<int2, Entity>(1024, Allocator.Temp);
-        foreach (var (gp, e) in SystemAPI.Query<RefRO<GridPosition>>().WithAll<Herbivore>().WithEntityAccess())
+        var herbJobHandle = new BuildHerbMapJob
         {
-            herbCells.Add(gp.ValueRO.Cell);
-            herbMap.TryAdd(gp.ValueRO.Cell, e);
-        }
+            Cells = _herbCells.AsParallelWriter(),
+            Map = _herbMap.AsParallelWriter()
+        }.ScheduleParallel(plantJobHandle);
 
-        // Celdas con obstáculos estáticos del escenario.
-        var obstacles = new NativeParallelHashSet<int2>(1024, Allocator.Temp);
-        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
+        var obstacleJobHandle = new BuildObstacleJob
         {
-            obstacles.Add(gp.ValueRO.Cell);
-        }
+            Obstacles = _obstacles.AsParallelWriter()
+        }.ScheduleParallel(herbJobHandle);
 
-        int2[] dirs = new int2[8]
-        {
-            new int2(1,0),  new int2(-1,0),  new int2(0,1),  new int2(0,-1),
-            new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
-        };
-
-
-
-
-
-
-
-
-
-
-        int2[] dirs4 = new int2[4]
-        {
-            new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
-        };
+        state.Dependency = obstacleJobHandle;
+        state.Dependency.Complete();
 
         // Devuelve la siguiente celda que acerca al objetivo evitando obstáculos y otros
         // herbívoros. Esta versión evita la búsqueda por anchura costosa del antiguo
@@ -81,9 +131,9 @@ public partial struct HerbivoreSystem : ISystem
                 int2 cand = start + dirs4[i];
                 if (math.abs(cand.x) > bounds.x || math.abs(cand.y) > bounds.y)
                     continue;
-                if (obstacles.Contains(cand))
+                if (_obstacles.Contains(cand))
                     continue;
-                if (herbCells.Contains(cand) && !math.all(cand == target))
+                if (_herbCells.Contains(cand) && !math.all(cand == target))
                     continue;
 
                 float dist = math.lengthsq((float2)(target - cand));
@@ -124,14 +174,14 @@ public partial struct HerbivoreSystem : ISystem
             bool needsFood = energy.ValueRO.Value < energy.ValueRO.SeekThreshold;
             bool hasKnownPlant = herb.ValueRO.HasKnownPlant != 0;
 
-            if (hasKnownPlant && !plants.TryGetFirstValue(herb.ValueRO.KnownPlantCell, out _, out _))
+            if (hasKnownPlant && !_plants.TryGetFirstValue(herb.ValueRO.KnownPlantCell, out _, out _))
             {
                 herb.ValueRW.HasKnownPlant = 0;
                 hasKnownPlant = false;
             }
 
             Entity eatingPlant = Entity.Null;
-            bool plantHere = plants.TryGetFirstValue(currentCell, out eatingPlant, out _);
+            bool plantHere = _plants.TryGetFirstValue(currentCell, out eatingPlant, out _);
 
             bool isEating = herb.ValueRO.IsEating != 0;
             if (isEating)
@@ -162,7 +212,7 @@ public partial struct HerbivoreSystem : ISystem
                 {
                     if (hasKnownPlant)
                     {
-                        if (plants.TryGetFirstValue(herb.ValueRO.KnownPlantCell, out var targetPlant, out _))
+                        if (_plants.TryGetFirstValue(herb.ValueRO.KnownPlantCell, out var targetPlant, out _))
                         {
                             eatingPlant = targetPlant;
                             if (!math.all(herb.ValueRO.KnownPlantCell == currentCell))
@@ -192,13 +242,13 @@ public partial struct HerbivoreSystem : ISystem
                         float bestDist = float.MaxValue;
                         int2 target = currentCell;
                         float radiusSq = herb.ValueRO.PlantSeekRadius * herb.ValueRO.PlantSeekRadius;
-                        for (int i = 0; i < plantCells.Length; i++)
+                        for (int i = 0; i < _plantCells.Length; i++)
                         {
-                            float dist = math.lengthsq((float2)(plantCells[i] - currentCell));
+                            float dist = math.lengthsq((float2)(_plantCells[i] - currentCell));
                             if (dist < bestDist && dist <= radiusSq)
                             {
                                 bestDist = dist;
-                                target = plantCells[i];
+                                target = _plantCells[i];
                             }
                         }
 
@@ -235,13 +285,13 @@ public partial struct HerbivoreSystem : ISystem
                         float bestDist = float.MaxValue;
                         int2 target = currentCell;
                         float radiusSq = herb.ValueRO.PlantSeekRadius * herb.ValueRO.PlantSeekRadius;
-                        for (int i = 0; i < plantCells.Length; i++)
+                        for (int i = 0; i < _plantCells.Length; i++)
                         {
-                            float dist = math.lengthsq((float2)(plantCells[i] - currentCell));
+                            float dist = math.lengthsq((float2)(_plantCells[i] - currentCell));
                             if (dist < bestDist && dist <= radiusSq)
                             {
                                 bestDist = dist;
-                                target = plantCells[i];
+                                target = _plantCells[i];
                             }
                         }
                         if (bestDist < float.MaxValue)
@@ -263,7 +313,7 @@ public partial struct HerbivoreSystem : ISystem
                             for (int y = -radius; y <= radius; y++)
                             {
                                 int2 c = currentCell + new int2(x, y);
-                                if (herbMap.TryGetValue(c, out var cand) && cand != entity)
+                                if (_herbMap.TryGetValue(c, out var cand) && cand != entity)
                                 {
                                     var candRepro = state.EntityManager.GetComponentData<Reproduction>(cand);
                                     var candEnergy = state.EntityManager.GetComponentData<Energy>(cand);
@@ -396,7 +446,7 @@ public partial struct HerbivoreSystem : ISystem
                     {
                         if (x == 0 && y == 0) continue;
                         int2 c = currentCell + new int2(x, y);
-                        if (herbMap.TryGetValue(c, out var other) && other != entity)
+                        if (_herbMap.TryGetValue(c, out var other) && other != entity)
                         {
                             float2 diff = new float2(currentCell.x - c.x, currentCell.y - c.y);
                             float distSq = math.lengthsq(diff);
@@ -435,9 +485,9 @@ public partial struct HerbivoreSystem : ISystem
                         int2 cx = cell + new int2(step.x, 0);
                         int2 cy = cell + new int2(0, step.y);
                         if (math.abs(cx.x) > bounds.x || math.abs(cx.y) > bounds.y ||
-                            obstacles.Contains(cx) || herbCells.Contains(cx) ||
+                            _obstacles.Contains(cx) || _herbCells.Contains(cx) ||
                             math.abs(cy.x) > bounds.x || math.abs(cy.y) > bounds.y ||
-                            obstacles.Contains(cy) || herbCells.Contains(cy))
+                            _obstacles.Contains(cy) || _herbCells.Contains(cy))
                         {
                             move = float3.zero;
                             herb.ValueRW.MoveRemainder = float3.zero;
@@ -447,7 +497,7 @@ public partial struct HerbivoreSystem : ISystem
                     }
 
                     if (math.abs(next.x) > bounds.x || math.abs(next.y) > bounds.y ||
-                        obstacles.Contains(next) || herbCells.Contains(next))
+                        _obstacles.Contains(next) || _herbCells.Contains(next))
                     {
                         move = float3.zero;
                         herb.ValueRW.MoveRemainder = float3.zero;
@@ -455,9 +505,9 @@ public partial struct HerbivoreSystem : ISystem
                         break;
                     }
 
-                    herbCells.Remove(cell);
+                    _herbCells.Remove(cell);
                     cell = next;
-                    herbCells.Add(cell);
+                    _herbCells.Add(cell);
                     move -= new float3(step.x, 0f, step.y);
                 }
 
@@ -478,7 +528,7 @@ public partial struct HerbivoreSystem : ISystem
                 transform.ValueRW.Position = new float3(cell.x * grid.CellSize, 0f, cell.y * grid.CellSize) + worldOffset;
             }
 
-            if (obstacles.Contains(cell))
+            if (_obstacles.Contains(cell))
                 obstacleManager.ValueRW.DebugCrossings++;
 
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
@@ -529,10 +579,5 @@ public partial struct HerbivoreSystem : ISystem
         }
 
         ecb.Playback(state.EntityManager);
-        plants.Dispose();
-        plantCells.Dispose();
-        herbCells.Dispose();
-        herbMap.Dispose();
-        obstacles.Dispose();
     }
 }
