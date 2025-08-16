@@ -46,7 +46,7 @@ public partial struct ObstacleSpawnerSystem : ISystem
             var e = ecb.Instantiate(manager.Prefab);
             var pos = new float3(cell.x, 0f, cell.y);
             ecb.SetComponent(e, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, 1f));
-            ecb.AddComponent(e, new GridPosition { Cell = cell });
+            ecb.SetComponent(e, new GridPosition { Cell = cell });
             spawned++;
         }
 

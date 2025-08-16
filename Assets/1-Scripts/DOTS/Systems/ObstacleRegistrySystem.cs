@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 /// Construye un registro de celdas ocupadas por obstáculos estáticos.
+[UpdateAfter(typeof(ObstacleSpawnerSystem))]
 public partial struct ObstacleRegistrySystem : ISystem
 {
     public static NativeParallelHashSet<int2> Obstacles;
