@@ -129,7 +129,14 @@ public partial struct DebugAgentSystem : ISystem
             p = cameFrom[p];
         }
         path.Add(start);
-        path.Reverse();
+
+        // NativeList<T> lacks a built-in Reverse, so swap elements manually.
+        for (int i = 0, j = path.Length - 1; i < j; i++, j--)
+        {
+            int2 tmp = path[i];
+            path[i] = path[j];
+            path[j] = tmp;
+        }
 
         frontier.Dispose();
         cameFrom.Dispose();
