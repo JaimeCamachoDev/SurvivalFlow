@@ -6,6 +6,8 @@ using Unity.Transforms;
 
 /// Sistema que controla la reproducción global de las plantas.
 /// Solo se intenta un nacimiento por intervalo definido en PlantManager.
+[UpdateAfter(typeof(ObstacleRegistrySystem))]
+[UpdateAfter(typeof(ObstacleSpawnerSystem))]
 [BurstCompile]
 public partial struct PlantReproductionSystem : ISystem
 {
@@ -13,7 +15,8 @@ public partial struct PlantReproductionSystem : ISystem
     {
         // Obtenemos la configuración global y los datos de la cuadrícula.
         if (!SystemAPI.TryGetSingletonRW<PlantManager>(out var managerRw) ||
-            !SystemAPI.TryGetSingleton<GridManager>(out var grid))
+            !SystemAPI.TryGetSingleton<GridManager>(out var grid) ||
+            (SystemAPI.TryGetSingleton<ObstacleManager>(out var obstacleManager) && obstacleManager.Initialized == 0))
             return;
 
         var manager = managerRw.ValueRO;
