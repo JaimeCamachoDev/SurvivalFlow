@@ -410,6 +410,10 @@ public partial struct HerbivoreSystem : ISystem
                     hasDirection = true;
                 }
             }
+            if (!hasDirection)
+            {
+                herb.ValueRW.MoveDirection = float3.zero;
+            }
 
             if (math.all(herb.ValueRO.MoveDirection == float3.zero))
             {
