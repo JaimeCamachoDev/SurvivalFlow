@@ -270,6 +270,7 @@ GameObject:
   - component: {fileID: 4701265952735268773}
   - component: {fileID: 8453608748146524226}
   - component: {fileID: 3811792812782949824}
+  - component: {fileID: -2757980841542466310}
   m_Layer: 0
   m_Name: DOT_DEBUG
   m_TagString: Untagged
@@ -327,7 +328,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4dfd55ca50a6d4e4bb9c57f249bc7e02, type: 2}
+  - {fileID: 2100000, guid: c076cc2b262244b4b88c7b67e3858bb1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -370,6 +371,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-2757980841542466310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7596814737169414124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eef10ca5045a4c0e854ec6c5781418b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 2
 --- !u!1 &7833623928901765993
 GameObject:
   m_ObjectHideFlags: 0
