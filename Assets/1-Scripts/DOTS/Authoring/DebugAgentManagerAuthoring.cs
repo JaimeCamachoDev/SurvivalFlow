@@ -9,7 +9,6 @@ public class DebugAgentManagerAuthoring : MonoBehaviour
 
     // Número de agentes iniciales.
     public int count = 5;
-
     // Velocidad de movimiento que se aplicará a todos los agentes.
     public float moveSpeed = 4f;
 

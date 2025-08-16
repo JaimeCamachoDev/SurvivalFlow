@@ -30,7 +30,6 @@ public partial struct ObstacleSpawnerSystem : ISystem
 
         float2 area = grid.AreaSize;
         int2 half = (int2)(area / 2f);
-
         // Celdas ya ocupadas por obstáculos existentes o plantas.
         var occupied = new NativeParallelHashSet<int2>(manager.Count, Allocator.Temp);
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
