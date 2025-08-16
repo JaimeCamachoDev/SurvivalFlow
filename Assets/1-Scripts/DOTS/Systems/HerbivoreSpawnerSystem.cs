@@ -30,9 +30,13 @@ public partial struct HerbivoreSpawnerSystem : ISystem
         int2 half = (int2)(area / 2f);
 
         // Evitamos colocar herbívoros sobre obstáculos existentes.
-        var occupied = new NativeParallelHashSet<int2>(manager.InitialCount, Allocator.Temp);
-        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
-            occupied.Add(gp.ValueRO.Cell);
+        var obstacleQuery = SystemAPI.QueryBuilder().WithAll<GridPosition, ObstacleTag>().Build();
+        int obstacleCount = obstacleQuery.CalculateEntityCount();
+        var occupied = new NativeParallelHashSet<int2>(manager.InitialCount + obstacleCount, Allocator.Temp);
+        var obstacleCells = obstacleQuery.ToComponentDataArray<GridPosition>(Allocator.Temp);
+        for (int i = 0; i < obstacleCells.Length; i++)
+            occupied.Add(obstacleCells[i].Cell);
+        obstacleCells.Dispose();
 
         // Instanciamos el número solicitado de herbívoros en posiciones aleatorias.
         int spawned = 0;

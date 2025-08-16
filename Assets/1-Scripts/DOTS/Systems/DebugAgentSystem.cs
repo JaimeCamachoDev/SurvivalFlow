@@ -62,7 +62,7 @@ public partial struct DebugAgentSystem : ISystem
                 float3 b = new float3(path[i + 1].x, 0f, path[i + 1].y);
                 Debug.DrawLine(a, b, Color.cyan);
             }
-
+            
             // Desplazar suavemente al agente hacia la siguiente celda del camino.
             if (path.Length > 1)
             {
@@ -89,7 +89,6 @@ public partial struct DebugAgentSystem : ISystem
                     transform.ValueRW.Position = pos + delta / dist * step;
                 }
             }
-
             // Liberar la lista de celdas del camino.
             path.Dispose();
         }
