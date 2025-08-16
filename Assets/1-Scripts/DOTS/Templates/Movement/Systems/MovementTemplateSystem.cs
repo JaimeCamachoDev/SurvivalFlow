@@ -5,7 +5,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 /// Sistema de movimiento reutilizable basado en la plantilla de agentes.
-[UpdateAfter(typeof(ObstacleRegistrySystem))]
+[UpdateAfter(typeof(MovementObstacleRegistrySystem))]
 public partial struct MovementTemplateSystem : ISystem
 {
     private static readonly int2[] Directions = new int2[8]
@@ -20,7 +20,7 @@ public partial struct MovementTemplateSystem : ISystem
             return;
 
         // Copiar el registro de obstáculos a una variable local para usarlo en las búsquedas.
-        var obstacles = ObstacleRegistrySystem.Obstacles;
+        var obstacles = MovementObstacleRegistrySystem.Obstacles;
 
         // Calcular los límites de la grilla (mitad del tamaño del área).
         float2 half = grid.AreaSize * 0.5f;
