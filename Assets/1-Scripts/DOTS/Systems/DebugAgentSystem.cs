@@ -43,7 +43,6 @@ public partial struct DebugAgentSystem : ISystem
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 13));
 
         var obstacles = _obstacles;
-
         bool TryFindNextStep(int2 start, int2 target, out int2 next)
         {
             next = start;
