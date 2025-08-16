@@ -12,7 +12,6 @@ public partial struct DebugAgentSystem : ISystem
     {
         if (!SystemAPI.TryGetSingleton<GridManager>(out var grid))
             return;
-
         var obstacles = ObstacleRegistrySystem.Obstacles;
 
         float2 half = grid.AreaSize * 0.5f;
@@ -56,6 +55,7 @@ public partial struct DebugAgentSystem : ISystem
                 {
                     newTarget = new int2(rand.NextInt(-bounds.x, bounds.x + 1), rand.NextInt(-bounds.y, bounds.y + 1));
                 } while (obstacles.Contains(newTarget));
+
                 agent.ValueRW.Target = newTarget;
             }
 
