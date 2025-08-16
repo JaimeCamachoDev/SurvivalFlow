@@ -18,7 +18,6 @@ public partial struct DebugAgentSystem : ISystem
         float2 half = grid.AreaSize * 0.5f;
         int2 bounds = (int2)half;
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 13));
-
         foreach (var (transform, agent, gp, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<DebugAgent>, RefRW<GridPosition>>().WithEntityAccess())
         {
             int2 current = gp.ValueRO.Cell;
