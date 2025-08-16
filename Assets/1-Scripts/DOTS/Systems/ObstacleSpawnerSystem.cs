@@ -26,11 +26,21 @@ public partial struct ObstacleSpawnerSystem : ISystem
         int2 half = (int2)(area / 2f);
 
         // Celdas ya ocupadas por plantas u otros obstáculos.
-        var occupied = new NativeParallelHashSet<int2>(manager.Count, Allocator.Temp);
-        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
-            occupied.Add(gp.ValueRO.Cell);
-        foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<Plant>())
-            occupied.Add(gp.ValueRO.Cell);
+        var obstacleQuery = SystemAPI.QueryBuilder().WithAll<GridPosition, ObstacleTag>().Build();
+        var plantQuery = SystemAPI.QueryBuilder().WithAll<GridPosition, Plant>().Build();
+        int obstacleCount = obstacleQuery.CalculateEntityCount();
+        int plantCount = plantQuery.CalculateEntityCount();
+        var occupied = new NativeParallelHashSet<int2>(manager.Count + obstacleCount + plantCount, Allocator.Temp);
+
+        var obstacleCells = obstacleQuery.ToComponentDataArray<GridPosition>(Allocator.Temp);
+        for (int i = 0; i < obstacleCells.Length; i++)
+            occupied.Add(obstacleCells[i].Cell);
+        obstacleCells.Dispose();
+
+        var plantCells = plantQuery.ToComponentDataArray<GridPosition>(Allocator.Temp);
+        for (int i = 0; i < plantCells.Length; i++)
+            occupied.Add(plantCells[i].Cell);
+        plantCells.Dispose();
 
         int spawned = 0;
         int attempts = 0;
