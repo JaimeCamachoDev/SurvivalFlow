@@ -230,7 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f3da3c5e9f846b589393839836e582a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  areaSize: {x: 20, y: 20}
+  areaSize: {x: 100, y: 100}
   cellSize: 1
 --- !u!114 &9005791815627068384
 MonoBehaviour:
@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   obstaclePrefab: {fileID: 7334716910294301947, guid: f8f8cd13adc1f5f40bf586cfcf582200, type: 3}
-  count: 100
+  count: 1000
 --- !u!114 &9005791815627068385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,7 +259,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 7596814737169414124, guid: 396dc4db36fcd1740b1d55c047a26321, type: 3}
-  count: 1
+  count: 5
+  moveSpeed: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
