@@ -205,18 +205,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   plantPrefab: {fileID: 8311962731384735518, guid: 7bdfa0a76e3956b4eafd27fcefa04ecc, type: 3}
-  initialCount: 300
-  patchCount: 20
-  patchRadius: 10
+  initialCount: 100
+  patchCount: 2
+  patchRadius: 5
   maxEnergy: 100
-  energyGainRate: 2
-  initialEnergyPercent: 0.05
+  energyGainRate: 1
+  initialEnergyPercent: 0.3
   reproductionInterval: 1
-  maxPlants: 10000
+  maxPlants: 1000
   minDistanceBetweenPlants: 2
   reproductionRadius: 4
   randomSpawnChance: 0.1
-  reproductionCost: 0.1
+  reproductionCost: 0.3
   reproductionCount: 1
 --- !u!114 &9005791815627068383
 MonoBehaviour:
@@ -230,7 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f3da3c5e9f846b589393839836e582a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  areaSize: {x: 100, y: 100}
+  areaSize: {x: 20, y: 20}
   cellSize: 1
 --- !u!114 &9005791815627068384
 MonoBehaviour:
@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   obstaclePrefab: {fileID: 7334716910294301947, guid: f8f8cd13adc1f5f40bf586cfcf582200, type: 3}
-  count: 200
+  count: 100
 --- !u!114 &9005791815627068385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 7596814737169414124, guid: 396dc4db36fcd1740b1d55c047a26321, type: 3}
-  count: 5
+  count: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
