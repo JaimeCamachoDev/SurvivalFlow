@@ -423,49 +423,35 @@ public partial struct HerbivoreSystem : ISystem
             else
             {
                 float3 move = herb.ValueRO.MoveDirection * speed * dt + herb.ValueRO.MoveRemainder;
-                int2 delta = int2.zero;
+                int2 cell = currentCell;
 
-                if (math.abs(herb.ValueRO.MoveDirection.x) > 0f && math.abs(herb.ValueRO.MoveDirection.z) > 0f)
+                while (math.abs(move.x) >= 1f || math.abs(move.z) >= 1f)
                 {
-                    int stepX = (int)math.floor(math.abs(move.x));
-                    int stepZ = (int)math.floor(math.abs(move.z));
-                    int steps = math.min(stepX, stepZ);
-                    if (steps > 0)
+                    int2 step = int2.zero;
+                    if (math.abs(move.x) >= 1f) step.x = (int)math.sign(move.x);
+                    if (math.abs(move.z) >= 1f) step.y = (int)math.sign(move.z);
+                    int2 next = cell + step;
+
+                    if (math.abs(next.x) > bounds.x || math.abs(next.y) > bounds.y ||
+                        obstacles.Contains(next) || herbCells.Contains(next))
                     {
-                        delta = new int2((int)math.sign(move.x) * steps, (int)math.sign(move.z) * steps);
-                        move -= new float3(delta.x, 0f, delta.y);
+                        move = float3.zero;
+                        herb.ValueRW.MoveRemainder = float3.zero;
+                        herb.ValueRW.MoveDirection = float3.zero;
+                        break;
                     }
-                }
-                else
-                {
-                    int stepX = (int)math.floor(math.abs(move.x));
-                    int stepZ = (int)math.floor(math.abs(move.z));
-                    if (stepX != 0 || stepZ != 0)
-                    {
-                        delta = new int2((int)math.sign(move.x) * stepX, (int)math.sign(move.z) * stepZ);
-                        move -= new float3(delta.x, 0f, delta.y);
-                    }
+
+                    herbCells.Remove(cell);
+                    cell = next;
+                    herbCells.Add(cell);
+                    move -= new float3(step.x, 0f, step.y);
                 }
 
+                gp.ValueRW.Cell = cell;
                 herb.ValueRW.MoveRemainder = move;
-                int2 targetCell = currentCell + delta;
-                targetCell.x = math.clamp(targetCell.x, -bounds.x, bounds.x);
-                targetCell.y = math.clamp(targetCell.y, -bounds.y, bounds.y);
-
                 float3 worldOffset = new float3(move.x, 0f, move.z) * grid.CellSize;
-                if ((!herbCells.Contains(targetCell) && !obstacles.Contains(targetCell)) || math.all(targetCell == currentCell))
-                {
-                    float3 targetPos = new float3(targetCell.x * grid.CellSize, 0f, targetCell.y * grid.CellSize) + worldOffset;
-                    transform.ValueRW.Position = targetPos;
-                    gp.ValueRW.Cell = targetCell;
-                    herbCells.Remove(currentCell);
-                    herbCells.Add(targetCell);
-                }
-                else
-                {
-                    transform.ValueRW.Position = new float3(currentCell.x * grid.CellSize, 0f, currentCell.y * grid.CellSize);
-                    herb.ValueRW.MoveRemainder = float3.zero;
-                }
+                transform.ValueRW.Position = new float3(cell.x * grid.CellSize, 0f, cell.y * grid.CellSize) + worldOffset;
+
             }
 
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
