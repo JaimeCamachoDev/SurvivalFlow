@@ -40,6 +40,7 @@ public partial struct DebugAgentSystem : ISystem
                 } while (obstacles.Contains(newTarget));
                 agent.ValueRW.Target = newTarget;
             }
+
             // Obtener el camino hasta el objetivo evitando obstáculos.
             if (!FindPath(current, agent.ValueRO.Target, obstacles, bounds, out var path))
             {
@@ -61,6 +62,7 @@ public partial struct DebugAgentSystem : ISystem
                 float3 b = new float3(path[i + 1].x, 0f, path[i + 1].y);
                 Debug.DrawLine(a, b, Color.cyan);
             }
+            
             // Desplazar suavemente al agente hacia la siguiente celda del camino.
             if (path.Length > 1)
             {
@@ -70,6 +72,11 @@ public partial struct DebugAgentSystem : ISystem
                 float step = agent.ValueRO.MoveSpeed * SystemAPI.Time.DeltaTime;
                 float3 delta = world - pos;
                 float dist = math.length(delta);
+
+                // Orientar al agente hacia la dirección del movimiento para que avance "de frente".
+                if (dist > 0f)
+                    transform.ValueRW.Rotation = quaternion.LookRotationSafe(delta / dist, math.up());
+
                 if (dist <= step)
                 {
                     // Llegó a la siguiente celda.
@@ -149,6 +156,7 @@ public partial struct DebugAgentSystem : ISystem
                 frontier.Enqueue(next);
             }
         }
+
         // Si no se encontró camino, liberar recursos y salir.
         if (!found)
         {
@@ -158,6 +166,7 @@ public partial struct DebugAgentSystem : ISystem
             path = default;
             return false;
         }
+
         // Reconstruir el camino desde el objetivo hasta el origen.
         int2 p = target;
         while (!math.all(p == start))
