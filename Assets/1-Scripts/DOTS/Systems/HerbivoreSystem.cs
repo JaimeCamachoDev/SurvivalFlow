@@ -24,7 +24,6 @@ public partial struct HerbivoreSystem : ISystem
     {
         new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
     };
-
     public void OnCreate(ref SystemState state)
     {
         _plants = new NativeParallelMultiHashMap<int2, Entity>(1024, Allocator.Persistent);
@@ -51,7 +50,7 @@ public partial struct HerbivoreSystem : ISystem
         void Execute(Entity entity, in GridPosition gp, in Plant tag)
         {
             Plants.Add(gp.Cell, entity);
-            PlantCells.Add(gp.Cell);
+            PlantCells.AddNoResize(gp.Cell);
         }
     }
 
@@ -77,6 +76,35 @@ public partial struct HerbivoreSystem : ISystem
         }
     }
 
+    // Devuelve la siguiente celda que acerca al objetivo evitando obstáculos y otros
+    // herbívoros evaluando únicamente las cuatro direcciones principales.
+    [BurstCompile]
+    private bool TryFindNextStep(int2 start, int2 target, int2 bounds, out int2 next)
+    {
+        next = start;
+        float bestDist = float.MaxValue;
+
+        for (int i = 0; i < dirs4.Length; i++)
+        {
+            int2 cand = start + dirs4[i];
+            if (math.abs(cand.x) > bounds.x || math.abs(cand.y) > bounds.y)
+                continue;
+            if (_obstacles.Contains(cand))
+                continue;
+            if (_herbCells.Contains(cand) && !math.all(cand == target))
+                continue;
+
+            float dist = math.lengthsq((float2)(target - cand));
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                next = cand;
+            }
+        }
+
+        return bestDist < float.MaxValue;
+    }
+
     public void OnUpdate(ref SystemState state)
     {
         // Comprobamos que existan los gestores necesarios para delimitar el movimiento y depurar obstáculos.
@@ -91,8 +119,12 @@ public partial struct HerbivoreSystem : ISystem
         int2 bounds = (int2)half;
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
+        var plantQuery = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
+        int plantCount = plantQuery.CalculateEntityCount();
         _plants.Clear();
         _plantCells.Clear();
+        if (_plantCells.Capacity < plantCount)
+            _plantCells.Capacity = plantCount;
         _herbCells.Clear();
         _herbMap.Clear();
         _obstacles.Clear();
@@ -116,36 +148,6 @@ public partial struct HerbivoreSystem : ISystem
 
         state.Dependency = obstacleJobHandle;
         state.Dependency.Complete();
-
-        // Devuelve la siguiente celda que acerca al objetivo evitando obstáculos y otros
-        // herbívoros. Esta versión evita la búsqueda por anchura costosa del antiguo
-        // algoritmo y simplemente evalúa las cuatro direcciones principales para
-        // escoger el movimiento que más se aproxima al destino.
-        bool TryFindNextStep(int2 start, int2 target, out int2 next)
-        {
-            next = start;
-            float bestDist = float.MaxValue;
-
-            for (int i = 0; i < dirs4.Length; i++)
-            {
-                int2 cand = start + dirs4[i];
-                if (math.abs(cand.x) > bounds.x || math.abs(cand.y) > bounds.y)
-                    continue;
-                if (_obstacles.Contains(cand))
-                    continue;
-                if (_herbCells.Contains(cand) && !math.all(cand == target))
-                    continue;
-
-                float dist = math.lengthsq((float2)(target - cand));
-                if (dist < bestDist)
-                {
-                    bestDist = dist;
-                    next = cand;
-                }
-            }
-
-            return bestDist < float.MaxValue;
-        }
 
         // Recorremos cada herbívoro.
         foreach (var (transform, energy, health, herb, gp, repro, info, entity) in
@@ -217,7 +219,7 @@ public partial struct HerbivoreSystem : ISystem
                             eatingPlant = targetPlant;
                             if (!math.all(herb.ValueRO.KnownPlantCell == currentCell))
                             {
-                                if (TryFindNextStep(currentCell, herb.ValueRO.KnownPlantCell, out var nextCell))
+                                if (TryFindNextStep(currentCell, herb.ValueRO.KnownPlantCell, bounds, out var nextCell))
                                 {
                                     int2 step = nextCell - currentCell;
                                     herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
@@ -256,7 +258,7 @@ public partial struct HerbivoreSystem : ISystem
                         {
                             herb.ValueRW.KnownPlantCell = target;
                             herb.ValueRW.HasKnownPlant = 1;
-                            if (TryFindNextStep(currentCell, target, out var nextCell))
+                            if (TryFindNextStep(currentCell, target, bounds, out var nextCell))
                             {
                                 int2 step = nextCell - currentCell;
                                 herb.ValueRW.MoveDirection = math.normalize(new float3(step.x, 0f, step.y));
@@ -394,7 +396,7 @@ public partial struct HerbivoreSystem : ISystem
                             }
                             else
                             {
-                                if (TryFindNextStep(currentCell, mateCell, out var nextCell))
+                                if (TryFindNextStep(currentCell, mateCell, bounds, out var nextCell))
                                 {
                                     int2 step = nextCell - currentCell;
                                     if (step.x != 0 || step.y != 0)
