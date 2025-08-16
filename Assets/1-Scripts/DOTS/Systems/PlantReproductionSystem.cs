@@ -6,6 +6,8 @@ using Unity.Transforms;
 
 /// Sistema que controla la reproducción global de las plantas.
 /// Solo se intenta un nacimiento por intervalo definido en PlantManager.
+[UpdateAfter(typeof(ObstacleRegistrySystem))]
+[UpdateAfter(typeof(ObstacleSpawnerSystem))]
 [BurstCompile]
 public partial struct PlantReproductionSystem : ISystem
 {
@@ -13,7 +15,8 @@ public partial struct PlantReproductionSystem : ISystem
     {
         // Obtenemos la configuración global y los datos de la cuadrícula.
         if (!SystemAPI.TryGetSingletonRW<PlantManager>(out var managerRw) ||
-            !SystemAPI.TryGetSingleton<GridManager>(out var grid))
+            !SystemAPI.TryGetSingleton<GridManager>(out var grid) ||
+            (SystemAPI.TryGetSingleton<ObstacleManager>(out var obstacleManager) && obstacleManager.Initialized == 0))
             return;
 
         var manager = managerRw.ValueRO;
@@ -34,8 +37,28 @@ public partial struct PlantReproductionSystem : ISystem
         var positions = new NativeList<float3>(Allocator.Temp);
         var matureEntities = new NativeList<Entity>(Allocator.Temp);
         var maturePositions = new NativeList<float3>(Allocator.Temp);
-        var occupied = new NativeParallelHashSet<int2>(manager.MaxPlants, Allocator.Temp);
-        // Reservamos las celdas que contienen obstáculos para impedir nacimientos allí.
+
+        // Aseguramos suficiente capacidad para celdas ocupadas por plantas y obstáculos.
+        int obstacleCount = 0;
+        if (ObstacleRegistrySystem.Obstacles.IsCreated)
+            obstacleCount = ObstacleRegistrySystem.Obstacles.Count();
+        else
+        {
+            var obstacleQuery = SystemAPI.QueryBuilder().WithAll<GridPosition, ObstacleTag>().Build();
+            obstacleCount = obstacleQuery.CalculateEntityCount();
+        }
+        var occupied = new NativeParallelHashSet<int2>(manager.MaxPlants + obstacleCount, Allocator.Temp);
+
+        // Incluimos celdas de obstáculos ya registrados para impedir nacimientos allí.
+        if (ObstacleRegistrySystem.Obstacles.IsCreated)
+        {
+            var obstacleCells = ObstacleRegistrySystem.Obstacles.ToNativeArray(Allocator.Temp);
+            for (int i = 0; i < obstacleCells.Length; i++)
+                occupied.Add(obstacleCells[i]);
+            obstacleCells.Dispose();
+        }
+
+        // Como respaldo, también consultamos los obstáculos existentes en la escena.
         foreach (var gp in SystemAPI.Query<RefRO<GridPosition>>().WithAll<ObstacleTag>())
             occupied.Add(gp.ValueRO.Cell);
 
