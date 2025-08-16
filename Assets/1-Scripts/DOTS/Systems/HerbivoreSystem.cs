@@ -66,58 +66,34 @@ public partial struct HerbivoreSystem : ISystem
             new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1)
         };
 
-        var pathQueue = new NativeQueue<int2>(Allocator.Temp);
-        var cameFrom = new NativeParallelHashMap<int2, int2>(1024, Allocator.Temp);
-
-        // Búsqueda simple por anchura para encontrar la siguiente celda hacia un objetivo.
+        // Devuelve la siguiente celda que acerca al objetivo evitando obstáculos y otros
+        // herbívoros. Esta versión evita la búsqueda por anchura costosa del antiguo
+        // algoritmo y simplemente evalúa las cuatro direcciones principales para
+        // escoger el movimiento que más se aproxima al destino.
         bool TryFindNextStep(int2 start, int2 target, out int2 next)
         {
-            pathQueue.Clear();
-            cameFrom.Clear();
-
-            pathQueue.Enqueue(start);
-            cameFrom.TryAdd(start, start);
-
-
-            bool found = false;
-
-
-            while (pathQueue.TryDequeue(out var cell))
-            {
-                if (math.all(cell == target))
-                {
-                    found = true;
-                    break;
-                }
-
-                for (int i = 0; i < dirs4.Length; i++)
-                {
-                    int2 nc = cell + dirs4[i];
-                    if (math.abs(nc.x) > bounds.x || math.abs(nc.y) > bounds.y)
-                        continue;
-                    if (obstacles.Contains(nc))
-                        continue;
-                    if (herbCells.Contains(nc) && !math.all(nc == target))
-                        continue;
-                    if (!cameFrom.TryAdd(nc, cell))
-                        continue;
-                    pathQueue.Enqueue(nc);
-                }
-            }
-
             next = start;
-            if (found)
+            float bestDist = float.MaxValue;
+
+            for (int i = 0; i < dirs4.Length; i++)
             {
-                var cur = target;
-                var prev = cameFrom[cur];
-                while (!math.all(prev == start))
+                int2 cand = start + dirs4[i];
+                if (math.abs(cand.x) > bounds.x || math.abs(cand.y) > bounds.y)
+                    continue;
+                if (obstacles.Contains(cand))
+                    continue;
+                if (herbCells.Contains(cand) && !math.all(cand == target))
+                    continue;
+
+                float dist = math.lengthsq((float2)(target - cand));
+                if (dist < bestDist)
                 {
-                    cur = prev;
-                    prev = cameFrom[cur];
+                    bestDist = dist;
+                    next = cand;
                 }
-                next = cur;
             }
-            return found;
+
+            return bestDist < float.MaxValue;
         }
 
         // Recorremos cada herbívoro.
@@ -475,6 +451,7 @@ public partial struct HerbivoreSystem : ISystem
                 herb.ValueRW.MoveRemainder = move;
                 float3 worldOffset = new float3(move.x, 0f, move.z) * grid.CellSize;
                 transform.ValueRW.Position = new float3(cell.x * grid.CellSize, 0f, cell.y * grid.CellSize) + worldOffset;
+
             }
 
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
@@ -530,7 +507,5 @@ public partial struct HerbivoreSystem : ISystem
         herbCells.Dispose();
         herbMap.Dispose();
         obstacles.Dispose();
-        pathQueue.Dispose();
-        cameFrom.Dispose();
     }
 }
