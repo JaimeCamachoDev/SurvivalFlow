@@ -37,7 +37,17 @@ public partial struct PlantReproductionSystem : ISystem
         var positions = new NativeList<float3>(Allocator.Temp);
         var matureEntities = new NativeList<Entity>(Allocator.Temp);
         var maturePositions = new NativeList<float3>(Allocator.Temp);
-        var occupied = new NativeParallelHashSet<int2>(manager.MaxPlants, Allocator.Temp);
+
+        // Aseguramos suficiente capacidad para celdas ocupadas por plantas y obstáculos.
+        int obstacleCount = 0;
+        if (ObstacleRegistrySystem.Obstacles.IsCreated)
+            obstacleCount = ObstacleRegistrySystem.Obstacles.Count();
+        else
+        {
+            var obstacleQuery = SystemAPI.QueryBuilder().WithAll<GridPosition, ObstacleTag>().Build();
+            obstacleCount = obstacleQuery.CalculateEntityCount();
+        }
+        var occupied = new NativeParallelHashSet<int2>(manager.MaxPlants + obstacleCount, Allocator.Temp);
 
         // Incluimos celdas de obstáculos ya registrados para impedir nacimientos allí.
         if (ObstacleRegistrySystem.Obstacles.IsCreated)
