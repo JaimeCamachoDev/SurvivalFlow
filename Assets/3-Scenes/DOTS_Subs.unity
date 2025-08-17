@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   obstaclePrefab: {fileID: 7334716910294301947, guid: f8f8cd13adc1f5f40bf586cfcf582200, type: 3}
-  count: 1000
+  count: 3000
 --- !u!114 &9005791815627068385
 MonoBehaviour:
   m_ObjectHideFlags: 0
