@@ -15,9 +15,6 @@ public struct Plant : IComponentData
     public float MaxEnergy;  // Energía máxima
     public float EnergyGainRate; // Velocidad de obtención de energía
 
-    /// Último escalón de escala aplicado (1..5) para evitar cambios cada frame.
-    public byte ScaleStep;
-
     /// Estado visual/biológico actual.
     public PlantStage Stage;
 

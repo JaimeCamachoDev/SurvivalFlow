@@ -124,15 +124,14 @@ public partial struct PlantReproductionSystem : ISystem
                         var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
                         template.MaxEnergy = manager.PlantMaxEnergy;
                         template.EnergyGainRate = manager.PlantEnergyGainRate;
-                        template.Energy = manager.PlantMaxEnergy * manager.InitialEnergyPercent;
-                        template.ScaleStep = 1;
+                        float initialPercent = math.max(manager.InitialEnergyPercent, 0.2f);
+                        template.Energy = manager.PlantMaxEnergy * initialPercent;
                         template.Stage = PlantStage.Growing;
-                        float scale = math.max(manager.InitialEnergyPercent, 0.2f);
                         ecb.SetComponent(child, template);
-                        ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
+                        ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, initialPercent));
                         ecb.SetComponent(child, new LocalToWorld
                         {
-                            Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
+                            Value = float4x4.TRS(pos, quaternion.identity, new float3(initialPercent))
                         });
                         ecb.AddComponent(child, new GridPosition { Cell = cell });
 
@@ -189,15 +188,14 @@ public partial struct PlantReproductionSystem : ISystem
                     var template = state.EntityManager.GetComponentData<Plant>(manager.Prefab);
                     template.MaxEnergy = manager.PlantMaxEnergy;
                     template.EnergyGainRate = manager.PlantEnergyGainRate;
-                    template.Energy = manager.PlantMaxEnergy * manager.InitialEnergyPercent;
-                    template.ScaleStep = 1;
+                    float initialPercent = math.max(manager.InitialEnergyPercent, 0.2f);
+                    template.Energy = manager.PlantMaxEnergy * initialPercent;
                     template.Stage = PlantStage.Growing;
-                    float scale = math.max(manager.InitialEnergyPercent, 0.2f);
                     ecb.SetComponent(child, template);
-                    ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, scale));
+                    ecb.SetComponent(child, LocalTransform.FromPositionRotationScale(pos, quaternion.identity, initialPercent));
                     ecb.SetComponent(child, new LocalToWorld
                     {
-                        Value = float4x4.TRS(pos, quaternion.identity, new float3(scale))
+                        Value = float4x4.TRS(pos, quaternion.identity, new float3(initialPercent))
                     });
                     ecb.AddComponent(child, new GridPosition { Cell = cell });
 

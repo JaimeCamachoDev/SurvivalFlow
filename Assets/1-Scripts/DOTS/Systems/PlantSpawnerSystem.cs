@@ -38,10 +38,10 @@ public partial struct PlantSpawnerSystem : ISystem
         var prefabPlant = state.EntityManager.GetComponentData<Plant>(prefab);
         prefabPlant.MaxEnergy = manager.PlantMaxEnergy;
         prefabPlant.EnergyGainRate = manager.PlantEnergyGainRate;
-        prefabPlant.Energy = manager.PlantMaxEnergy * manager.InitialEnergyPercent;
-        prefabPlant.ScaleStep = 1;
+        float initialPercent = math.max(manager.InitialEnergyPercent, 0.2f);
+        prefabPlant.Energy = manager.PlantMaxEnergy * initialPercent;
         prefabPlant.Stage = PlantStage.Growing;
-        float initialScale = math.max(manager.InitialEnergyPercent, 0.2f);
+        float initialScale = initialPercent;
 
         // Conjunto de celdas ocupadas y centros de cada parche.
         int2 half = (int2)(area / 2f);
