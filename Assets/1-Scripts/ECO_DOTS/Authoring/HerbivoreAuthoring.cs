@@ -1,67 +1,38 @@
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
-/// Authoring para el prefab de herbívoro en DOTS.
+/// <summary>
+/// Baker que inicializa los nuevos componentes de herbívoro.
+/// </summary>
 public class HerbivoreAuthoring : MonoBehaviour
 {
-    [Header("Stats")]
-    // Vida máxima del herbívoro.
-    public float maxHealth = 50f;
+    [Header("Vida")]
+    public float lifeSpan = 600f;
+    public float startHealth = 1f;
 
-    // Energía máxima que puede almacenar.
-    public float maxEnergy = 100f;
+    [Header("Metabolismo")]
+    public float startEnergy = 0.6f;
+    public float startStamina = 0.6f;
+    public float startHunger = 0.6f;
+    public float baseRate = 0.01f;
+    public float moveCost = 0.02f;
+    public float sprintCost = 0.04f;
+    public float healThreshold = 0.8f;
+    public float starveThreshold = 0f;
 
-    // Velocidad de movimiento.
-    public float moveSpeed = 2f;
-
-    // Consumo de energía por segundo cuando está quieto.
-    public float idleEnergyCost = 1f;
-
-    // Consumo adicional de energía al moverse.
-    public float moveEnergyCost = 2f;
-
-    // Tasa de alimentación (energía recuperada por segundo).
-    public float eatEnergyRate = 40f;
-
-    // Radio en el que pueden detectar plantas.
-    public float plantSeekRadius = 5f;
-
-    [Header("Percepción")]
-    public float predatorSenseRadius = 6f;
-
-    [Header("Separación")]
-    public float separationRadius = 1.5f;
-    public float separationForce = 1f;
-
-    [Header("Decisiones")]
-    public float decisionCooldown = 0.2f;
-
-    [Header("Colores de estado")]
-    public Color wanderColor = Color.green;
-    public Color eatColor = Color.yellow;
-    public Color mateColor = Color.cyan;
-    public Color fleeColor = Color.red;
+    [Header("Locomoción")]
+    public float walkSpeed = 1.5f;
+    public float runSpeed = 3.5f;
+    public float visionRadius = 6f;
 
     [Header("Reproducción")]
-    public float reproductionThreshold = 80f;
-    public float reproductionSeekRadius = 6f;
-    public float reproductionMatingDistance = 1f;
-    public float reproductionCooldown = 10f;
-    public int minOffspring = 1;
-    public int maxOffspring = 2;
-    [Range(0f,1f)] public float reproductionEnergyCostPercent = 0.25f;
-
-    // Porcentaje de vida restaurada al comer.
-    [Range(0f,1f)] public float healthRestorePercent = 0.25f;
-
-    // Tiempo entre cambios de dirección aleatorios.
-    public float changeDirectionInterval = 2f;
-
-    // Convierte el prefab en una entidad con todos sus componentes.
+    [Range(0f,1f)] public float fertility = 0.5f;
+    public float mateCooldown = 120f;
+    public float mateCost = 0.2f;
+    public float minHealth = 0.8f;
+    public float minEnergy = 0.6f;
 
     class Baker : Baker<HerbivoreAuthoring>
     {
@@ -69,93 +40,46 @@ public class HerbivoreAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-
-            // Datos de comportamiento del herbívoro.
             AddComponent(entity, new Herbivore
             {
-                MoveSpeed = authoring.moveSpeed,
-                IdleEnergyCost = authoring.idleEnergyCost,
-                MoveEnergyCost = authoring.moveEnergyCost,
-                EatEnergyRate = authoring.eatEnergyRate,
-                PlantSeekRadius = authoring.plantSeekRadius,
-                HealthRestorePercent = authoring.healthRestorePercent,
-                ChangeDirectionInterval = authoring.changeDirectionInterval,
-                DirectionTimer = 0f,
-                MoveDirection = float3.zero,
-                MoveRemainder = float3.zero,
-                KnownPlantCell = int2.zero,
-                HasKnownPlant = 0,
-                IsEating = 0
+                Generation = 1,
+                Age = 0f,
+                LifeSpan = authoring.lifeSpan
             });
 
-            AddComponent(entity, new HerbivoreState
+            AddComponent(entity, new Health { Value = authoring.startHealth });
+
+            AddComponent(entity, new Metabolism
             {
-                Current = HerbivoreBehaviour.Wander,
-                DecisionCooldown = authoring.decisionCooldown
+                Energy = authoring.startEnergy,
+                Stamina = authoring.startStamina,
+                Hunger = authoring.startHunger,
+                BaseRate = authoring.baseRate,
+                MoveCost = authoring.moveCost,
+                SprintCost = authoring.sprintCost,
+                HealThreshold = authoring.healThreshold,
+                StarveThreshold = authoring.starveThreshold
             });
 
-            AddComponent(entity, new HerbivoreDecisionTimer { TimeLeft = 0f });
-
-            AddComponent(entity, new PredatorSense { Radius = authoring.predatorSenseRadius });
-
-            AddComponent(entity, new SeparationRadius
+            AddComponent(entity, new Locomotion
             {
-                Value = authoring.separationRadius,
-                Force = authoring.separationForce
+                WalkSpeed = authoring.walkSpeed,
+                RunSpeed = authoring.runSpeed,
+                VisionRadius = authoring.visionRadius
             });
 
-            AddComponent(entity, new StateColor
-            {
-                Wander = new float4(authoring.wanderColor.r, authoring.wanderColor.g, authoring.wanderColor.b, authoring.wanderColor.a),
-                Eat = new float4(authoring.eatColor.r, authoring.eatColor.g, authoring.eatColor.b, authoring.eatColor.a),
-                Mate = new float4(authoring.mateColor.r, authoring.mateColor.g, authoring.mateColor.b, authoring.mateColor.a),
-                Flee = new float4(authoring.fleeColor.r, authoring.fleeColor.g, authoring.fleeColor.b, authoring.fleeColor.a)
-            });
-
-            // Componentes de salud y hambre iniciales.
-
-            AddComponent(entity, new Health
-            {
-                Value = authoring.maxHealth,
-                Max = authoring.maxHealth
-            });
-
-            AddComponent(entity, new Energy
-            {
-                Value = authoring.maxEnergy,
-                Max = authoring.maxEnergy,
-                SeekThreshold = authoring.maxEnergy * 0.5f,
-                DeathThreshold = 0f
-            });
-
-            // Reproducción y datos informativos.
             AddComponent(entity, new Reproduction
             {
-                Threshold = authoring.reproductionThreshold,
-                SeekRadius = authoring.reproductionSeekRadius,
-                MatingDistance = authoring.reproductionMatingDistance,
-                Cooldown = authoring.reproductionCooldown,
-                Timer = 0f,
-                MinOffspring = authoring.minOffspring,
-                MaxOffspring = authoring.maxOffspring,
-                EnergyCostPercent = authoring.reproductionEnergyCostPercent
+                Fertility = authoring.fertility,
+                MateCooldown = authoring.mateCooldown,
+                MateCost = authoring.mateCost,
+                MinHealth = authoring.minHealth,
+                MinEnergy = authoring.minEnergy
             });
 
-            AddComponent(entity, new HerbivoreInfo
-            {
-                Name = new FixedString64Bytes(""),
-                Lifetime = 0f,
-                Generation = 1
-            });
-
-            // Transform y posición inicial del herbívoro.
-            AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, 1f));
-            AddComponent(entity, new GridPosition { Cell = int2.zero });
-
-            // Etiqueta y color inicial.
-
-            AddComponent<HerbivoreTag>(entity);
-            AddComponent(entity, new URPMaterialPropertyBaseColor { Value = new float4(0f, 1f, 0f, 1f) });
+            AddComponent<Intent>(entity);
+            AddComponent(entity, new TargetPlant { Plant = Entity.Null });
+            AddComponent<LocalTransform>(entity, LocalTransform.Identity);
         }
     }
 }
