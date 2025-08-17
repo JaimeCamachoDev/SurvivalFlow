@@ -24,73 +24,75 @@ public partial struct TemplateAgentSystem : ISystem
         // Crear un generador aleatorio que dependa del tiempo para variar los caminos.
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 13));
 
+        float dt = SystemAPI.Time.DeltaTime;
+
         // Iterar sobre todos los agentes plantilla existentes.
-        foreach (var (transform, agent, gp, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<TemplateAgent>, RefRW<GridPosition>>().WithEntityAccess())
+        foreach (var (transform, agent, gp, pathBuffer) in SystemAPI
+                     .Query<RefRW<LocalTransform>, RefRW<TemplateAgent>, RefRW<GridPosition>, DynamicBuffer<PathBufferElement>>())
         {
-            // Posición actual del agente en celdas.
             int2 current = gp.ValueRO.Cell;
 
-            // Si ya llegó a su objetivo, seleccionar uno nuevo aleatorio.
-            if (math.all(current == agent.ValueRO.Target))
+            // Asegurar que la ruta contenga la celda actual como punto inicial.
+            if (pathBuffer.Length == 0)
             {
+                pathBuffer.Add(new PathBufferElement { Cell = current });
+                agent.ValueRW.PathIndex = 0;
+            }
+
+            // Si se alcanzó el final del camino, esperar o buscar uno nuevo.
+            if (agent.ValueRO.PathIndex >= pathBuffer.Length)
+            {
+                agent.ValueRW.WaitTimer -= dt;
+                if (agent.ValueRO.WaitTimer > 0f)
+                    continue; // El agente "piensa" antes de decidir.
+
                 int2 newTarget;
                 do
                 {
                     newTarget = new int2(rand.NextInt(-bounds.x, bounds.x + 1), rand.NextInt(-bounds.y, bounds.y + 1));
                 } while (obstacles.Contains(newTarget));
-                agent.ValueRW.Target = newTarget;
-            }
 
-            // Obtener el camino hasta el objetivo evitando obstáculos.
-            if (!FindPath(current, agent.ValueRO.Target, obstacles, bounds, out var path))
-            {
-                // Si falla, reintentar con un nuevo objetivo aleatorio.
-                int2 newTarget;
-                do
+                agent.ValueRW.Target = newTarget;
+                agent.ValueRW.WaitTimer = rand.NextFloat(0.5f, 1.5f);
+
+                if (FindPath(current, newTarget, obstacles, bounds, out var newPath))
                 {
-                    newTarget = new int2(rand.NextInt(-bounds.x, bounds.x + 1), rand.NextInt(-bounds.y, bounds.y + 1));
-                } while (obstacles.Contains(newTarget));
-                agent.ValueRW.Target = newTarget;
-                if (!FindPath(current, newTarget, obstacles, bounds, out path))
-                    continue; // No se encontró camino, saltar a la siguiente entidad.
+                    pathBuffer.Clear();
+                    for (int i = 0; i < newPath.Length; i++)
+                        pathBuffer.Add(new PathBufferElement { Cell = newPath[i] });
+                    agent.ValueRW.PathIndex = math.min(1, pathBuffer.Length);
+                    newPath.Dispose();
+                }
+                else
+                {
+                    agent.ValueRW.PathIndex = pathBuffer.Length; // Reintentar en el próximo frame.
+                }
             }
 
-            // Dibujar la ruta calculada en la vista de escena del editor.
-            for (int i = 0; i < path.Length - 1; i++)
-            {
-                float3 a = new float3(path[i].x, 0f, path[i].y);
-                float3 b = new float3(path[i + 1].x, 0f, path[i + 1].y);
-                Debug.DrawLine(a, b, Color.cyan);
-            }
-            
             // Desplazar suavemente al agente hacia la siguiente celda del camino.
-            if (path.Length > 1)
+            if (agent.ValueRO.PathIndex < pathBuffer.Length)
             {
-                int2 next = path[1];
+                int2 next = pathBuffer[agent.ValueRO.PathIndex].Cell;
                 float3 world = new float3(next.x, 0f, next.y);
                 float3 pos = transform.ValueRO.Position;
-                float step = agent.ValueRO.MoveSpeed * SystemAPI.Time.DeltaTime;
+                float step = agent.ValueRO.MoveSpeed * dt;
                 float3 delta = world - pos;
                 float dist = math.length(delta);
 
-                // Orientar al agente hacia la dirección del movimiento para que avance "de frente".
                 if (dist > 0f)
                     transform.ValueRW.Rotation = quaternion.LookRotationSafe(delta / dist, math.up());
 
                 if (dist <= step)
                 {
-                    // Llegó a la siguiente celda.
                     transform.ValueRW.Position = world;
                     gp.ValueRW.Cell = next;
+                    agent.ValueRW.PathIndex++;
                 }
                 else
                 {
-                    // Avanzar una fracción hacia la celda destino.
                     transform.ValueRW.Position = pos + delta / dist * step;
                 }
             }
-            // Liberar la lista de celdas del camino.
-            path.Dispose();
         }
     }
 

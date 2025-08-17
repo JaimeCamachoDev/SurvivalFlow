@@ -25,6 +25,9 @@ public partial struct HerbivoreSpawnerSystem : ISystem
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var rand = Unity.Mathematics.Random.CreateFromIndex(3);
 
+        // Datos base del prefab para personalizar cada instancia.
+        var prefabData = state.EntityManager.GetComponentData<Herbivore>(manager.Prefab);
+
         // Rango del área jugable en celdas.
         float2 area = grid.AreaSize;
         int2 half = (int2)(area / 2f);
@@ -60,6 +63,18 @@ public partial struct HerbivoreSpawnerSystem : ISystem
                 Scale = 1f
             });
             ecb.AddComponent(e, new GridPosition { Cell = cell });
+
+            // Personalizar los datos del herbívoro para esta instancia.
+            var herb = prefabData;
+            herb.Target = cell;
+            herb.WaitTimer = rand.NextFloat(0f, 1f);
+            herb.PathIndex = 0;
+            ecb.SetComponent(e, herb);
+
+            // Buffer de ruta inicial con la celda actual.
+            var path = ecb.AddBuffer<PathBufferElement>(e);
+            path.Add(new PathBufferElement { Cell = cell });
+
             ecb.SetComponent(e, new HerbivoreInfo
             {
                 Name = HerbivoreNameGenerator.NextName(),

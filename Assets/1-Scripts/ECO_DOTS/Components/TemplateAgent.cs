@@ -13,4 +13,10 @@ public struct TemplateAgent : IComponentData
     /// Esta se inicializa desde el manager y puede variarse para todos
     /// los agentes simultáneamente.
     public float MoveSpeed;
+
+    /// Tiempo de espera antes de elegir un nuevo objetivo.
+    public float WaitTimer;
+
+    /// Índice del siguiente nodo dentro del buffer de ruta.
+    public int PathIndex;
 }

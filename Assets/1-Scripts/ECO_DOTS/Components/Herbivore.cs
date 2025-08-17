@@ -42,4 +42,13 @@ public struct Herbivore : IComponentData
 
     /// Indicador de si actualmente está comiendo una planta.
     public byte IsEating;
+
+    /// Celda objetivo actual para navegación.
+    public int2 Target;
+
+    /// Tiempo de espera antes de buscar un nuevo objetivo.
+    public float WaitTimer;
+
+    /// Índice de la siguiente celda dentro del buffer de ruta.
+    public int PathIndex;
 }
