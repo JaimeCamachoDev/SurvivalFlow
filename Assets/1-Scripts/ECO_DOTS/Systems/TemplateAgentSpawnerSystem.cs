@@ -56,6 +56,8 @@ public partial struct TemplateAgentSpawnerSystem : ISystem
             var agent = prefabData;
             agent.Target = cell; // El primer objetivo es su posición actual.
             agent.MoveSpeed = manager.MoveSpeed; // Asignar velocidad desde el manager.
+            agent.WaitTimer = rand.NextFloat(0f, 1f); // Escalonar el cálculo de rutas.
+            agent.PathIndex = 0;
             ecb.SetComponent(e, agent);
         }
 

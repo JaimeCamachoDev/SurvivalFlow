@@ -85,7 +85,10 @@ public class HerbivoreAuthoring : MonoBehaviour
                 MoveRemainder = float3.zero,
                 KnownPlantCell = int2.zero,
                 HasKnownPlant = 0,
-                IsEating = 0
+                IsEating = 0,
+                Target = int2.zero,
+                WaitTimer = 0f,
+                PathIndex = 0
             });
 
             AddComponent(entity, new HerbivoreState
@@ -151,6 +154,9 @@ public class HerbivoreAuthoring : MonoBehaviour
             // Transform y posición inicial del herbívoro.
             AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, 1f));
             AddComponent(entity, new GridPosition { Cell = int2.zero });
+
+            // Buffer de ruta para que el herbívoro pueda almacenar sus destinos.
+            AddBuffer<PathBufferElement>(entity);
 
             // Etiqueta y color inicial.
 

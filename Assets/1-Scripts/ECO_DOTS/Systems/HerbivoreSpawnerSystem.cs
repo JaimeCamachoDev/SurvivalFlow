@@ -39,10 +39,11 @@ public partial struct HerbivoreSpawnerSystem : ISystem
         obstacleCells.Dispose();
 
         // Instanciamos el número solicitado de herbívoros en posiciones aleatorias.
+        int spawnCount = math.min(manager.InitialCount, manager.MaxPopulation);
         int spawned = 0;
         int attempts = 0;
-        int maxAttempts = manager.InitialCount * 20;
-        while (spawned < manager.InitialCount && attempts < maxAttempts)
+        int maxAttempts = spawnCount * 20;
+        while (spawned < spawnCount && attempts < maxAttempts)
         {
             attempts++;
             int2 cell = new int2(
@@ -60,6 +61,23 @@ public partial struct HerbivoreSpawnerSystem : ISystem
                 Scale = 1f
             });
             ecb.AddComponent(e, new GridPosition { Cell = cell });
+
+            // Personalizar los datos del herbívoro para esta instancia.
+            var herb = manager.BaseHerbivore;
+            herb.Target = cell;
+            herb.WaitTimer = rand.NextFloat(0f, 1f);
+            herb.PathIndex = 0;
+            ecb.SetComponent(e, herb);
+            ecb.SetComponent(e, manager.BaseHealth);
+            ecb.SetComponent(e, manager.BaseEnergy);
+            var repro = manager.BaseReproduction;
+            repro.Timer = rand.NextFloat(0f, repro.Cooldown);
+            ecb.SetComponent(e, repro);
+
+            // Buffer de ruta inicial con la celda actual.
+            var path = ecb.AddBuffer<PathBufferElement>(e);
+            path.Add(new PathBufferElement { Cell = cell });
+
             ecb.SetComponent(e, new HerbivoreInfo
             {
                 Name = HerbivoreNameGenerator.NextName(),
