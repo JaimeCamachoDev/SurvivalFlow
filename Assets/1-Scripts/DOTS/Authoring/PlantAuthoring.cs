@@ -24,20 +24,21 @@ public class PlantAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
+            // Porcentaje mínimo para asegurar visibilidad.
+            float initialPercent = math.max(authoring.initialEnergyPercent, 0.2f);
+
             // Componentes de energía de la planta.
             AddComponent(entity, new Plant
             {
-                Energy = authoring.maxEnergy * authoring.initialEnergyPercent,
+                Energy = authoring.maxEnergy * initialPercent,
                 MaxEnergy = authoring.maxEnergy,
                 EnergyGainRate = authoring.energyGainRate,
-                ScaleStep = 1,
                 Stage = PlantStage.Growing,
                 BeingEaten = 0
             });
 
             // Transform inicial según el porcentaje de energía.
-            float initialScale = math.max(authoring.initialEnergyPercent, 0.2f);
-            AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, initialScale));
+            AddComponent(entity, LocalTransform.FromPositionRotationScale(float3.zero, quaternion.identity, initialPercent));
 
             // Color inicial para indicar estado de crecimiento.
             AddComponent(entity, new URPMaterialPropertyBaseColor { Value = new float4(1f, 1f, 0f, 1f) });

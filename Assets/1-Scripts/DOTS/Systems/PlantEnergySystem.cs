@@ -47,15 +47,9 @@ public partial struct PlantEnergySystem : ISystem
 
             plant.ValueRW.BeingEaten = 0;
 
-            // Ajusta la escala visual solo cuando cambia lo suficiente.
+            // Ajusta la escala visual de forma continua según la energía.
             float percent = math.clamp(plant.ValueRO.Energy / plant.ValueRO.MaxEnergy, 0f, 1f);
-            int step = (int)math.floor(percent * 10f);
-            if (step < 1) step = 1;
-            if (plant.ValueRO.ScaleStep != step)
-            {
-                transform.ValueRW.Scale = step / 10f;
-                plant.ValueRW.ScaleStep = (byte)step;
-            }
+            transform.ValueRW.Scale = percent;
         }
 
         ecb.Playback(state.EntityManager);
