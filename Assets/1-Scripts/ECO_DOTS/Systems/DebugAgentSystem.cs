@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -5,6 +6,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 /// Sistema de movimiento para los agentes de depuración.
+[BurstCompile]
 [UpdateAfter(typeof(ObstacleRegistrySystem))]
 public partial struct DebugAgentSystem : ISystem
 {
@@ -94,24 +96,29 @@ public partial struct DebugAgentSystem : ISystem
         }
     }
 
+    [BurstCompile]
     private static bool FindPath(int2 start, int2 target, NativeParallelHashSet<int2> obstacles, int2 bounds, out NativeList<int2> path)
     {
         // Capacidad máxima estimada del grid para reservar memoria.
         var capacity = (bounds.x * 2 + 1) * (bounds.y * 2 + 1);
         var cameFrom = new NativeHashMap<int2, int2>(capacity, Allocator.Temp);
         var frontier = new NativeQueue<int2>(Allocator.Temp);
-        path = new NativeList<int2>(Allocator.Temp);
+        path = new NativeList<int2>(capacity, Allocator.Temp);
 
         // Inicializar la búsqueda con la celda de partida.
         frontier.Enqueue(start);
         cameFrom.TryAdd(start, start);
 
-        // Direcciones permitidas (4 ortogonales + 4 diagonales).
-        int2[] dirs = new int2[8]
-        {
-            new int2(1,0), new int2(-1,0), new int2(0,1), new int2(0,-1),
-            new int2(1,1), new int2(1,-1), new int2(-1,1), new int2(-1,-1)
-        };
+        // Direcciones permitidas (4 ortogonales + 4 diagonales) sin generar GC.
+        FixedList128Bytes<int2> dirs = default;
+        dirs.Add(new int2(1, 0));
+        dirs.Add(new int2(-1, 0));
+        dirs.Add(new int2(0, 1));
+        dirs.Add(new int2(0, -1));
+        dirs.Add(new int2(1, 1));
+        dirs.Add(new int2(1, -1));
+        dirs.Add(new int2(-1, 1));
+        dirs.Add(new int2(-1, -1));
 
         bool found = false;
 
@@ -125,7 +132,7 @@ public partial struct DebugAgentSystem : ISystem
             }
 
             // Explorar las celdas vecinas.
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < dirs.Length; i++)
             {
                 int2 dir = dirs[i];
                 int2 next = current + dir;
