@@ -110,7 +110,7 @@ public partial struct DebugAgentSystem : ISystem
         cameFrom.TryAdd(start, start);
 
         // Direcciones permitidas (4 ortogonales + 4 diagonales) sin generar GC.
-        FixedList128<int2> dirs = default;
+        FixedList128Bytes<int2> dirs = default;
         dirs.Add(new int2(1, 0));
         dirs.Add(new int2(-1, 0));
         dirs.Add(new int2(0, 1));
