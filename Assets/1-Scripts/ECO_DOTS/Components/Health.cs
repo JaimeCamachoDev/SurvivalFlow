@@ -5,5 +5,8 @@ public struct Health : IComponentData
 {
     /// Salud actual.
     public float Value;
+
+    /// Salud máxima alcanzable.
+    public float Max;
 }
 
