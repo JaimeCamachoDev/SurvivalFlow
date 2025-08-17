@@ -181,14 +181,31 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6811824876002106655}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 924f9cd669f6482abccb28eb19121742, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   herbivorePrefab: {fileID: 7596814737169414124, guid: 319110b30eed98b42b4de6ff4cf14378, type: 3}
-  meatPrefab: {fileID: 0}
-  initialCount: 20
+  meatPrefab: {fileID: 2452465126184015909, guid: 07ce61a6ae27e1c448ad66d2ef3a15e8, type: 3}
+  initialCount: 2
+  maxPopulation: 500
+  maxHealth: 100
+  maxEnergy: 100
+  moveSpeed: 2
+  idleEnergyCost: 1
+  moveEnergyCost: 2
+  eatEnergyRate: 40
+  plantSeekRadius: 5
+  healthRestorePercent: 0.25
+  changeDirectionInterval: 2
+  reproductionThreshold: 80
+  reproductionSeekRadius: 4
+  reproductionMatingDistance: 1
+  reproductionCooldown: 100
+  minOffspring: 0
+  maxOffspring: 2
+  reproductionEnergyCostPercent: 0.3
   enableGenetics: 0
   mutationChance: 0
   mutationScale: 0
@@ -245,7 +262,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   obstaclePrefab: {fileID: 7334716910294301947, guid: f8f8cd13adc1f5f40bf586cfcf582200, type: 3}
-  count: 3000
+  count: 1000
 --- !u!114 &9005791815627068385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -253,14 +270,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6811824876002106655}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 193ac54b0b29428cbbff4297be0fd284, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 7596814737169414124, guid: 396dc4db36fcd1740b1d55c047a26321, type: 3}
-  count: 5
-  moveSpeed: 5
+  count: 20
+  moveSpeed: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

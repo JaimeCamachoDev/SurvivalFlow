@@ -384,11 +384,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 50
-  maxHunger: 100
+  maxEnergy: 100
   moveSpeed: 2
-  idleHungerRate: 1
-  moveHungerRate: 2
-  eatRate: 40
+  idleEnergyCost: 1
+  moveEnergyCost: 2
+  eatEnergyRate: 40
   plantSeekRadius: 50
   predatorSenseRadius: 6
   separationRadius: 1
@@ -399,11 +399,12 @@ MonoBehaviour:
   mateColor: {r: 0, g: 1, b: 1, a: 1}
   fleeColor: {r: 1, g: 0, b: 0, a: 1}
   reproductionThreshold: 50
-  reproductionSeekRadius: 5
+  reproductionSeekRadius: 3
   reproductionMatingDistance: 1
-  reproductionCooldown: 50
+  reproductionCooldown: 100
   minOffspring: 0
   maxOffspring: 2
+  reproductionEnergyCostPercent: 0.25
   healthRestorePercent: 0.1
   changeDirectionInterval: 2
 --- !u!1 &7833623928901765993
