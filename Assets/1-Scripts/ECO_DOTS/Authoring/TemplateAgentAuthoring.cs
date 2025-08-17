@@ -22,7 +22,9 @@ public class TemplateAgentAuthoring : MonoBehaviour
             AddComponent(entity, new TemplateAgent
             {
                 Target = int2.zero,
-                MoveSpeed = authoring.moveSpeed
+                MoveSpeed = authoring.moveSpeed,
+                WaitTimer = 0f,
+                PathIndex = 0
             });
 
             // Añadir un transform local para posicionar la entidad en el mundo.
@@ -30,6 +32,9 @@ public class TemplateAgentAuthoring : MonoBehaviour
 
             // Cada agente necesita conocer la celda que ocupa en la grilla.
             AddComponent(entity, new GridPosition { Cell = int2.zero });
+
+            // Buffer para almacenar las celdas del camino a seguir.
+            AddBuffer<PathBufferElement>(entity);
         }
     }
 }
