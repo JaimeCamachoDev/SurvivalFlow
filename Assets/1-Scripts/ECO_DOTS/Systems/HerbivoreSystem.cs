@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 /// Gestiona el movimiento, hambre y alimentación de los herbívoros DOTS.
-[BurstCompile]
+[BurstCompile, DisableAutoCreation]
 public partial struct HerbivoreSystem : ISystem
 {
     private NativeParallelMultiHashMap<int2, Entity> _plants;
