@@ -69,6 +69,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
                     Scale = 1f
                 });
                 ecb.AddComponent(child, new GridPosition { Cell = current });
+
                 var childHerb = hManager.BaseHerbivore;
                 childHerb.Target = current;
                 childHerb.WaitTimer = rand.NextFloat(0f, 1f);
