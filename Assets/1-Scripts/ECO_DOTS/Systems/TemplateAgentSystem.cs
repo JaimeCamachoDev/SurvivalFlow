@@ -4,9 +4,9 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-/// Sistema de movimiento para los agentes de depuración.
+/// Sistema de movimiento para los agentes plantilla.
 [UpdateAfter(typeof(ObstacleRegistrySystem))]
-public partial struct DebugAgentSystem : ISystem
+public partial struct TemplateAgentSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
@@ -24,8 +24,8 @@ public partial struct DebugAgentSystem : ISystem
         // Crear un generador aleatorio que dependa del tiempo para variar los caminos.
         var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 13));
 
-        // Iterar sobre todos los agentes de depuración existentes.
-        foreach (var (transform, agent, gp, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<DebugAgent>, RefRW<GridPosition>>().WithEntityAccess())
+        // Iterar sobre todos los agentes plantilla existentes.
+        foreach (var (transform, agent, gp, entity) in SystemAPI.Query<RefRW<LocalTransform>, RefRW<TemplateAgent>, RefRW<GridPosition>>().WithEntityAccess())
         {
             // Posición actual del agente en celdas.
             int2 current = gp.ValueRO.Cell;

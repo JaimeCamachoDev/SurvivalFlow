@@ -1,10 +1,10 @@
 using Unity.Entities;
 using UnityEngine;
 
-/// Autoría para configurar la generación de agentes de depuración.
-public class DebugAgentManagerAuthoring : MonoBehaviour
+/// Autoría para configurar la generación de agentes plantilla.
+public class TemplateAgentManagerAuthoring : MonoBehaviour
 {
-    // Prefab del agente de depuración.
+    // Prefab del agente plantilla.
     public GameObject agentPrefab;
 
     // Número de agentes iniciales.
@@ -12,17 +12,17 @@ public class DebugAgentManagerAuthoring : MonoBehaviour
     // Velocidad de movimiento que se aplicará a todos los agentes.
     public float moveSpeed = 4f;
 
-    class Baker : Baker<DebugAgentManagerAuthoring>
+    class Baker : Baker<TemplateAgentManagerAuthoring>
     {
         // Convierte los datos de la escena en componentes ECS.
-        public override void Bake(DebugAgentManagerAuthoring authoring)
+        public override void Bake(TemplateAgentManagerAuthoring authoring)
         {
             // Obtener la entidad que representará al manager.
             var entity = GetEntity(TransformUsageFlags.None);
 
             // Registrar un componente singleton con todos los parámetros necesarios
-            // para instanciar y configurar los agentes de depuración.
-            AddComponent(entity, new DebugAgentManager
+            // para instanciar y configurar los agentes plantilla.
+            AddComponent(entity, new TemplateAgentManager
             {
                 // Referencia al prefab convertido a entidad.
                 Prefab = GetEntity(authoring.agentPrefab, TransformUsageFlags.Dynamic),
@@ -37,8 +37,8 @@ public class DebugAgentManagerAuthoring : MonoBehaviour
     }
 }
 
-/// Componente singleton que controla a los agentes de depuración.
-public struct DebugAgentManager : IComponentData
+/// Componente singleton que controla a los agentes plantilla.
+public struct TemplateAgentManager : IComponentData
 {
     public Entity Prefab;
     public int Count;

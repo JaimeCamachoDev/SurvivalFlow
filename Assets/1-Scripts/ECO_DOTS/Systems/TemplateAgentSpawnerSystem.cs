@@ -4,14 +4,14 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-/// Genera los agentes de depuración configurados por DebugAgentManager.
+/// Genera los agentes plantilla configurados por TemplateAgentManager.
 [BurstCompile]
-public partial struct DebugAgentSpawnerSystem : ISystem
+public partial struct TemplateAgentSpawnerSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
         // Comprobar que existan el manager y la información de la grilla.
-        if (!SystemAPI.TryGetSingletonRW<DebugAgentManager>(out var managerRw) ||
+        if (!SystemAPI.TryGetSingletonRW<TemplateAgentManager>(out var managerRw) ||
             !SystemAPI.TryGetSingleton<GridManager>(out var grid))
             return;
 
@@ -28,7 +28,7 @@ public partial struct DebugAgentSpawnerSystem : ISystem
         int2 half = (int2)(area / 2f);
 
         // Datos base del prefab del agente (sin modificar el prefab en sí).
-        var prefabData = state.EntityManager.GetComponentData<DebugAgent>(manager.Prefab);
+        var prefabData = state.EntityManager.GetComponentData<TemplateAgent>(manager.Prefab);
 
         // Instanciar la cantidad solicitada de agentes.
         for (int i = 0; i < manager.Count; i++)
