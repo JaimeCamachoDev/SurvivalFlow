@@ -20,6 +20,10 @@ public partial struct HerbivoreTemplateSystem : ISystem
         int2 bounds = (int2)half;
         float dt = SystemAPI.Time.DeltaTime;
 
+        // Contamos la población actual para limitar la reproducción.
+        var herbQuery = SystemAPI.QueryBuilder().WithAll<Herbivore>().Build();
+        int population = herbQuery.CalculateEntityCount();
+
         // Construir un mapa de plantas para búsquedas rápidas.
         var plantQuery = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
         int plantCount = plantQuery.CalculateEntityCount();
@@ -55,7 +59,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
 
             // Reproducción simple sin pareja.
             repro.ValueRW.Timer = math.max(0f, repro.ValueRO.Timer - dt);
-            if (energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f)
+            if (energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f && population < hManager.MaxPopulation)
             {
                 var child = ecb.Instantiate(hManager.Prefab);
                 ecb.SetComponent(child, new LocalTransform
@@ -65,13 +69,20 @@ public partial struct HerbivoreTemplateSystem : ISystem
                     Scale = 1f
                 });
                 ecb.AddComponent(child, new GridPosition { Cell = current });
-                var childHerb = herb.ValueRO;
+
+                var childHerb = hManager.BaseHerbivore;
                 childHerb.Target = current;
                 childHerb.WaitTimer = rand.NextFloat(0f, 1f);
                 childHerb.PathIndex = 0;
                 ecb.SetComponent(child, childHerb);
+                ecb.SetComponent(child, hManager.BaseHealth);
+                ecb.SetComponent(child, hManager.BaseEnergy);
+                var childRepro = hManager.BaseReproduction;
+                childRepro.Timer = childRepro.Cooldown;
+                ecb.SetComponent(child, childRepro);
                 var childPath = ecb.AddBuffer<PathBufferElement>(child);
                 childPath.Add(new PathBufferElement { Cell = current });
+                population++;
 
                 energy.ValueRW.Value *= (1f - repro.ValueRO.EnergyCostPercent);
                 repro.ValueRW.Timer = repro.ValueRO.Cooldown;
