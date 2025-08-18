@@ -24,7 +24,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
         var herbQuery = SystemAPI.QueryBuilder().WithAll<Herbivore>().Build();
         int population = herbQuery.CalculateEntityCount();
 
-        // Construir un mapa de plantas para búsquedas rápidas.
+        // Mapas auxiliares para plantas y herbívoros.
         var plantQuery = SystemAPI.QueryBuilder().WithAll<Plant, GridPosition>().Build();
         int plantCount = plantQuery.CalculateEntityCount();
         var plantMap = new NativeParallelHashMap<int2, Entity>(plantCount, Allocator.Temp);
@@ -33,11 +33,18 @@ public partial struct HerbivoreTemplateSystem : ISystem
             plantMap.TryAdd(gp.ValueRO.Cell, entity);
         }
 
+        var herbMap = new NativeParallelHashMap<int2, Entity>(population, Allocator.Temp);
+        foreach (var (gp, entity) in SystemAPI.Query<RefRO<GridPosition>>().WithAll<Herbivore>().WithEntityAccess())
+        {
+            herbMap.TryAdd(gp.ValueRO.Cell, entity);
+        }
+
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        foreach (var (transform, herb, gp, energy, repro, path) in SystemAPI
-                 .Query<RefRW<LocalTransform>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Energy>, RefRW<Reproduction>, DynamicBuffer<PathBufferElement>>())
+        foreach (var (transform, herb, gp, energy, repro, health, info, entity) in SystemAPI
+                 .Query<RefRW<LocalTransform>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Energy>, RefRW<Reproduction>, RefRW<Health>, RefRW<HerbivoreInfo>>().WithEntityAccess())
         {
+            var path = state.EntityManager.GetBuffer<PathBufferElement>(entity);
             int2 current = gp.ValueRO.Cell;
 
             if (path.Length == 0)
@@ -49,43 +56,143 @@ public partial struct HerbivoreTemplateSystem : ISystem
             // Comer si hay planta en la celda actual.
             if (plantMap.TryGetValue(current, out var plantEntity))
             {
-                energy.ValueRW.Value = math.min(energy.ValueRO.Max, energy.ValueRO.Value + herb.ValueRO.EatEnergyRate * dt);
-                if (energy.ValueRO.Value >= energy.ValueRO.Max)
+                var plant = state.EntityManager.GetComponentData<Plant>(plantEntity);
+                float eat = herb.ValueRO.EatEnergyRate * dt;
+                energy.ValueRW.Value = math.min(energy.ValueRO.Max, energy.ValueRO.Value + eat);
+                float healthGain = health.ValueRO.Max * herb.ValueRO.HealthRestorePercent * dt;
+                health.ValueRW.Value = math.min(health.ValueRO.Max, health.ValueRO.Value + healthGain);
+                plant.Stage = PlantStage.Withering;
+                plant.BeingEaten = 1;
+                plant.Energy -= eat;
+                if (plant.Energy <= 0f)
                 {
                     ecb.DestroyEntity(plantEntity);
                     plantMap.Remove(current);
                 }
+                else
+                {
+                    state.EntityManager.SetComponentData(plantEntity, plant);
+                }
+                herb.ValueRW.PathIndex = path.Length; // permanecer en la planta
             }
 
-            // Reproducción simple sin pareja.
+            // Actualizar temporizador de reproducción.
             repro.ValueRW.Timer = math.max(0f, repro.ValueRO.Timer - dt);
-            if (energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f && population < hManager.MaxPopulation)
+
+            // Buscar pareja si está listo.
+            bool readyToMate = energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f && population < hManager.MaxPopulation;
+            Entity mate = Entity.Null;
+            int2 mateCell = current;
+            float bestMateDist = float.MaxValue;
+            if (readyToMate)
             {
-                var child = ecb.Instantiate(hManager.Prefab);
-                ecb.SetComponent(child, new LocalTransform
+                int radius = (int)math.ceil(repro.ValueRO.SeekRadius);
+                for (int x = -radius; x <= radius; x++)
                 {
-                    Position = transform.ValueRO.Position,
-                    Rotation = quaternion.identity,
-                    Scale = 1f
-                });
-                ecb.AddComponent(child, new GridPosition { Cell = current });
+                    for (int y = -radius; y <= radius; y++)
+                    {
+                        int2 c = current + new int2(x, y);
+                        if (herbMap.TryGetValue(c, out var cand) && cand != entity)
+                        {
+                            var candEnergy = state.EntityManager.GetComponentData<Energy>(cand);
+                            var candRepro = state.EntityManager.GetComponentData<Reproduction>(cand);
+                            if (candEnergy.Value >= candRepro.Threshold && candRepro.Timer <= 0f)
+                            {
+                                float dist = math.lengthsq(new float2(x, y));
+                                if (dist < bestMateDist)
+                                {
+                                    bestMateDist = dist;
+                                    mate = cand;
+                                    mateCell = c;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-                var childHerb = hManager.BaseHerbivore;
-                childHerb.Target = current;
-                childHerb.WaitTimer = rand.NextFloat(0f, 1f);
-                childHerb.PathIndex = 0;
-                ecb.SetComponent(child, childHerb);
-                ecb.SetComponent(child, hManager.BaseHealth);
-                ecb.SetComponent(child, hManager.BaseEnergy);
-                var childRepro = hManager.BaseReproduction;
-                childRepro.Timer = childRepro.Cooldown;
-                ecb.SetComponent(child, childRepro);
-                var childPath = ecb.AddBuffer<PathBufferElement>(child);
-                childPath.Add(new PathBufferElement { Cell = current });
-                population++;
-
-                energy.ValueRW.Value *= (1f - repro.ValueRO.EnergyCostPercent);
+            bool reproduced = false;
+            if (mate != Entity.Null && bestMateDist <= repro.ValueRO.MatingDistance * repro.ValueRO.MatingDistance && entity.Index < mate.Index)
+            {
+                var mateInfo = state.EntityManager.GetComponentData<HerbivoreInfo>(mate);
+                int offspringCount = rand.NextInt(repro.ValueRO.MinOffspring, repro.ValueRO.MaxOffspring + 1);
+                int gen = math.max(info.ValueRO.Generation, mateInfo.Generation) + 1;
+                for (int i = 0; i < offspringCount; i++)
+                {
+                    int2 spawnCell = current;
+                    var child = ecb.Instantiate(hManager.Prefab);
+                    ecb.SetComponent(child, new LocalTransform
+                    {
+                        Position = new float3(spawnCell.x, 0f, spawnCell.y),
+                        Rotation = quaternion.identity,
+                        Scale = 1f
+                    });
+                    ecb.AddComponent(child, new GridPosition { Cell = spawnCell });
+                    ecb.SetComponent(child, hManager.BaseHealth);
+                    ecb.SetComponent(child, hManager.BaseEnergy);
+                    var childHerb = hManager.BaseHerbivore;
+                    childHerb.Target = spawnCell;
+                    childHerb.WaitTimer = rand.NextFloat(0f, 1f);
+                    childHerb.PathIndex = 0;
+                    ecb.SetComponent(child, childHerb);
+                    var childRepro = hManager.BaseReproduction;
+                    childRepro.Timer = childRepro.Cooldown;
+                    ecb.SetComponent(child, childRepro);
+                    var childPath = ecb.AddBuffer<PathBufferElement>(child);
+                    childPath.Add(new PathBufferElement { Cell = spawnCell });
+                    ecb.SetComponent(child, new HerbivoreInfo
+                    {
+                        Name = HerbivoreNameGenerator.NextName(),
+                        Lifetime = 0f,
+                        Generation = gen
+                    });
+                    population++;
+                }
                 repro.ValueRW.Timer = repro.ValueRO.Cooldown;
+                energy.ValueRW.Value *= (1f - repro.ValueRO.EnergyCostPercent);
+
+                var mateRepro = state.EntityManager.GetComponentData<Reproduction>(mate);
+                mateRepro.Timer = mateRepro.Cooldown;
+                state.EntityManager.SetComponentData(mate, mateRepro);
+                var mateEnergy = state.EntityManager.GetComponentData<Energy>(mate);
+                mateEnergy.Value *= (1f - repro.ValueRO.EnergyCostPercent);
+                state.EntityManager.SetComponentData(mate, mateEnergy);
+
+                reproduced = true;
+            }
+
+            // Redirigir si tiene hambre y no se dirige a una planta.
+            if (energy.ValueRO.Value < energy.ValueRO.SeekThreshold && !plantMap.ContainsKey(current))
+            {
+                bool headingToPlant = path.Length > 0 && plantMap.ContainsKey(path[path.Length - 1].Cell);
+                if (!headingToPlant)
+                {
+                    float bestDist = float.MaxValue;
+                    int2 bestCell = current;
+                    var keys = plantMap.GetKeyArray(Allocator.Temp);
+                    float radiusSq = herb.ValueRO.PlantSeekRadius * herb.ValueRO.PlantSeekRadius;
+                    for (int i = 0; i < keys.Length; i++)
+                    {
+                        float dist = math.lengthsq((float2)(keys[i] - current));
+                        if (dist < bestDist && dist <= radiusSq)
+                        {
+                            bestDist = dist;
+                            bestCell = keys[i];
+                        }
+                    }
+                    keys.Dispose();
+                    if (bestDist < float.MaxValue &&
+                        FindPath(current, bestCell, obstacles, bounds, out var newPath))
+                    {
+                        path.Clear();
+                        for (int i = 0; i < newPath.Length; i++)
+                            path.Add(new PathBufferElement { Cell = newPath[i] });
+                        herb.ValueRW.PathIndex = math.min(1, path.Length);
+                        herb.ValueRW.Target = bestCell;
+                        herb.ValueRW.WaitTimer = 0f;
+                        newPath.Dispose();
+                    }
+                }
             }
 
             // Si terminó la ruta, decidir nuevo objetivo.
@@ -97,7 +204,12 @@ public partial struct HerbivoreTemplateSystem : ISystem
 
                 int2 newTarget = current;
                 bool seekFood = energy.ValueRO.Value < energy.ValueRO.SeekThreshold;
-                if (seekFood)
+
+                if (mate != Entity.Null && !reproduced)
+                {
+                    newTarget = mateCell;
+                }
+                else if (seekFood)
                 {
                     float bestDist = float.MaxValue;
                     int2 bestCell = current;
@@ -141,6 +253,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
             }
 
             // Movimiento suave a lo largo del camino.
+            bool isMoving = false;
             if (herb.ValueRO.PathIndex < path.Length)
             {
                 int2 next = path[herb.ValueRO.PathIndex].Cell;
@@ -158,16 +271,38 @@ public partial struct HerbivoreTemplateSystem : ISystem
                     transform.ValueRW.Position = world;
                     gp.ValueRW.Cell = next;
                     herb.ValueRW.PathIndex++;
+                    if (dist > 0f)
+                        isMoving = true;
                 }
                 else
                 {
                     transform.ValueRW.Position = pos + delta / dist * step;
+                    isMoving = true;
                 }
             }
+
+            // Consumo de energía y muerte por inanición.
+            float energyCost = herb.ValueRO.IdleEnergyCost * dt;
+            if (isMoving)
+                energyCost += herb.ValueRO.MoveEnergyCost * herb.ValueRO.MoveSpeed * dt;
+            energy.ValueRW.Value = math.max(0f, energy.ValueRO.Value - energyCost);
+
+            if (energy.ValueRO.Value <= energy.ValueRO.DeathThreshold)
+            {
+                health.ValueRW.Value -= dt;
+                if (health.ValueRO.Value <= 0f)
+                {
+                    ecb.DestroyEntity(entity);
+                    continue;
+                }
+            }
+
+            info.ValueRW.Lifetime += dt;
         }
 
         ecb.Playback(state.EntityManager);
         plantMap.Dispose();
+        herbMap.Dispose();
     }
 
     private static bool FindPath(int2 start, int2 target, NativeParallelHashSet<int2> obstacles, int2 bounds, out NativeList<int2> path)
