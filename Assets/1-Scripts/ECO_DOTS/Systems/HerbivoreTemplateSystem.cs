@@ -176,6 +176,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
                     herb.ValueRW.Target = bestCell;
                     herb.ValueRW.WaitTimer = 0f;
                     newPath.Dispose();
+
                 }
             }
 
