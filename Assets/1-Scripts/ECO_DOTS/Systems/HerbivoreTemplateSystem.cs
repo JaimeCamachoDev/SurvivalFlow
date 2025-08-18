@@ -161,6 +161,40 @@ public partial struct HerbivoreTemplateSystem : ISystem
                 reproduced = true;
             }
 
+            // Redirigir si tiene hambre y no se dirige a una planta.
+            if (energy.ValueRO.Value < energy.ValueRO.SeekThreshold && !plantMap.ContainsKey(current))
+            {
+                bool headingToPlant = path.Length > 0 && plantMap.ContainsKey(path[path.Length - 1].Cell);
+                if (!headingToPlant)
+                {
+                    float bestDist = float.MaxValue;
+                    int2 bestCell = current;
+                    var keys = plantMap.GetKeyArray(Allocator.Temp);
+                    float radiusSq = herb.ValueRO.PlantSeekRadius * herb.ValueRO.PlantSeekRadius;
+                    for (int i = 0; i < keys.Length; i++)
+                    {
+                        float dist = math.lengthsq((float2)(keys[i] - current));
+                        if (dist < bestDist && dist <= radiusSq)
+                        {
+                            bestDist = dist;
+                            bestCell = keys[i];
+                        }
+                    }
+                    keys.Dispose();
+                    if (bestDist < float.MaxValue &&
+                        FindPath(current, bestCell, obstacles, bounds, out var newPath))
+                    {
+                        path.Clear();
+                        for (int i = 0; i < newPath.Length; i++)
+                            path.Add(new PathBufferElement { Cell = newPath[i] });
+                        herb.ValueRW.PathIndex = math.min(1, path.Length);
+                        herb.ValueRW.Target = bestCell;
+                        herb.ValueRW.WaitTimer = 0f;
+                        newPath.Dispose();
+                    }
+                }
+            }
+
             // Si terminó la ruta, decidir nuevo objetivo.
             if (herb.ValueRO.PathIndex >= path.Length)
             {
