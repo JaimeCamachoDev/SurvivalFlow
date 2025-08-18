@@ -165,33 +165,18 @@ public partial struct HerbivoreTemplateSystem : ISystem
             if (energy.ValueRO.Value < energy.ValueRO.SeekThreshold && !plantMap.ContainsKey(current))
             {
                 bool headingToPlant = path.Length > 0 && plantMap.ContainsKey(path[path.Length - 1].Cell);
-                if (!headingToPlant)
+                if (!headingToPlant &&
+                    FindNearestPlant(current, herb.ValueRO.PlantSeekRadius, plantMap, out var bestCell) &&
+                    FindPath(current, bestCell, obstacles, bounds, out var newPath))
                 {
-                    float bestDist = float.MaxValue;
-                    int2 bestCell = current;
-                    var keys = plantMap.GetKeyArray(Allocator.Temp);
-                    float radiusSq = herb.ValueRO.PlantSeekRadius * herb.ValueRO.PlantSeekRadius;
-                    for (int i = 0; i < keys.Length; i++)
-                    {
-                        float dist = math.lengthsq((float2)(keys[i] - current));
-                        if (dist < bestDist && dist <= radiusSq)
-                        {
-                            bestDist = dist;
-                            bestCell = keys[i];
-                        }
-                    }
-                    keys.Dispose();
-                    if (bestDist < float.MaxValue &&
-                        FindPath(current, bestCell, obstacles, bounds, out var newPath))
-                    {
-                        path.Clear();
-                        for (int i = 0; i < newPath.Length; i++)
-                            path.Add(new PathBufferElement { Cell = newPath[i] });
-                        herb.ValueRW.PathIndex = math.min(1, path.Length);
-                        herb.ValueRW.Target = bestCell;
-                        herb.ValueRW.WaitTimer = 0f;
-                        newPath.Dispose();
-                    }
+                    path.Clear();
+                    for (int i = 0; i < newPath.Length; i++)
+                        path.Add(new PathBufferElement { Cell = newPath[i] });
+                    herb.ValueRW.PathIndex = math.min(1, path.Length);
+                    herb.ValueRW.Target = bestCell;
+                    herb.ValueRW.WaitTimer = 0f;
+                    newPath.Dispose();
+
                 }
             }
 
@@ -211,21 +196,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
                 }
                 else if (seekFood)
                 {
-                    float bestDist = float.MaxValue;
-                    int2 bestCell = current;
-                    var keys = plantMap.GetKeyArray(Allocator.Temp);
-                    float radiusSq = herb.ValueRO.PlantSeekRadius * herb.ValueRO.PlantSeekRadius;
-                    for (int i = 0; i < keys.Length; i++)
-                    {
-                        float dist = math.lengthsq((float2)(keys[i] - current));
-                        if (dist < bestDist && dist <= radiusSq)
-                        {
-                            bestDist = dist;
-                            bestCell = keys[i];
-                        }
-                    }
-                    keys.Dispose();
-                    if (bestDist < float.MaxValue)
+                    if (FindNearestPlant(current, herb.ValueRO.PlantSeekRadius, plantMap, out var bestCell))
                         newTarget = bestCell;
                     else
                         newTarget = new int2(rand.NextInt(-bounds.x, bounds.x + 1), rand.NextInt(-bounds.y, bounds.y + 1));
@@ -236,7 +207,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
                 }
 
                 herb.ValueRW.Target = newTarget;
-                herb.ValueRW.WaitTimer = rand.NextFloat(0.5f, 1.5f);
+                herb.ValueRW.WaitTimer = (seekFood || (mate != Entity.Null && !reproduced)) ? 0f : rand.NextFloat(0.5f, 1.5f);
 
                 if (FindPath(current, newTarget, obstacles, bounds, out var newPath))
                 {
@@ -303,6 +274,33 @@ public partial struct HerbivoreTemplateSystem : ISystem
         ecb.Playback(state.EntityManager);
         plantMap.Dispose();
         herbMap.Dispose();
+    }
+
+    private static bool FindNearestPlant(int2 current, float radius, NativeParallelHashMap<int2, Entity> plantMap, out int2 bestCell)
+    {
+        int intRadius = (int)math.ceil(radius);
+        float bestDist = float.MaxValue;
+        bestCell = current;
+        bool found = false;
+        float radiusSq = radius * radius;
+        for (int x = -intRadius; x <= intRadius; x++)
+        {
+            for (int y = -intRadius; y <= intRadius; y++)
+            {
+                int2 c = current + new int2(x, y);
+                if (plantMap.ContainsKey(c))
+                {
+                    float dist = x * x + y * y;
+                    if (dist < bestDist && dist <= radiusSq)
+                    {
+                        bestDist = dist;
+                        bestCell = c;
+                        found = true;
+                    }
+                }
+            }
+        }
+        return found;
     }
 
     private static bool FindPath(int2 start, int2 target, NativeParallelHashSet<int2> obstacles, int2 bounds, out NativeList<int2> path)
