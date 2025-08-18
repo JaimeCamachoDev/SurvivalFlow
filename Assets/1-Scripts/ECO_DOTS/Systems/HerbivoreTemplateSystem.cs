@@ -41,9 +41,10 @@ public partial struct HerbivoreTemplateSystem : ISystem
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        foreach (var (transform, herb, gp, energy, repro, health, info, path, entity) in SystemAPI
-                 .Query<RefRW<LocalTransform>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Energy>, RefRW<Reproduction>, RefRW<Health>, RefRW<HerbivoreInfo>, DynamicBuffer<PathBufferElement>>().WithEntityAccess())
+        foreach (var (transform, herb, gp, energy, repro, health, info, entity) in SystemAPI
+                 .Query<RefRW<LocalTransform>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Energy>, RefRW<Reproduction>, RefRW<Health>, RefRW<HerbivoreInfo>>().WithEntityAccess())
         {
+            var path = state.EntityManager.GetBuffer<PathBufferElement>(entity);
             int2 current = gp.ValueRO.Cell;
 
             if (path.Length == 0)
