@@ -188,7 +188,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   herbivorePrefab: {fileID: 7596814737169414124, guid: 319110b30eed98b42b4de6ff4cf14378, type: 3}
   meatPrefab: {fileID: 2452465126184015909, guid: 07ce61a6ae27e1c448ad66d2ef3a15e8, type: 3}
-  initialCount: 2
+  initialCount: 100
   maxPopulation: 500
   maxHealth: 100
   maxEnergy: 100
@@ -222,9 +222,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   plantPrefab: {fileID: 8311962731384735518, guid: 7bdfa0a76e3956b4eafd27fcefa04ecc, type: 3}
-  initialCount: 100
-  patchCount: 2
-  patchRadius: 5
+  initialCount: 300
+  patchCount: 4
+  patchRadius: 10
   maxEnergy: 100
   energyGainRate: 1
   initialEnergyPercent: 0.3
