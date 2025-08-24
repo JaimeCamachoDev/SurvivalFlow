@@ -53,7 +53,6 @@ public partial struct HerbivoreTemplateSystem : ISystem
             return;
 
         float dt = SystemAPI.Time.DeltaTime;
-        var rand = Unity.Mathematics.Random.CreateFromIndex((uint)(SystemAPI.Time.ElapsedTime * 1000 + 11));
         float2 half = grid.AreaSize * 0.5f;
         int2 bounds = (int2)half;
         var obstacles = ObstacleRegistrySystem.Obstacles;
@@ -84,6 +83,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
             var path = state.EntityManager.GetBuffer<PathBufferElement>(entity);
             int2 current = gp.ValueRO.Cell;
             repro.ValueRW.Timer = math.max(0f, repro.ValueRO.Timer - dt);
+            var rand = new Unity.Mathematics.Random(herb.ValueRO.RandomState == 0 ? 1u : herb.ValueRO.RandomState);
 
             // Comer si hay planta en la celda actual.
             if (_plants.TryGetValue(current, out var plantEntity) && energy.ValueRO.Value < energy.ValueRO.Max)
@@ -140,6 +140,38 @@ public partial struct HerbivoreTemplateSystem : ISystem
                         herb.ValueRW.HasKnownPlant = 1;
                     }
                 }
+            }
+            else
+            {
+                bool ready = energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f && population < hManager.MaxPopulation;
+                if (ready)
+                {
+                    float bestDist = float.MaxValue;
+                    Entity mate = Entity.Null;
+                    int2 mateCell = current;
+                    int radius = (int)math.ceil(repro.ValueRO.SeekRadius);
+                    for (int x = -radius; x <= radius; x++)
+                    {
+                        for (int y = -radius; y <= radius; y++)
+                        {
+                            int2 c = current + new int2(x, y);
+                            if (_herbMap.TryGetValue(c, out var cand) && cand != entity)
+                            {
+                                var candEnergy = state.EntityManager.GetComponentData<Energy>(cand);
+                                var candRepro = state.EntityManager.GetComponentData<Reproduction>(cand);
+                                if (candEnergy.Value >= candRepro.Threshold && candRepro.Timer <= 0f)
+                                {
+                                    float dist = x * x + y * y;
+                                    if (dist < bestDist)
+                                    {
+                                        bestDist = dist;
+                                        mate = cand;
+                                        mateCell = c;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                 if (herb.ValueRO.HasKnownPlant != 0 && !math.all(herb.ValueRO.KnownPlantCell == current))
                 {
@@ -202,7 +234,10 @@ public partial struct HerbivoreTemplateSystem : ISystem
                                 ecb.AddComponent(child, new GridPosition { Cell = current });
                                 ecb.SetComponent(child, hManager.BaseHealth);
                                 ecb.SetComponent(child, hManager.BaseEnergy);
-                                ecb.SetComponent(child, hManager.BaseHerbivore);
+                                var childHerb = hManager.BaseHerbivore;
+                                childHerb.DirectionTimer = rand.NextFloat(0f, childHerb.ChangeDirectionInterval);
+                                childHerb.RandomState = rand.NextUInt();
+                                ecb.SetComponent(child, childHerb);
                                 var childRepro = hManager.BaseReproduction;
                                 childRepro.Timer = childRepro.Cooldown;
                                 ecb.SetComponent(child, childRepro);
@@ -233,6 +268,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
                     }
                 }
             }
+
             if (!hasDirection)
             {
                 herb.ValueRW.DirectionTimer -= dt;
@@ -241,7 +277,8 @@ public partial struct HerbivoreTemplateSystem : ISystem
                     int choice = rand.NextInt(dirs8.Length);
                     int2 d = dirs8[choice];
                     herb.ValueRW.MoveDirection = math.normalize(new float3(d.x, 0f, d.y));
-                    herb.ValueRW.DirectionTimer = herb.ValueRO.ChangeDirectionInterval;
+                    herb.ValueRW.DirectionTimer = rand.NextFloat(herb.ValueRO.ChangeDirectionInterval * 0.5f,
+                                                                herb.ValueRO.ChangeDirectionInterval * 1.5f);
                 }
             }
 
@@ -267,11 +304,15 @@ public partial struct HerbivoreTemplateSystem : ISystem
                 _herbCells.Add(cell);
                 move -= new float3(step.x, 0f, step.y);
             }
-
+            cell.x = math.clamp(cell.x, -bounds.x, bounds.x);
+            cell.y = math.clamp(cell.y, -bounds.y, bounds.y);
             gp.ValueRW.Cell = cell;
             herb.ValueRW.MoveRemainder = move;
-            transform.ValueRW.Position = new float3(cell.x * grid.CellSize, 0f, cell.y * grid.CellSize) +
-                                         new float3(move.x, 0f, move.z) * grid.CellSize;
+            float3 pos = new float3(cell.x * grid.CellSize, 0f, cell.y * grid.CellSize) +
+                         new float3(move.x, 0f, move.z) * grid.CellSize;
+            pos.x = math.clamp(pos.x, -bounds.x * grid.CellSize, bounds.x * grid.CellSize);
+            pos.z = math.clamp(pos.z, -bounds.y * grid.CellSize, bounds.y * grid.CellSize);
+            transform.ValueRW.Position = pos;
             if (!math.all(herb.ValueRO.MoveDirection == float3.zero))
                 transform.ValueRW.Rotation = quaternion.LookRotationSafe(herb.ValueRO.MoveDirection, math.up());
 
@@ -292,6 +333,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
             }
 
             info.ValueRW.Lifetime += dt;
+            herb.ValueRW.RandomState = rand.state;
         }
 
         ecb.Playback(state.EntityManager);
