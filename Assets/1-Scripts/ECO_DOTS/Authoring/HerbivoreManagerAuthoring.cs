@@ -82,7 +82,8 @@ public class HerbivoreManagerAuthoring : MonoBehaviour
                     IsEating = 0,
                     Target = int2.zero,
                     WaitTimer = 0f,
-                    PathIndex = 0
+                    PathIndex = 0,
+                    RandomState = 1u
                 },
                 BaseEnergy = new Energy
                 {

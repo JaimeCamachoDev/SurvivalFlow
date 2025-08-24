@@ -51,4 +51,7 @@ public struct Herbivore : IComponentData
 
     /// Índice de la siguiente celda dentro del buffer de ruta.
     public int PathIndex;
+
+    /// Estado interno del generador aleatorio para comportamiento individual.
+    public uint RandomState;
 }
