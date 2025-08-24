@@ -140,38 +140,6 @@ public partial struct HerbivoreTemplateSystem : ISystem
                         herb.ValueRW.HasKnownPlant = 1;
                     }
                 }
-            }
-            else
-            {
-                bool ready = energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f && population < hManager.MaxPopulation;
-                if (ready)
-                {
-                    float bestDist = float.MaxValue;
-                    Entity mate = Entity.Null;
-                    int2 mateCell = current;
-                    int radius = (int)math.ceil(repro.ValueRO.SeekRadius);
-                    for (int x = -radius; x <= radius; x++)
-                    {
-                        for (int y = -radius; y <= radius; y++)
-                        {
-                            int2 c = current + new int2(x, y);
-                            if (_herbMap.TryGetValue(c, out var cand) && cand != entity)
-                            {
-                                var candEnergy = state.EntityManager.GetComponentData<Energy>(cand);
-                                var candRepro = state.EntityManager.GetComponentData<Reproduction>(cand);
-                                if (candEnergy.Value >= candRepro.Threshold && candRepro.Timer <= 0f)
-                                {
-                                    float dist = x * x + y * y;
-                                    if (dist < bestDist)
-                                    {
-                                        bestDist = dist;
-                                        mate = cand;
-                                        mateCell = c;
-                                    }
-                                }
-                            }
-                        }
-                    }
 
                 if (herb.ValueRO.HasKnownPlant != 0 && !math.all(herb.ValueRO.KnownPlantCell == current))
                 {
@@ -185,8 +153,8 @@ public partial struct HerbivoreTemplateSystem : ISystem
             }
             else
             {
-                bool ready = energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f && population < hManager.MaxPopulation;
-                if (ready)
+                bool canReproduce = energy.ValueRO.Value >= repro.ValueRO.Threshold && repro.ValueRO.Timer <= 0f && population < hManager.MaxPopulation;
+                if (canReproduce)
                 {
                     float bestDist = float.MaxValue;
                     Entity mate = Entity.Null;
@@ -304,6 +272,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
                 _herbCells.Add(cell);
                 move -= new float3(step.x, 0f, step.y);
             }
+
             cell.x = math.clamp(cell.x, -bounds.x, bounds.x);
             cell.y = math.clamp(cell.y, -bounds.y, bounds.y);
             gp.ValueRW.Cell = cell;
