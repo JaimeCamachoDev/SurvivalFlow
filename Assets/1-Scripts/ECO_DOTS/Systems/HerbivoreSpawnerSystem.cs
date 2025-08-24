@@ -71,6 +71,8 @@ public partial struct HerbivoreSpawnerSystem : ISystem
             herb.Target = cell;
             herb.WaitTimer = rand.NextFloat(0f, 1f);
             herb.PathIndex = 0;
+            herb.DirectionTimer = rand.NextFloat(0f, herb.ChangeDirectionInterval);
+            herb.RandomState = rand.NextUInt();
             ecb.SetComponent(e, herb);
             ecb.SetComponent(e, manager.BaseHealth);
             ecb.SetComponent(e, manager.BaseEnergy);
