@@ -80,6 +80,7 @@ public partial struct HerbivoreTemplateSystem : ISystem
         foreach (var (transform, herb, gp, energy, repro, health, info, entity) in
                  SystemAPI.Query<RefRW<LocalTransform>, RefRW<Herbivore>, RefRW<GridPosition>, RefRW<Energy>, RefRW<Reproduction>, RefRW<Health>, RefRW<HerbivoreInfo>>().WithEntityAccess())
         {
+            var path = state.EntityManager.GetBuffer<PathBufferElement>(entity);
             int2 current = gp.ValueRO.Cell;
             repro.ValueRW.Timer = math.max(0f, repro.ValueRO.Timer - dt);
             var rand = new Unity.Mathematics.Random(herb.ValueRO.RandomState == 0 ? 1u : herb.ValueRO.RandomState);
